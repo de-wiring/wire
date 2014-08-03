@@ -5,6 +5,7 @@ require 'common'
 require 'cli'
 require 'commands'
 require 'model'
+require 'execution'
 
 include Wire
 
