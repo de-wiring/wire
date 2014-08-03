@@ -15,10 +15,19 @@ module Wire
 			loader = ProjectYamlLoader.new
 			project = loader.load_project(params[:target_dir])
 
-			pp project
+      if $log.debug?
+			  pp project
+      end
+
 			run_on_project project
 		end
 
+    def run_validation(project,validation_class)
+      $log.debug "Running validation class #{validation_class}"
+      val_object = validation_class.new(project)
+      val_object.run_validations
+      val_object.errors
+    end
 
 		def run_on_project(project)
 
@@ -26,9 +35,7 @@ module Wire
 
 			# run validations against it
 			[ NetworksValidation ].each do |val_clazz|
-				val_obj = val_clazz.new(project)
-				val_obj.run_validations
-				( errors << val_obj.errors ).flatten!
+				( errors << run_validation(project,val_clazz) ).flatten!
 			end
 
 			errors

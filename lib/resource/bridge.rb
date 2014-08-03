@@ -11,14 +11,12 @@ module Wire
 			# given name and type
 			# params:
 			# - name	bridge name, i.e. "br0"
-			# - type	supported bridge types, i.e. :ovs
-			def initialize(name,type)
-				super.initialize(name)
-				@type = type
+			def initialize(name)
+				super(name)
 			end
 
 			def exist?
-        exist_exec = LocalExecution.new('ovs-vsctl',['br-exists',@name])
+        exist_exec = Wire::Execution::LocalExecution.new('ovs-vsctl',['br-exists',@name])
         exist_exec.run
 
         return (exist_exec.exitstatus != 2)

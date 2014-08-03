@@ -21,7 +21,11 @@ describe WireCLI do
 			fail unless cli.methods.include? :validate
 		end
 
-		def streams_before
+    it 'should have the verify command' do
+      fail unless cli.methods.include? :verify
+    end
+
+    def streams_before
 			out_ = $stdout
 			err_ = $stderr
 			$stdout = StringIO.new

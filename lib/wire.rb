@@ -10,6 +10,7 @@ require_relative 'cli.rb'
 require_relative 'commands.rb'
 require_relative 'model.rb'
 require_relative 'execution.rb'
+require_relative 'resource.rb'
 
 include Wire
 

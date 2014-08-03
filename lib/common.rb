@@ -1,10 +1,22 @@
 # encoding: utf-8
 
 require 'thor'
+
 require 'rainbow'
+require 'rainbow/ext/string'
 
 require 'yaml'
 require 'pp'
+
+# set up log object
+require 'logger'
+
+$log = Logger.new STDOUT
+# parametrize
+$log.formatter = proc do |severity, _, _, msg|
+  "#{severity}  #{msg}\n"
+end
+$log.level = Logger::INFO
 
 # define exit codes
 module Wire

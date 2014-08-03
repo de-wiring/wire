@@ -9,6 +9,8 @@ module Wire
     # supports sudo and shell wrapping
     class LocalExecution
 
+      attr_accessor :exitstatus, :stdout, :stderr
+
       # params:
       # - command: binary to execute
       # - args: optional cmd line arguments (exec array)
@@ -45,6 +47,7 @@ module Wire
       def run
         cmd = get_command
 
+        $log.debug "Executing #{cmd}"
         @stdout =`#{cmd}`
         @stderr = nil
         @exitstatus = $?.exitstatus
