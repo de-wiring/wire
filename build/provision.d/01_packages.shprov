@@ -1,6 +1,6 @@
 echo == Updating, installing packages
 
-sudo apt-get update -y
+sudo apt-get update -yqq
 sudo apt-get install -yqq curl git openssl ca-certificates make
 
 echo == Installing std ruby 

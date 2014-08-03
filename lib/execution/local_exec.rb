@@ -1,16 +1,19 @@
 # encoding: utf-8
 
+# Wire module
 module Wire
+  # Execution module for executing commands
   module Execution
 
     # Able to execute commands locally
+    # supports sudo and shell wrapping
     class LocalExecution
 
       # params:
       # - command: binary to execute
       # - args: optional cmd line arguments (exec array)
       # - options:
-      #   - b_shell: if true, run as /bin/sh -c <command> [args]
+      #   - b_shell: if true, run as /bin/sh -c '<command> [args]'
       #   - b_sudo: insert sudo if true
       def initialize(command, args = nil, options = { :b_shell => true, :b_sudo => true })
         @command = command
@@ -18,6 +21,8 @@ module Wire
         @options = options
       end
 
+      # constructs the single command line string from
+      # given parameters.
       def get_command
         cmd_arr = []
         command_args = "#{@command} #{@args}".strip
@@ -34,6 +39,9 @@ module Wire
         return cmd_arr.join(" ").strip
       end
 
+      # runs the command
+      # sets instance variables
+      # stdout, stderr, exitstatus
       def run
         cmd = get_command
 

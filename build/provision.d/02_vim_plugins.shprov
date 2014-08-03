@@ -22,3 +22,13 @@ if [[ $? -ne 0 ]]; then
 	echo "filetype plugin indent on" >>/home/vagrant/.vimrc
 fi
 
+# install nerdtree
+cd /home/vagrant/.vim/bundle
+if [[ ! -d nerdtree ]]; then
+	git clone https://github.com/scrooloose/nerdtree.git
+fi
+
+echo "autocmd StdinReadPre * let s:std_in=1" >>/home/vagrant/.vimrc
+echo 'autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif' >>/home/vagrant/.vimrc
+echo 'autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif' >>/home/vagrant/.vimrc
+
