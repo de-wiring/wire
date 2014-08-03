@@ -1,0 +1,11 @@
+*.gem
+.bundle
+.config
+Gemfile.lock
+coverage
+doc/
+pkg
+rdoc
+spec/reports
+tmp
+.vagrant

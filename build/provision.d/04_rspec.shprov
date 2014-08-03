@@ -1,0 +1,9 @@
+echo == installing ruby addons
+
+# testing stuff
+sudo gem install bundler rake --no-ri --no-rdoc
+sudo gem install guard --no-ri --no-rdoc
+
+# set some defaults
+echo "--color" >/home/vagrant/.rspec
+echo "-f documentation" >>/home/vagrant/.rspec

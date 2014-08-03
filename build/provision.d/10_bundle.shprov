@@ -1,0 +1,4 @@
+echo == bundle project
+
+sudo su - vagrant -c 'cd /home/vagrant/wire; bundle'
+

@@ -1,0 +1,15 @@
+---
+directories:
+  - lib
+report_levels:
+  - error
+  - info
+presenter: text
+analysis_classes:
+  - argument_amount
+  - shadowing_variables
+  - unused_variables
+  - undefined_variables
+  - useless_equality_checks
+directories:
+  - lib

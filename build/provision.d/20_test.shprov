@@ -1,0 +1,6 @@
+echo == Running tests..
+
+sudo su - vagrant -c 'cd /home/vagrant/wire; rake lint'
+sudo su - vagrant -c 'cd /home/vagrant/wire; rake spec'
+sudo su - vagrant -c 'cd /home/vagrant/wire; rake critic'
+

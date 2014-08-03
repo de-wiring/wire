@@ -1,0 +1,7 @@
+echo == Done
+
+date >/tmp/vagrant_provisioned_at
+
+echo == to test:
+echo cd ./wire
+echo rake -T

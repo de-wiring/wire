@@ -1,0 +1,24 @@
+echo Installing pathogen, syntastic
+
+# set up vim magic
+sudo apt-get -y install vim
+mkdir -p /home/vagrant/.vim/bundle
+mkdir -p /home/vagrant/.vim/autoload 
+chown -R vagrant:vagrant /home/vagrant/.vim
+cd /home/vagrant/.vim/bundle
+if [[ ! -d syntastic ]]; then
+	git clone git://github.com/scrooloose/syntastic.git
+fi
+cd /home/vagrant/.vim/autoload
+if [[ ! -f pathogen.vim ]]; then
+	wget https://raw.github.com/tpope/vim-pathogen/master/autoload/pathogen.vim
+fi
+
+# patch in pathogen to vimrc
+grep pathogen /home/vagrant/.vimrc >/dev/null
+if [[ $? -ne 0 ]]; then
+	echo "call pathogen#infect()" >>/home/vagrant/.vimrc
+	echo "syntax on" >>/home/vagrant/.vimrc
+	echo "filetype plugin indent on" >>/home/vagrant/.vimrc
+fi
+

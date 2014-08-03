@@ -1,0 +1,44 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "trusty64"
+  config.vm.box_url = "http://cloud-images.ubuntu.com/vagrant/trusty/20140723/trusty-server-cloudimg-amd64-vagrant-disk1.box"
+
+  config.vm.define "wire-testing_vm", primary: true do |s|
+
+    s.vm.synced_folder "../../lib", "/mnt/project/lib"
+    s.vm.synced_folder "../../test", "/mnt/project/test"
+
+    # install open vswitch parts ne weed
+    s.vm.provision "shell", inline: <<EOS
+echo == Installing Open vSwitch
+      sudo apt-get install -yqq bridge-utils arping
+      sudo apt-get install -yqq openvswitch-common openvswitch-switch openvswitch-test
+EOS
+
+    # install gem needed by wire (by hand, not using bundler)
+    s.vm.provision "shell", inline: <<EOS
+echo == Installing Wire gems
+	sudo gem install rainbow thor --no-rdoc --no-ri
+EOS
+
+    # install & run serverspec
+    s.vm.synced_folder "spec.d/", "/mnt/spec.d"
+
+    s.vm.provision 'shell', inline: <<EOS
+echo == Installing serverspec
+( sudo gem list --local | grep -q serverspec ) || {
+	sudo gem install rake -v '10.3.2' --no-rdoc --no-ri
+	sudo gem install rspec -v '2.99.0' --no-rdoc --no-ri
+	sudo gem install specinfra -v '1.21.0' --no-rdoc --no-ri
+	sudo gem install serverspec -v '1.10.0' --no-rdoc --no-ri
+}
+cd /mnt/spec.d
+rake spec
+
+EOS
+
+  end
+  
+end

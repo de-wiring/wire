@@ -1,0 +1,7 @@
+echo == Updating, installing packages
+
+sudo apt-get update -y
+sudo apt-get install -yqq curl git openssl ca-certificates make
+
+echo == Installing std ruby 
+sudo apt-get install -yqq ruby1.9.1-full ruby1.9.3
