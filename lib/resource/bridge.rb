@@ -1,39 +1,46 @@
 # encoding: utf-8
 
+include Wire::Execution
+
+# Wire module
 module Wire
-	module Resource
+  # Resource module
+  module Resource
+    # Open vSwitch Bridge resource
+    class OVSBridge < ResourceBase
+      attr_accessor	:type
 
-		# Open vSwitch Bridge resource
-		class OVSBridge < ResourceBase
-			attr_accessor	:type
+      # initialize the bridge object with
+      # given name and type
+      # params:
+      # - name	bridge name, i.e. "br0"
+      def initialize(name)
+        super(name)
+      end
 
-			# initialize the bridge object with
-			# given name and type
-			# params:
-			# - name	bridge name, i.e. "br0"
-			def initialize(name)
-				super(name)
-			end
+      def exist?
+        LocalExecution.with('ovs-vsctl',
+                            ['br-exists', @name]) do |exec_obj|
+          exec_obj.run
+          return (exec_obj.exitstatus != 2)
+        end
+      end
 
-			def exist?
-        exist_exec = Wire::Execution::LocalExecution.new('ovs-vsctl',['br-exists',@name])
-        exist_exec.run
+      def up?
+        exist?
+      end
 
-        return (exist_exec.exitstatus != 2)
-			end
+      def up
+        LocalExecution.with('ovs-vsctl',
+                            ['add-br', @name]) do |up_exec_obj|
+          up_exec_obj.run
+          return (up_exec_obj.exitstatus != 2)
+        end
+      end
 
-			def is_up?
-			end
-
-			def up
-			end
-
-			def to_s
-				"Bridge:[#{name},type=#{type}]"
-			end
-
-		end
-
-	end
-
+      def to_s
+        "Bridge:[#{name},type=#{type}]"
+      end
+    end
+  end
 end

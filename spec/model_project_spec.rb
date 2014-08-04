@@ -11,8 +11,8 @@ describe Project do
 			test_elem = { :key => :elem }
 			project.merge_element('test',test_elem)
 
-			project.has_element('test').should eq(true)
-			project.has_element('nonsense').should eq(false)
+			project.element?('test').should eq(true)
+			project.element?('nonsense').should eq(false)
 
 			project.get_element('test').should eq(test_elem)
 			lambda {

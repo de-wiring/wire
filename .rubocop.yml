@@ -1,10 +1,14 @@
 AllCops:
   Include:
-    - '**/Rakefile'
     - 'lib/**/*'
   Exclude:
     - 'spec/**/*'
     - 'test/**/*'
+    - 'bin/**/*'
+    - 'build/**/*'
+    - 'tmp/**/*'
+    - 'Rakefile'
+    - '**/Rakefile'
 Style/HashSyntax:
   EnforcedStyle: ruby18
   SupportedStyles:
@@ -16,3 +20,7 @@ Style/BracesAroundHashParameters:
   SupportedStyles:
     - braces
     - no_braces
+Style/GlobalVars:
+  Enabled: false
+MethodLength:
+  Enabled: false

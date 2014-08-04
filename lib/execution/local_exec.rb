@@ -4,11 +4,9 @@
 module Wire
   # Execution module for executing commands
   module Execution
-
     # Able to execute commands locally
     # supports sudo and shell wrapping
     class LocalExecution
-
       attr_accessor :exitstatus, :stdout, :stderr
 
       # params:
@@ -17,18 +15,25 @@ module Wire
       # - options:
       #   - b_shell: if true, run as /bin/sh -c '<command> [args]'
       #   - b_sudo: insert sudo if true
-      def initialize(command, args = nil, options = { :b_shell => true, :b_sudo => true })
+      def initialize(command, args = nil, options =
+          { :b_shell => true, :b_sudo => true })
         @command = command
         @args = array_or_nil_as_str(args)
         @options = options
       end
 
+      def self.with(command, args = nil, options =
+          { :b_shell => true, :b_sudo => true })
+        obj = LocalExecution.new command, args, options
+        yield obj
+      end
+
       # constructs the single command line string from
       # given parameters.
-      def get_command
+      def construct_command
         cmd_arr = []
         command_args = "#{@command} #{@args}".strip
-        sudo_str = (@options[:b_sudo]?'sudo ':'')
+        sudo_str = (@options[:b_sudo] ? 'sudo ' : '')
         if @options[:b_shell]
           cmd_arr << '/bin/sh'
           cmd_arr << '-c'
@@ -38,20 +43,20 @@ module Wire
           cmd_arr << "#{sudo_str}#{command_args}"
         end
 
-        return cmd_arr.join(" ").strip
+        cmd_arr.join(' ').strip
       end
 
       # runs the command
       # sets instance variables
       # stdout, stderr, exitstatus
       def run
-        cmd = get_command
+        cmd = construct_command
 
         $log.debug "Executing #{cmd}"
-        @stdout =`#{cmd}`
+        @stdout = `#{cmd}`
         @stderr = nil
-        @exitstatus = $?.exitstatus
-
+        @exitstatus = $CHILD_STATUS.exitstatus
+        # @exitstatus = $?.exitstatus
       end
 
       private
@@ -60,6 +65,5 @@ module Wire
         (array_or_nil || []).join(' ')
       end
     end
-
   end
 end

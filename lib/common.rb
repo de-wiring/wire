@@ -7,6 +7,7 @@ require 'rainbow/ext/string'
 
 require 'yaml'
 require 'pp'
+require 'English'
 
 # set up log object
 require 'logger'

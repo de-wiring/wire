@@ -6,6 +6,7 @@ require 'cli'
 require 'commands'
 require 'model'
 require 'execution'
+require 'resource'
 
 include Wire
 
