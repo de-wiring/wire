@@ -8,15 +8,23 @@ module Wire
   # - :target_dir
   class ValidateCommand < BaseCommand
     def run(params = {})
-      puts "Validating model in #{params[:target_dir]}"
+      target_dir = params[:target_dir]
+      puts "Validating model in #{target_dir}"
 
       # load it first
-      loader = ProjectYamlLoader.new
-      project = loader.load_project(params[:target_dir])
+      begin
+        loader = ProjectYamlLoader.new
+        project = loader.load_project(target_dir)
 
-      $log.debug? && pp(project)
+        $log.debug? && pp(project)
 
-      run_on_project project
+        run_on_project project
+      rescue => load_execption
+        $log.error "Unable to load project model from #{target_dir}"
+        $log.debug? && puts(load_execption.backtrace)
+
+        ['No project model file(s) found.']
+      end
     end
 
     def run_validation(project, validation_class)

@@ -25,6 +25,10 @@ describe WireCLI do
       fail unless cli.methods.include? :verify
     end
 
+    it 'should have the spec command' do
+      fail unless cli.methods.include? :spec
+    end
+
     def streams_before
 			out_ = $stdout
 			err_ = $stderr

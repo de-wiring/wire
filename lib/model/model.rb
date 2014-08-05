@@ -57,9 +57,18 @@ module Wire
 
       MODEL_ELEMENTS.each do |model_element|
         filename = File.join(target_dir, "#{model_element}.yaml")
+        $log.debug "Loading model file #{filename}"
+
         element_data = load_model_element_file(filename)
         project.merge_element model_element, element_data
       end
+
+      # dump some statistics
+      puts(project.calc_stats.reduce([]) do |res, elem|
+        type = elem[0]
+        count = elem[1]
+        res << "#{count} #{type}(s)"
+      end.join(', '))
 
       project
     end

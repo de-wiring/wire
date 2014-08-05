@@ -8,6 +8,7 @@ require 'rainbow/ext/string'
 require 'yaml'
 require 'pp'
 require 'English'
+require 'erb'
 
 # set up log object
 require 'logger'

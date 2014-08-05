@@ -13,7 +13,8 @@ module Wire
         @commands = {
           :init_command => InitCommand.new,
           :validate_command => ValidateCommand.new,
-          :verify_command => VerifyCommand.new
+          :verify_command => VerifyCommand.new,
+          :spec_command => SpecCommand.new
         } unless @commands
       end
 
@@ -45,11 +46,15 @@ module Wire
           end
         end
       end
+
+      def run_spec(target_dir)
+        @commands[:spec_command].run({ :target_dir => target_dir })
+      end
     end
 
     class_option :nocolor, { :desc => 'Disable coloring in output',
-                             :required => false }
-    class_option :debug, { :desc => 'Show debug output' }
+                             :required => false, :banner => '' }
+    class_option :debug, { :desc => 'Show debug output', :banner => '' }
 
     # init
     #
@@ -94,6 +99,23 @@ module Wire
       initialize_commands
       apply_globals
       run_verify(target_dir)
+    end
+
+    # spec
+    #
+    desc 'spec [TARGETDIR]',
+         'read model in TARGETDIR and create a serverspec' \
+         'specification example in TARGETDIR'
+    long_desc <<-LONGDESC
+      Given a model in TARGETDIR, the verify commands reads
+      the model. For each element it creates a serverspec-conformant
+      describe()-block in a spec file.
+      Writes spec helpers if they do not exist.
+    LONGDESC
+    def spec(target_dir = '.')
+      initialize_commands
+      apply_globals
+      run_spec(target_dir)
     end
   end
 end

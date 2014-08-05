@@ -39,6 +39,11 @@ rake spec
 
 EOS
 
+    # add link project dir in to vagrant home
+    s.vm.provision 'shell', inline: <<EOS
+    	ln -s /mnt/project /home/vagrant/project
+EOS
+
   end
   
 end
