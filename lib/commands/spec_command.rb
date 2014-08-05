@@ -27,11 +27,10 @@ module Wire
         return false
       end
 
-
-#      @spec_code.each do |block_text|
-#        puts block_text
-#      end
-      spec_writer = SpecWriter.new(File.join(target_dir,'serverspec'),@spec_code)
+      # use the specwrite class to write a complete
+      # serverspec example in a subdirectory(serverspec)
+      target_specdir = File.join(target_dir, 'serverspec')
+      spec_writer = SpecWriter.new(target_specdir, @spec_code)
       spec_writer.write
 
       true
@@ -59,24 +58,23 @@ module Wire
       networks = @project.get_element('networks')
 
       # select networks in current zone only
-      networks_in_zone  = networks.select { |_, network_data| network_data[:zone] == zone_name }
+      networks_in_zone = networks.select do|_, network_data|
+        network_data[:zone] == zone_name
+      end
       networks_in_zone.each do |network_name, _|
         $log.debug("Creating specs for network #{network_name}")
 
         bridge_name = network_name
 
         template = SpecTemplates.get_template__bridge_exists(zone_name, bridge_name)
-        erb = ERB.new(template,nil,"%")
+        erb = ERB.new(template, nil, '%')
         @spec_code << erb.result(binding)
-
       end
-
     end
   end
 
   # stateless erb template methods
   class SpecTemplates
-
     # rubocop:disable Lint/UnusedMethodArgument
     # :reek:UnusedParameters
     def self.get_template__bridge_exists(zone_name, bridge_name)
@@ -89,7 +87,7 @@ module Wire
 ERB
     end
 
-    def self.get_spec_helper
+    def self.template_spec_helper
       <<ERB
 require 'serverspec'
 require 'rspec/its'
@@ -108,7 +106,7 @@ end
 ERB
     end
 
-    def self.get_rakefile
+    def self.template_rakefile
       <<ERB
 require 'rake'
 require 'rspec/core/rake_task'
@@ -121,7 +119,6 @@ end
 task :default => :spec
 ERB
     end
-
   end
 
   # SpecWriter is able to create a directory
@@ -150,21 +147,21 @@ ERB
 
     def ensure_files
       rakefile_name = File.join(@target_dir, 'Rakefile')
-      has_file?(rakefile_name) || File.open(rakefile_name,'w') do |file|
-        template = SpecTemplates.get_rakefile
-        erb = ERB.new(template,nil,"%")
+      file?(rakefile_name) || File.open(rakefile_name, 'w') do |file|
+        template = SpecTemplates.template_rakefile
+        erb = ERB.new(template, nil, '%')
         file.puts(erb.result(binding))
       end
 
       spechelper_name = File.join(@target_dir, 'spec', 'spec_helper.rb')
-      has_file?(spechelper_name) || File.open(spechelper_name,'w') do |file|
-        template = SpecTemplates.get_spec_helper
-        erb = ERB.new(template,nil,"%")
+      file?(spechelper_name) || File.open(spechelper_name, 'w') do |file|
+        template = SpecTemplates.template_spec_helper
+        erb = ERB.new(template, nil, '%')
         file.puts(erb.result(binding))
       end
 
       specfile_name = File.join(@target_dir, 'spec', 'localhost', 'wire_spec.rb')
-      File.open(specfile_name,'w') do |file|
+      File.open(specfile_name, 'w') do |file|
         template = <<ERB
 require 'spec_helper.rb'
 
@@ -174,11 +171,9 @@ require 'spec_helper.rb'
 
 # end of spec file
 ERB
-        erb = ERB.new(template,nil,"%")
+        erb = ERB.new(template, nil, '%')
         file.puts(erb.result(binding))
       end
-
-
     end
 
     private
@@ -192,7 +187,7 @@ ERB
       end
     end
 
-    def has_file?(target_file)
+    def file?(target_file)
       File.exist?(target_file) && File.file?(target_file)
     end
   end

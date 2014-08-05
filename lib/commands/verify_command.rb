@@ -66,7 +66,10 @@ module Wire
       networks = @project.get_element('networks')
 
       # select networks in current zone only
-      networks_in_zone  = networks.select { |_, network_data| network_data[:zone] == zone_name }
+      networks_in_zone = networks.select do |_, network_data|
+        network_data[:zone] == zone_name
+      end
+
       networks_in_zone.each do |network_name, network_data|
         $log.debug("Verifying network #{network_name}")
 

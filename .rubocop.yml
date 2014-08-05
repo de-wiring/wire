@@ -24,3 +24,5 @@ Style/GlobalVars:
   Enabled: false
 MethodLength:
   Enabled: false
+LineLength:
+  Max: 100
