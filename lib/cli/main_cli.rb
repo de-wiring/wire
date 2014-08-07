@@ -10,12 +10,7 @@ module Wire
     no_commands do
       # pre-build array of available commands
       def initialize_commands
-        @commands = {
-          :init_command => InitCommand.new,
-          :validate_command => ValidateCommand.new,
-          :verify_command => VerifyCommand.new,
-          :spec_command => SpecCommand.new
-        } unless @commands
+        @wire_commands = Wire::WireCommands.new
       end
 
       def apply_globals
@@ -23,33 +18,6 @@ module Wire
         options[:debug] && $log.level = Logger::DEBUG
       end
 
-      def run_validate(target_dir)
-        res = @commands[:validate_command].run({ :target_dir => target_dir })
-        if res.size == 0
-          puts 'OK, model is consistent.'.color(:green)
-        else
-          puts 'ERROR, detected inconsistencies/errors:'.color(:red)
-          res.each do |val_error|
-            puts val_error.to_s
-          end
-        end
-      end
-
-      def run_verify(target_dir)
-        res = @commands[:verify_command].run({ :target_dir => target_dir })
-        if res.size == 0
-          puts 'OK, system is conforming to model'.color(:green)
-        else
-          puts 'ERROR, detected inconsistencies/errors:'.color(:red)
-          res.each do |val_error|
-            puts val_error.to_s
-          end
-        end
-      end
-
-      def run_spec(target_dir)
-        @commands[:spec_command].run({ :target_dir => target_dir })
-      end
     end
 
     class_option :nocolor, { :desc => 'Disable coloring in output',
@@ -68,7 +36,7 @@ module Wire
     def init(target_dir = '.')
       initialize_commands
       apply_globals
-      @commands[:init_command].run({ :target_dir => target_dir })
+      @wire_commands.run_init(target_dir)
     end
 
     # validate
@@ -83,7 +51,7 @@ module Wire
     def validate(target_dir = '.')
       initialize_commands
       apply_globals
-      run_validate(target_dir)
+      @wire_commands.run_validate(target_dir)
     end
 
     # verify
@@ -98,7 +66,7 @@ module Wire
     def verify(target_dir = '.')
       initialize_commands
       apply_globals
-      run_verify(target_dir)
+      @wire_commands.run_verify(target_dir)
     end
 
     # spec
@@ -112,10 +80,41 @@ module Wire
       describe()-block in a spec file.
       Writes spec helpers if they do not exist.
     LONGDESC
+    option :run, { :desc => 'Automatically run serverspec', :banner => '', :type => :boolean }
     def spec(target_dir = '.')
       initialize_commands
       apply_globals
-      run_spec(target_dir)
+      @wire_commands.run_spec(target_dir, options[:run])
+    end
+
+    # up
+    #
+    desc 'up [TARGETDIR]',
+         'read model in TARGETDIR and bring system up' \
+         'according to model elements in TARGETDIR'
+    long_desc <<-LONGDESC
+      Given a model in TARGETDIR, the up commands reads
+      the model. Each model element is brought to live.
+    LONGDESC
+    def up(target_dir = '.')
+      initialize_commands
+      apply_globals
+      @wire_commands.run_up(target_dir)
+    end
+
+    # down
+    #
+    desc 'down [TARGETDIR]',
+         'read model in TARGETDIR and bring system down' \
+         'according to model elements in TARGETDIR'
+    long_desc <<-LONGDESC
+      Given a model in TARGETDIR, the up commands reads
+      the model. Each model element is stopped and removed.
+    LONGDESC
+    def down(target_dir = '.')
+      initialize_commands
+      apply_globals
+      @wire_commands.run_down(target_dir)
     end
   end
 end

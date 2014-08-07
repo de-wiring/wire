@@ -7,6 +7,8 @@ module Wire
   # params:
   # - :target_dir
   class VerifyCommand < BaseCommand
+    attr_accessor :project, :findings
+
     def run(params = {})
       target_dir = params[:target_dir]
       puts "Verifying model in #{target_dir}"
@@ -21,7 +23,7 @@ module Wire
 
         $log.debug? && pp(@project)
       rescue => load_execption
-        $log.error "Unable to load project model from #{target_dir}"
+        $stderr.puts "Unable to load project model from #{target_dir}"
         $log.debug? && puts(load_execption.backtrace)
 
         return ['No project model file(s) found.']
@@ -45,7 +47,7 @@ module Wire
         .each do |zone_name, zone_data|
           # error occured in run_on_zone call. Lets mark this
           zone_data.store :status, :failed
-          mark("Not all elements of zone #{zone_name} are valid.",
+          mark("Not all elements of zone \'#{zone_name}\' are valid.",
                :zone, zone_name, zone_data)
         end.size > 0)
     end
@@ -54,7 +56,13 @@ module Wire
     def run_on_project_zones(zones)
       zones.select do |zone_name, _|
         $log.debug("Verifying zone #{zone_name} ...")
-        run_on_zone(zone_name) == false
+        b_zone_res = run_on_zone(zone_name)
+
+        if b_zone_res
+          puts "Zone \'#{zone_name}\' verified successfully".color(:green)
+        end
+
+        b_zone_res == false
       end
     end
 
@@ -71,25 +79,26 @@ module Wire
       end
 
       networks_in_zone.each do |network_name, network_data|
-        $log.debug("Verifying network #{network_name}")
+        $log.debug("Verifying network \'#{network_name}\'")
 
         bridge_name = network_name
 
         # we should have a bridge with that name.
         bridge_resource = Wire::Resource::OVSBridge.new(bridge_name)
         if bridge_resource.exist?
-          puts "Bridge #{bridge_name} exists.".color(:green)
+          puts "Bridge \'#{bridge_name}\' exists.".color(:green)
           network_data.store :status, :ok
         else
-          puts "Bridge #{bridge_name} does not exist.".color(:red)
+          puts "Bridge \'#{bridge_name}\' does not exist.".color(:red)
 
           network_data.store :status, :failed
 
           b_verify_ok = false
-          mark("Bridge #{bridge_name} does not exist.",
+          mark("Bridge \'#{bridge_name}\' does not exist.",
                :network, network_name, network_data)
         end
       end
+
       b_verify_ok
     end
   end

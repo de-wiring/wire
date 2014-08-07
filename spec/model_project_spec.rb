@@ -20,6 +20,17 @@ describe Project do
 			}.should raise_error
 		end
 
+    it 'should calculate statistics correctly' do
+      p = Project.new(".")
+      p.merge_element(:zones,
+                      { 'z1' => { } }
+      )
+      p.merge_element(:networks,
+                      { 'n1' => { :zone => 'z1'} }
+      )
+      p.calc_stats.should eq({ :zones => 1, :networks => 1})
+    end
+
 	end
 
 end

@@ -10,3 +10,4 @@ rdoc
 spec/reports
 tmp
 .vagrant
+coverage

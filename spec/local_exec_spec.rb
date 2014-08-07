@@ -64,5 +64,22 @@ describe LocalExecution do
     e.construct_command.should eq('/bin/sh -c \'sudo echo Hello World | wc -l\'')
   end
 
+  it 'should construct a simple command correctly using with-style' do
+    cmd = 'echo HelloWorld'
+    LocalExecution.with(cmd,nil,{ :b_sudo => false, :b_shell => false }) do |e|
+      e.construct_command.should eq(cmd)
+    end
+
+  end
+
+  it 'should construct a simple command' do
+    cmd = 'echo HelloWorld'
+    LocalExecution.with(cmd,nil,{ :b_sudo => false, :b_shell => true }) do |e|
+      e.run
+      e.stdout.chomp.should eq('HelloWorld')
+      e.exitstatus.should eq(0)
+    end
+
+  end
 
 end

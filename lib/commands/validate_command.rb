@@ -20,7 +20,7 @@ module Wire
 
         run_on_project project
       rescue => load_execption
-        $log.error "Unable to load project model from #{target_dir}"
+        $stderr.puts "Unable to load project model from #{target_dir}"
         $log.debug? && puts(load_execption.backtrace)
 
         ['No project model file(s) found.']

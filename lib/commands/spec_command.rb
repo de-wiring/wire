@@ -7,11 +7,18 @@ module Wire
   # params:
   # - :target_dir
   class SpecCommand < BaseCommand
+    attr_accessor :project
+    attr_accessor :target_dir
+    attr_accessor :spec_code
+
+    def initialize
+      @spec_code = []
+    end
+
     def run(params = {})
       target_dir = params[:target_dir]
       puts "Verifying model in #{target_dir}"
 
-      @spec_code = []
       # load it first
       begin
         loader = ProjectYamlLoader.new
@@ -21,7 +28,7 @@ module Wire
 
         $log.debug? && pp(@project)
       rescue => load_execption
-        $log.error "Unable to load project model from #{target_dir}"
+        $stderr.puts "Unable to load project model from #{target_dir}"
         $log.debug? && puts(load_execption.backtrace)
 
         return false
@@ -32,6 +39,11 @@ module Wire
       target_specdir = File.join(target_dir, 'serverspec')
       spec_writer = SpecWriter.new(target_specdir, @spec_code)
       spec_writer.write
+
+      if params[:auto_run]
+        $log.debug 'Running serverspec'
+        puts `cd #{target_specdir} && rake spec`
+      end
 
       true
     end
@@ -137,6 +149,7 @@ ERB
 
       $log.info "Serverspecs written to #{@target_dir}. Run:"
       $log.info "( cd #{@target_dir}; rake spec )"
+      $log.info 'To run automatically, use --run'
     end
 
     def ensure_directory_structure
@@ -145,19 +158,25 @@ ERB
       ensure_directory File.join(@target_dir, 'spec', 'localhost')
     end
 
+    # writes template to file
+    def write_template(template, file)
+      erb = ERB.new(template, nil, '%')
+      file.puts(erb.result(binding))
+    end
+
+    # ensures that all serverspec skeleton files such as
+    # Rakefile, spec_helper etc. exist
+    # Then writes the models specification files into the
+    # skeleton
     def ensure_files
       rakefile_name = File.join(@target_dir, 'Rakefile')
       file?(rakefile_name) || File.open(rakefile_name, 'w') do |file|
-        template = SpecTemplates.template_rakefile
-        erb = ERB.new(template, nil, '%')
-        file.puts(erb.result(binding))
+        write_template(SpecTemplates.template_rakefile, file)
       end
 
       spechelper_name = File.join(@target_dir, 'spec', 'spec_helper.rb')
       file?(spechelper_name) || File.open(spechelper_name, 'w') do |file|
-        template = SpecTemplates.template_spec_helper
-        erb = ERB.new(template, nil, '%')
-        file.puts(erb.result(binding))
+        write_template(SpecTemplates.template_spec_helper, file)
       end
 
       specfile_name = File.join(@target_dir, 'spec', 'localhost', 'wire_spec.rb')
@@ -171,8 +190,7 @@ require 'spec_helper.rb'
 
 # end of spec file
 ERB
-        erb = ERB.new(template, nil, '%')
-        file.puts(erb.result(binding))
+        write_template(template, file)
       end
     end
 

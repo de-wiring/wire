@@ -29,6 +29,14 @@ describe WireCLI do
       fail unless cli.methods.include? :spec
     end
 
+    it 'should have the up command' do
+      fail unless cli.methods.include? :up
+    end
+
+    it 'should have the down command' do
+      fail unless cli.methods.include? :down
+    end
+
     def streams_before
 			out_ = $stdout
 			err_ = $stderr
@@ -58,13 +66,48 @@ describe WireCLI do
 
 			out_,err_ = streams_before
 			lambda {
-				cli.init("")
+				cli.init('')
 			}.should raise_error SystemExit
 
 			$stderr.string.should match(/^ERROR.*/)
 			streams_after out_,err_
 		end
-	end
+
+    it 'should fail on init with empty network input' do
+      STDIN.should_receive(:gets).and_return("nozone\n")
+      STDIN.should_receive(:gets).and_return("nonetwork\n")
+      STDIN.should_receive(:gets).and_return("\n")
+
+      out_,err_ = streams_before
+      lambda {
+        cli.init('')
+      }.should raise_error SystemExit
+
+      $stderr.string.should match(/^ERROR.*/)
+      streams_after out_,err_
+    end
+
+    it 'should create a directory structure when exporting a project' do
+      STDIN.should_receive(:gets).and_return("nozone\n")
+      STDIN.should_receive(:gets).and_return("nonetwork\n")
+      STDIN.should_receive(:gets).and_return("1.2.3.4/32\n")
+
+      dir = Dir.mktmpdir
+      begin
+        out_,err_ = streams_before
+        cli.init(dir)
+        streams_after out_,err_
+
+        new_dir = File.join(dir,'zones.yaml')
+        (File.exist?(new_dir)).should eq(true)
+      ensure
+        # remove the directory.
+        FileUtils.remove_entry_secure dir
+      end
+
+    end
+
+  end
 
 end
 

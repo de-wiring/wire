@@ -34,7 +34,19 @@ module Wire
         LocalExecution.with('ovs-vsctl',
                             ['add-br', @name]) do |up_exec_obj|
           up_exec_obj.run
-          return (up_exec_obj.exitstatus != 2)
+          return (up_exec_obj.exitstatus == 0)
+        end
+      end
+
+      def down?
+        !(up?)
+      end
+
+      def down
+        LocalExecution.with('ovs-vsctl',
+                            ['del-br', @name]) do |down_exec_obj|
+          down_exec_obj.run
+          return (down_exec_obj.exitstatus == 0)
         end
       end
 
