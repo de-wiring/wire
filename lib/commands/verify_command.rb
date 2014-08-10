@@ -9,26 +9,8 @@ module Wire
   class VerifyCommand < BaseCommand
     attr_accessor :project, :findings
 
-    def run(params = {})
-      target_dir = params[:target_dir]
-      puts "Verifying model in #{target_dir}"
+    def initialize
       @findings = []
-
-      # load it first
-      begin
-        loader = ProjectYamlLoader.new
-        @project = loader.load_project(target_dir)
-
-        run_on_project
-
-        $log.debug? && pp(@project)
-      rescue => load_execption
-        $stderr.puts "Unable to load project model from #{target_dir}"
-        $log.debug? && puts(load_execption.backtrace)
-
-        return ['No project model file(s) found.']
-      end
-      @findings
     end
 
     def mark(msg, type, element_name, element_data)

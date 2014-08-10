@@ -1,9 +1,27 @@
 # encoding: utf-8
+require 'singleton'
 
 # Wire module
 module Wire
   # Execution module for executing commands
   module Execution
+    def self.global_execution_options
+      ExecutionOptions.singleton
+    end
+
+    # Global execution options, such as noop mode etc.
+    class ExecutionOptions
+      include Singleton
+
+      def initialize
+        @options = { :b_noop => false }
+      end
+
+      def noop?
+        @options[:b_noop]
+      end
+    end
+
     # Able to execute commands locally
     # supports sudo and shell wrapping
     class LocalExecution

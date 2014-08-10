@@ -16,7 +16,7 @@ module Wire
       model_data.store :zones, zone_data
       model_data.store :networks, network_data
 
-      zone_names = ask_for_zone_names
+      zone_names = InitInteractive.ask_for_zone_names
       if zone_names.size == 0
         $stderr.puts 'ERROR: must at least have one zone'
         exit Wire.cli_exitcode(:init_bad_input)
@@ -30,10 +30,10 @@ module Wire
 
         zone_data.store zone_name, zone_detail
 
-        networks = ask_for_network_in_zone zone_name
+        networks = InitInteractive.ask_for_network_in_zone zone_name
         networks.each do |network_name|
 
-          network_details = ask_detail_data_for_network network_name
+          network_details = InitInteractive.ask_detail_data_for_network network_name
           network_details.merge!({ :zone => zone_name })
           network_data.store network_name, network_details
         end
@@ -41,50 +41,6 @@ module Wire
 
       # write resulting model to file
       export_model_file(model_data, params[:target_dir])
-    end
-
-    # ask for a comma separated list of zone names
-    def ask_for_zone_names
-      question = <<-EOF
-Please enter the names of desired system zones,
-as a comma-separated list:
-EOF
-      puts question
-      print '> '
-
-      line = STDIN.gets.chomp
-
-      line.split(',').map { |zone_name| zone_name.strip }
-    end
-
-    def ask_for_network_in_zone(zone_name)
-      question = <<-EOF
-- Configuring networks in zone #{zone_name}:
-Please enter the names of logical networks
-(or leave empty if no networks desired):
-EOF
-      puts question
-      print '> '
-
-      line = STDIN.gets.chomp
-
-      line.split(',').map { |network_name| network_name.strip }
-    end
-
-    def ask_detail_data_for_network(network_name)
-      question = <<-EOF
-= Configuring network #{network_name}
-Please enter network address in cidr (i.e.192.168.1.0/24)
-EOF
-      puts question
-      print '> '
-
-      line = STDIN.gets.chomp
-      result = {}
-
-      result.store :network, line.chomp.strip
-
-      result
     end
 
     # Given a model structure and a target dir, this method
@@ -124,6 +80,53 @@ EOF
       open(filename, 'w') do |out_file|
         out_file.puts(element_data.to_yaml)
       end
+    end
+  end
+
+  # interactive ask_ commands
+  class InitInteractive
+    # ask for a comma separated list of zone names
+    def self.ask_for_zone_names
+      question = <<-EOF
+Please enter the names of desired system zones,
+as a comma-separated list:
+      EOF
+      puts question
+      print '> '
+
+      line = STDIN.gets.chomp
+
+      line.split(',').map { |zone_name| zone_name.strip }
+    end
+
+    def self.ask_for_network_in_zone(zone_name)
+      question = <<-EOF
+- Configuring networks in zone #{zone_name}:
+Please enter the names of logical networks
+(or leave empty if no networks desired):
+      EOF
+      puts question
+      print '> '
+
+      line = STDIN.gets.chomp
+
+      line.split(',').map { |network_name| network_name.strip }
+    end
+
+    def self.ask_detail_data_for_network(network_name)
+      question = <<-EOF
+= Configuring network #{network_name}
+Please enter network address in cidr (i.e.192.168.1.0/24)
+      EOF
+      puts question
+      print '> '
+
+      line = STDIN.gets.chomp
+      result = {}
+
+      result.store :network, line.chomp.strip
+
+      result
     end
   end
 end

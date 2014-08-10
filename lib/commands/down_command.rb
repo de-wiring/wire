@@ -6,42 +6,7 @@ module Wire
   # and brings all defined model elements "down", that is
   # stopping and removing bridges, containers etc.
   # - :target_dir
-  class DownCommand < BaseCommand
-    # runs the command, according to parameters
-    def run(params = {})
-      target_dir = params[:target_dir]
-      puts "Bringing down model in #{target_dir}"
-      # load it first
-      begin
-        loader = ProjectYamlLoader.new
-        @project = loader.load_project(target_dir)
-
-        run_on_project
-
-        $log.debug? && pp(@project)
-      rescue => load_execption
-        $log.error "Unable to load project model from #{target_dir}"
-        $log.debug? && puts(load_execption.backtrace)
-
-        return false
-      end
-      true
-    end
-
-    def run_on_project
-      zones = @project.get_element('zones')
-
-      # iterates all zones, descend into zone
-      # for further checks, mark all those bad
-      # zones, decide upon boolean return flag
-      (run_on_project_zones(zones)
-        .each do |_, zone_data|
-          # error occured in run_on_zone call. Lets mark this
-          zone_data.store :status, :failed
-
-        end.size > 0)
-    end
-
+  class DownCommand < UpDownCommand
     # run on zones
     def run_on_project_zones(zones)
       zones.select do |zone_name, _|
@@ -59,10 +24,7 @@ module Wire
       networks = @project.get_element('networks')
 
       # select networks in current zone only
-      networks_in_zone = networks.select do |_, network_data|
-        network_data[:zone] == zone_name
-      end
-
+      networks_in_zone = UpDownCommand.get_networks_for_zone(networks, zone_name)
       networks_in_zone.each do |network_name, _|
         $log.debug("Bringing down network #{network_name}")
 

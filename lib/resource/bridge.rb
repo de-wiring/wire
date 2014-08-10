@@ -8,7 +8,7 @@ module Wire
   module Resource
     # Open vSwitch Bridge resource
     class OVSBridge < ResourceBase
-      attr_accessor	:type
+      attr_accessor	:type, :executables
 
       # initialize the bridge object with
       # given name and type
@@ -16,10 +16,14 @@ module Wire
       # - name	bridge name, i.e. "br0"
       def initialize(name)
         super(name)
+
+        @executables = {
+          :vsctl => '/usr/bin/ovs-vsctl'
+        }
       end
 
       def exist?
-        LocalExecution.with('ovs-vsctl',
+        LocalExecution.with(@executables[:vsctl],
                             ['br-exists', @name]) do |exec_obj|
           exec_obj.run
           return (exec_obj.exitstatus != 2)
@@ -31,7 +35,7 @@ module Wire
       end
 
       def up
-        LocalExecution.with('ovs-vsctl',
+        LocalExecution.with(@executables[:vsctl],
                             ['add-br', @name]) do |up_exec_obj|
           up_exec_obj.run
           return (up_exec_obj.exitstatus == 0)
@@ -43,7 +47,7 @@ module Wire
       end
 
       def down
-        LocalExecution.with('ovs-vsctl',
+        LocalExecution.with(@executables[:vsctl],
                             ['del-br', @name]) do |down_exec_obj|
           down_exec_obj.run
           return (down_exec_obj.exitstatus == 0)

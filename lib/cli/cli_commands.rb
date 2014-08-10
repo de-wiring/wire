@@ -29,12 +29,13 @@ module Wire
 
     # :reek:DuplicateCode
     def run_validate(target_dir)
-      res = @commands[:validate_command].run({ :target_dir => target_dir })
-      if res.size == 0
+      cmd_val_obj = @commands[:validate_command]
+      cmd_val_obj.run({ :target_dir => target_dir })
+      if cmd_val_obj.errors.size == 0
         puts 'OK, model is consistent.'.color(:green)
       else
         puts 'ERROR, detected inconsistencies/errors:'.color(:red)
-        res.each do |val_error|
+        cmd_val_obj.errors.each do |val_error|
           puts val_error.to_s
         end
       end
@@ -42,12 +43,13 @@ module Wire
 
     # :reek:DuplicateCode
     def run_verify(target_dir)
-      res = @commands[:verify_command].run({ :target_dir => target_dir })
-      if res.size == 0
+      cmd_ver_obj = @commands[:verify_command]
+      cmd_ver_obj.run({ :target_dir => target_dir })
+      if cmd_ver_obj.findings.size == 0
         puts 'OK, system is conforming to model'.color(:green)
       else
         puts 'ERROR, detected inconsistencies/errors:'.color(:red)
-        res.each do |val_error|
+        cmd_ver_obj.findings.each do |val_error|
           puts val_error.to_s
         end
       end

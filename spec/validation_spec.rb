@@ -70,7 +70,7 @@ describe ValidateCommand do
   it 'should fail on invalid target dir' do
     out_,err_ = streams_before
     res = vc.run({ :target_dir => 'nonexisting_project_validation'} )
-    res.should eq(['No project model file(s) found.'])
+    res.should eq(false)
     streams_after out_,err_
   end
 end

@@ -15,44 +15,27 @@ module Wire
       @spec_code = []
     end
 
-    def run(params = {})
-      target_dir = params[:target_dir]
-      puts "Verifying model in #{target_dir}"
-
-      # load it first
-      begin
-        loader = ProjectYamlLoader.new
-        @project = loader.load_project(target_dir)
-
-        run_on_project
-
-        $log.debug? && pp(@project)
-      rescue => load_execption
-        $stderr.puts "Unable to load project model from #{target_dir}"
-        $log.debug? && puts(load_execption.backtrace)
-
-        return false
-      end
-
-      # use the specwrite class to write a complete
-      # serverspec example in a subdirectory(serverspec)
-      target_specdir = File.join(target_dir, 'serverspec')
-      spec_writer = SpecWriter.new(target_specdir, @spec_code)
-      spec_writer.write
-
-      if params[:auto_run]
-        $log.debug 'Running serverspec'
-        puts `cd #{target_specdir} && rake spec`
-      end
-
-      true
-    end
-
     def run_on_project
+      @target_dir = @params[:target_dir]
       zones = @project.get_element('zones')
 
       # iterates all zones, descend into zone
       run_on_project_zones(zones)
+
+      # use the specwrite class to write a complete
+      # serverspec example in a subdirectory(serverspec)
+      target_specdir = File.join(@target_dir, 'serverspec')
+      spec_writer = SpecWriter.new(target_specdir, @spec_code)
+      spec_writer.write
+
+      run_serverspec(target_specdir) if @params[:auto_run]
+    end
+
+    def run_serverspec(target_specdir)
+      $log.debug 'Running serverspec'
+      cmd = "cd #{target_specdir} && rake spec"
+      $log.debug "cmd=#{cmd}"
+      puts `#{cmd}`
     end
 
     # run verification on zones
