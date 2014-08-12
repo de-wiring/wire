@@ -1,11 +1,21 @@
 require 'spec_helper.rb'
 
-describe 'It should instantiate a valid model' do
+# 05_up
+# make sure we are able to start model elements
+# on clean system and also on system with existing
+# model elements
+# tests 
+# - wire up
+
+describe 'It should be able to instantiate a valid model with no errors' do
 	describe command 'sudo /mnt/project/bin/wire up /mnt/project/test/d1' do
 		it { should return_exit_status 0 }
 		its(:stdout) { should match /^.*up/ }
 		its(:stdout) { should match /^OK/ }
 	end
+end
+
+describe 'It should be able to instantiate a valid model with no errors even if it is already running' do
 	describe command 'sudo /mnt/project/bin/wire up /mnt/project/test/d1' do
 		it { should return_exit_status 0 }
 		its(:stdout) { should match /^.*already up/ }

@@ -1,5 +1,11 @@
 require 'spec_helper.rb'
 
+# 01_prerun
+# make sure that our model definition is there
+# and valid.
+# tests
+# - wire validate
+
 describe 'It should have a valid model' do
 	describe file '/mnt/project/test/d1/zones.yaml' do
 		it { should be_file }

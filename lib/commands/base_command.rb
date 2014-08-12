@@ -12,7 +12,7 @@ module Wire
     def run(params = {})
       @params = params
       target_dir = @params[:target_dir]
-      puts "Bringing up model in #{target_dir}"
+      puts "Loading model in #{target_dir}"
       # load it first
       begin
         loader = ProjectYamlLoader.new
@@ -23,6 +23,7 @@ module Wire
         $log.debug? && pp(@project)
       rescue => load_execption
         $stderr.puts "Unable to load project model from #{target_dir}"
+        $log.debug? && puts(load_execption.inspect)
         $log.debug? && puts(load_execption.backtrace)
 
         return false

@@ -13,12 +13,12 @@ module Wire
       @errors = []
     end
 
-    def run_on_project(project)
+    def run_on_project
       @errors = []
 
       # run validations against it
       [NetworksValidation].each do |val_clazz|
-        (@errors << run_validation(project, val_clazz)).flatten!
+        (@errors << run_validation(@project, val_clazz)).flatten!
       end
 
       @errors
