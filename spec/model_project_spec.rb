@@ -3,7 +3,6 @@ require 'spec_helper'
 describe Project do
 	
 	let(:project) { Project.new(".") }
-
 	subject { project }
 
 	describe 'project' do
@@ -21,12 +20,12 @@ describe Project do
 		end
 
     it 'should calculate statistics correctly' do
-      p = Project.new(".")
+      p = Project.new('.')
       p.merge_element(:zones,
-                      { 'z1' => { } }
+        { 'z1' => { } }
       )
       p.merge_element(:networks,
-                      { 'n1' => { :zone => 'z1'} }
+        { 'n1' => { :zone => 'z1'} }
       )
       p.calc_stats.should eq({ :zones => 1, :networks => 1})
     end
@@ -34,5 +33,3 @@ describe Project do
 	end
 
 end
-
-

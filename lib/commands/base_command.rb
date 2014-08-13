@@ -4,7 +4,7 @@
 module Wire
   # (empty) Base command
   class BaseCommand
-    attr_accessor :params
+    attr_accessor :params, :project
 
     # runs the command, according to parameters
     # loads project into @project, calls run_on_project

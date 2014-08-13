@@ -77,6 +77,7 @@ describe WireCLI do
       STDIN.should_receive(:gets).and_return("nozone\n")
       STDIN.should_receive(:gets).and_return("nonetwork\n")
       STDIN.should_receive(:gets).and_return("\n")
+      STDIN.should_receive(:gets).and_return("\n")
 
       out_,err_ = streams_before
       lambda {
@@ -91,6 +92,7 @@ describe WireCLI do
       STDIN.should_receive(:gets).and_return("nozone\n")
       STDIN.should_receive(:gets).and_return("nonetwork\n")
       STDIN.should_receive(:gets).and_return("1.2.3.4/32\n")
+      STDIN.should_receive(:gets).and_return("\n")
 
       dir = Dir.mktmpdir
       begin

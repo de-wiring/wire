@@ -8,7 +8,7 @@ require 'spec_helper.rb'
 # - wire up
 
 describe 'It should be able to instantiate a valid model with no errors' do
-	describe command 'sudo /mnt/project/bin/wire up /mnt/project/test/d1' do
+	describe command "sudo #{property[:wire_executable]} up #{property[:model_path]}" do
 		it { should return_exit_status 0 }
 		its(:stdout) { should match /^.*up/ }
 		its(:stdout) { should match /^OK/ }
@@ -16,7 +16,7 @@ describe 'It should be able to instantiate a valid model with no errors' do
 end
 
 describe 'It should be able to instantiate a valid model with no errors even if it is already running' do
-	describe command 'sudo /mnt/project/bin/wire up /mnt/project/test/d1' do
+	describe command "sudo #{property[:wire_executable]} up #{property[:model_path]}" do
 		it { should return_exit_status 0 }
 		its(:stdout) { should match /^.*already up/ }
 		its(:stdout) { should match /^OK/ }

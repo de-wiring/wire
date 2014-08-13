@@ -9,6 +9,7 @@ require 'yaml'
 require 'pp'
 require 'English'
 require 'erb'
+require 'tempfile'
 
 # set up log object
 require 'logger'

@@ -36,7 +36,6 @@ describe NetworksValidation do
 end
 
 describe ValidateCommand do
-  let(:vc) { ValidateCommand.new }
   let(:correct_project) {
     p = Project.new(".")
     p.merge_element(:zones,
@@ -47,24 +46,12 @@ describe ValidateCommand do
     )
     p
   }
+  let(:vc) { ValidateCommand.new }
 
   it 'should yield no errors on a correct sample project' do
-    errors = vc.run_on_project(correct_project)
+    vc.project =  correct_project
+    errors = vc.run_on_project
     errors.size.should eq(0)
-  end
-
-
-  def streams_before
-    out_ = $stdout
-    err_ = $stderr
-    $stdout = StringIO.new
-    $stderr = StringIO.new
-    return out_,err_
-  end
-
-  def streams_after(out_,err_)
-    $stdout = out_
-    $stderr = err_
   end
 
   it 'should fail on invalid target dir' do

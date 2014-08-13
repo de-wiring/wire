@@ -29,8 +29,8 @@ module Wire
     # retrieve element hash, raise ArgumentError if
     # it does not exist.
     def get_element(element_name)
-      fail ArgumentError(
-           "Element #{element_name} not found"
+      fail(
+          ArgumentError, "Element #{element_name} not found"
       ) unless element?(element_name)
       @data[element_name.to_sym]
     end

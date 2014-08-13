@@ -7,14 +7,14 @@ require 'spec_helper.rb'
 # - wire validate
 
 describe 'It should have a valid model' do
-	describe file '/mnt/project/test/d1/zones.yaml' do
+	describe file "#{property[:model_path]}/zones.yaml" do
 		it { should be_file }
 	end
-	describe file '/mnt/project/test/d1/networks.yaml' do
+	describe file "#{property[:model_path]}/networks.yaml" do
 		it { should be_file }
 	end
 
-	describe command '/mnt/project/bin/wire validate /mnt/project/test/d1' do
+	describe command "#{property[:wire_executable]} validate #{property[:model_path]}" do
 		it { should return_exit_status 0 }
 		its(:stdout) { should match /^OK/ }
 	end

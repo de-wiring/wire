@@ -31,7 +31,7 @@ module Wire
         bridge_name = network_name
 
         # we should have a bridge with that name.
-        bridge_resource = Wire::Resource::OVSBridge.new(bridge_name)
+        bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsbridge, bridge_name)
         if bridge_resource.down?
           puts "Bridge #{bridge_name} already down.".color(:green)
         else

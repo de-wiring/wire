@@ -17,5 +17,22 @@ module Wire
         "Resource:[#{name}]"
       end
     end
+
+    # ResourceFactory creates Resource objects
+    # given by name
+    class ResourceFactory
+      include Singleton
+
+      # given a resource name as a symbol (i.e. :ovsbridge)
+      # this creates a resource with given name (i.e. "testbridge")
+      def create(resource_symname, resource_name)
+        clazz_map = {
+          :ovsbridge => OVSBridge
+        }
+        clazz = clazz_map[resource_symname]
+        fail(ArgumentError, "Unknown resource type #{resource_symname}") unless clazz
+        clazz.new(resource_name)
+      end
+    end
   end
 end
