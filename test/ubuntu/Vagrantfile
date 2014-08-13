@@ -20,7 +20,7 @@ EOS
 
     # install gem needed by wire (by hand, not using bundler)
     s.vm.provision "shell", inline: <<EOS
-echo == Ensure basic gems are installed (not yet via gem deps/bundler)
+echo == Ensure basic gems are installed, not yet via gem deps/bundler
 	( gem list --local | grep -wq rainbow ) || sudo gem install rainbow --no-rdoc --no-ri
 	( gem list --local | grep -wq thor ) || sudo gem install thor --no-rdoc --no-ri
 EOS
