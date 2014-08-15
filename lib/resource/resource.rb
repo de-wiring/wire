@@ -25,13 +25,14 @@ module Wire
 
       # given a resource name as a symbol (i.e. :ovsbridge)
       # this creates a resource with given name (i.e. "testbridge")
-      def create(resource_symname, resource_name)
+      def create(resource_symname, *resource_nameargs)
         clazz_map = {
-          :ovsbridge => OVSBridge
+          :ovsbridge => OVSBridge,
+          :bridgeip => IPAddressOnIntf
         }
         clazz = clazz_map[resource_symname]
         fail(ArgumentError, "Unknown resource type #{resource_symname}") unless clazz
-        clazz.new(resource_name)
+        clazz.new(*resource_nameargs)
       end
     end
   end

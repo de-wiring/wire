@@ -109,6 +109,37 @@ describe WireCLI do
 
     end
 
+    it 'should run a validation command on correct model' do
+      begin
+        out_,err_ = streams_before
+        cli.validate('./spec/data')
+
+        $stderr.string.should_not match(/ERROR.*/)
+        $stdout.string.should match(/OK/)
+      ensure
+        streams_after out_,err_
+      end
+    end
+
+    it 'should create a serverspec directory structure when run with spec command' do
+
+      dir = Dir.mktmpdir
+      begin
+        `cp -rp ./spec/data/* #{dir}/`
+
+        out_,err_ = streams_before
+        cli.spec(dir)
+        streams_after out_,err_
+
+        new_dir = File.join(dir,'serverspec')
+        (File.exist?(new_dir)).should eq(true)
+      ensure
+        streams_after out_,err_
+        # remove the directory.
+        FileUtils.remove_entry_secure dir
+      end
+
+    end
   end
 
 end

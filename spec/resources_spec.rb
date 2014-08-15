@@ -21,3 +21,14 @@ describe ResourceFactory do
     }.should raise_error
   end
 end
+
+describe IPAddr do
+  let(:ip1) { IPAddr.new('192.168.10.0/24') }
+  let(:ip2) { IPAddr.new('192.168.10.2') }
+  let(:ip3) { IPAddr.new('192.168.20.2') }
+
+  it '#in_range_of?' do
+    ip2.in_range_of?(ip1).should eq(true)
+    ip3.in_range_of?(ip1).should eq(false)
+  end
+end

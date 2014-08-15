@@ -4,6 +4,8 @@
 module Wire
   # Base class for up/down commands
   class UpDownCommand < BaseCommand
+    # generic method, calls run_on_project_zones for
+    # all zones in model
     def run_on_project
       zones = @project.get_element('zones')
 

@@ -1,6 +1,6 @@
 # Encoding: utf-8
 #
-# #require "bundler/gem_tasks"
+require 'bundler/gem_tasks'
 require 'rake/testtask'
 require 'rubocop/rake_task'
 

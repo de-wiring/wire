@@ -25,25 +25,65 @@ module Wire
 
       # select networks in current zone only
       networks_in_zone = UpDownCommand.get_networks_for_zone(networks, zone_name)
-      networks_in_zone.each do |network_name, _|
+      networks_in_zone.each do |network_name, network_data|
         $log.debug("Bringing down network #{network_name}")
 
-        bridge_name = network_name
+        # if we have a host ip on that bridge, take it down first
+        hostip = network_data[:hostip]
+        if hostip
+          success = handle_hostip(network_name, hostip)
+          b_result = false unless success
+        end
 
         # we should have a bridge with that name.
-        bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsbridge, bridge_name)
-        if bridge_resource.down?
-          puts "Bridge #{bridge_name} already down.".color(:green)
-        else
-          bridge_resource.down
-          if bridge_resource.down?
-            puts "Bridge #{bridge_name} down/removed.".color(:green)
-          else
-            puts "Error bringing down bridge #{bridge_name}.".color(:red)
-            b_result = false
-          end
+        success = handle_bridge(network_name)
+        b_result = false unless success
+      end
+      b_result
+    end
 
+    # take bridge down
+    def handle_bridge(bridge_name)
+      bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsbridge, bridge_name)
+      if bridge_resource.down?
+        puts "Bridge #{bridge_name} already down.".color(:green)
+      else
+        bridge_resource.down
+        if bridge_resource.down?
+          puts "Bridge #{bridge_name} down/removed.".color(:green)
+        else
+          puts "Error bringing down bridge #{bridge_name}.".color(:red)
+          b_result = false
         end
+
+      end
+      b_result
+    end
+
+    # remove ip from bridge interface
+    def handle_hostip(bridge_name, hostip)
+      b_result = true
+
+      bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsbridge, bridge_name)
+      if bridge_resource.down?
+        puts "Bridge #{bridge_name} already down, will not care about ip".color(:green)
+        return b_result
+      end
+
+      # we should have a bridge with that name.
+      hostip_resource = Wire::Resource::ResourceFactory
+      .instance.create(:bridgeip, hostip, bridge_name)
+      if hostip_resource.down?
+        puts "IP #{hostip} on bridge #{bridge_name} already down.".color(:green)
+      else
+        hostip_resource.down
+        if hostip_resource.down?
+          puts "IP #{hostip} on bridge #{bridge_name} down/removed.".color(:green)
+        else
+          puts "Error taking down ip #{hostip} on bridge #{bridge_name}.".color(:red)
+          b_result = false
+        end
+
       end
       b_result
     end

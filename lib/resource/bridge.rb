@@ -17,6 +17,7 @@ module Wire
       def initialize(name)
         super(name)
 
+        # TODO: make configurable
         @executables = {
           :vsctl => '/usr/bin/ovs-vsctl'
         }

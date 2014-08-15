@@ -13,7 +13,7 @@ module Wire
     end
 
     def to_s
-      "ValidationError on #{@element_type} #{@element_name} : #{@message}"
+      "ValidationError on #{@element_type} #{@element_name}: #{@message}"
     end
   end
 
@@ -28,27 +28,6 @@ module Wire
 
     def mark(message, element_type, element_name)
       @errors << ValidationError.new(message, element_type, element_name)
-    end
-  end
-
-  # Run validations on network model part
-  class NetworksValidation < ValidationBase
-    def run_validations
-      networks_attached_to_zones?
-    end
-
-    def networks_attached_to_zones?
-      zones = @project.get_element('zones')
-      @project.get_element('networks').each do |network_name, network_data|
-        zone = network_data[:zone]
-        type = 'network'
-        name = network_name
-        if !zone
-          mark('Network is not attached to a zone', type, name)
-        else
-          mark('Network has invalid zone', type, name) unless zones.key?(zone)
-        end
-      end
     end
   end
 end

@@ -4,8 +4,6 @@
 module Wire
   # Verify Command reads yaml, parses model elements
   # and checks if given elements are present on the system
-  # params:
-  # - :target_dir
   class VerifyCommand < BaseCommand
     attr_accessor :project, :findings
 
@@ -13,12 +11,23 @@ module Wire
       @findings = []
     end
 
+    # add a finding to the findings array
+    # params:
+    # - msg   what went wrong
+    # - type  element type, i.e. Network
+    # - element_name  element_name
+    # - element_data  map of details, from model
     def mark(msg, type, element_name, element_data)
       @findings <<
           VerificationError.new(msg, type,
                                 element_name, element_data)
     end
 
+    # run verification on whole project
+    # iterates all zones, descend into zone
+    # verification
+    # returns:
+    # - bool  true = verification ok
     def run_on_project
       zones = @project.get_element('zones')
 
@@ -52,36 +61,75 @@ module Wire
     # - check if bridges exist for all networks in
     #   this zone
     def run_on_zone(zone_name)
-      b_verify_ok = true
       networks = @project.get_element('networks')
 
       # select networks in current zone only
       networks_in_zone = networks.select do |_, network_data|
         network_data[:zone] == zone_name
       end
+      # verify these networks
+      verify_networks(networks_in_zone)
+    end
 
+    # given an array of network elements, this
+    # method runs the verification on each network.
+    # It checks the availability of a bridge and
+    # the optional host ip on that bridge.
+    def verify_networks(networks_in_zone)
+      b_verify_ok = true
       networks_in_zone.each do |network_name, network_data|
         $log.debug("Verifying network \'#{network_name}\'")
 
         bridge_name = network_name
 
         # we should have a bridge with that name.
-        bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsbridge, bridge_name)
-        if bridge_resource.exist?
-          puts "Bridge \'#{bridge_name}\' exists.".color(:green)
-          network_data.store :status, :ok
-        else
-          puts "Bridge \'#{bridge_name}\' does not exist.".color(:red)
-
+        if handle_bridge(bridge_name) == false
           network_data.store :status, :failed
-
           b_verify_ok = false
           mark("Bridge \'#{bridge_name}\' does not exist.",
                :network, network_name, network_data)
+        else
+          network_data.store :status, :ok
+
+          hostip = network_data[:hostip]
+          # if we have a host ip, then that bridge should have
+          # this ip
+          if hostip
+            if handle_hostip(bridge_name, hostip) == false
+              network_data.store :status, :failed
+              b_verify_ok = false
+              mark("Host ip \'#{hostip}\' not up on bridge \'#{bridge_name}\'.",
+                   :network, network_name, network_data)
+            else
+              network_data.store :status, :ok
+            end
+          end
         end
       end
-
       b_verify_ok
+    end
+
+    def handle_bridge(bridge_name)
+      bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsbridge, bridge_name)
+      if bridge_resource.exist?
+        puts "Bridge \'#{bridge_name}\' exists.".color(:green)
+        return true
+      else
+        puts "Bridge \'#{bridge_name}\' does not exist.".color(:red)
+        return false
+      end
+    end
+
+    def handle_hostip(bridge_name, hostip)
+      hostip_resource = Wire::Resource::ResourceFactory
+        .instance.create(:bridgeip, hostip, bridge_name)
+      if hostip_resource.up?
+        puts "IP \'#{hostip}\' on bridge \'#{bridge_name}\' exists.".color(:green)
+        return true
+      else
+        puts "IP \'#{hostip}\' on bridge \'#{bridge_name}\' does not exist.".color(:red)
+        return false
+      end
     end
   end
 end

@@ -28,7 +28,7 @@ describe SpecCommand do
                     { 'z1' => { } }
     )
     p.merge_element(:networks,
-                    { 'n1' => { :zone => 'z1'} }
+                    { 'n1' => { :zone => 'z1', :network => '10.0.0.0/8', :hostip => '10.20.30.1'} }
     )
     p
   }
@@ -39,25 +39,6 @@ describe SpecCommand do
     res.should eq(false)
     streams_after out_,err_
   end
-
-  #it 'should generate a serverspec skeleton for a valid project' do
-  #  sc.project = correct_project
-  #  dir = Dir.mktmpdir
-  #  begin
-  #    out_,err_ = streams_before
-  #    sc.target_dir = dir
-  #    sc.run_on_project
-  #    streams_after out_,err_
-  #
-  #    new_dir = File.join(dir,'serverspec')
-  #    (File.exist?(new_dir)).should eq(true)
-  #    (File.directory?(new_dir)).should eq(true)
-  #  ensure
-  #    # remove the directory.
-  #    FileUtils.remove_entry_secure dir
-  #  end
-  #
-  #end
   
   it 'should generate serverspec code' do
     sc.project = correct_project

@@ -20,6 +20,7 @@ module Wire
 
     end
 
+    # set global options
     class_option :nocolor, { :desc => 'Disable coloring in output',
                              :required => false, :banner => '' }
     class_option :debug, { :desc => 'Show debug output', :banner => '' }

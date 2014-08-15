@@ -2,3 +2,6 @@
 dmz:
   :desc: Enter a short description here
   :long_desc: Enter a longer description here
+backend:
+  :desc: Backend network
+  :long_desc: Enter a longer description here

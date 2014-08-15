@@ -35,9 +35,6 @@ def streams_after(out_,err_)
   $stderr = err_
 end
 
-
-require 'fixtures/bridge_.rb'
-
 RSpec.configure do |config|
 	  config.mock_framework = :rspec
 end

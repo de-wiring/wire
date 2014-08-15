@@ -3,4 +3,7 @@ FeatureEnvy:
   enabled: false
 LongParameterList:
   enabled: false
-
+RepeatedConditional:
+  max_ifs: 5
+DuplicateMethodCall:
+  enabled: false

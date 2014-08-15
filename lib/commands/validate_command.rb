@@ -4,8 +4,6 @@
 module Wire
   # Validate Command reads yaml, parses model elements
   # and runs a number of consistency checks
-  # params:
-  # - :target_dir
   class ValidateCommand < BaseCommand
     attr_accessor :errors
 
@@ -17,6 +15,7 @@ module Wire
       @errors = []
 
       # run validations against it
+      # TODO: Move validation classes to class level definition
       [NetworksValidation].each do |val_clazz|
         (@errors << run_validation(@project, val_clazz)).flatten!
       end

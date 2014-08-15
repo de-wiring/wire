@@ -41,7 +41,6 @@ module Wire
       end
     end
 
-    # :reek:DuplicateCode
     def run_verify(target_dir)
       cmd_ver_obj = @commands[:verify_command]
       cmd_ver_obj.run({ :target_dir => target_dir })

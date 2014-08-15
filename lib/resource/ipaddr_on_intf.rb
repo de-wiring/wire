@@ -7,6 +7,7 @@ module Wire
   # Resource module
   module Resource
     # Generic IP Address on an interface
+    # Able to add and remove ips on interfaces
     class IPAddressOnIntf < ResourceBase
       attr_accessor	:device, :executables
 
@@ -22,6 +23,9 @@ module Wire
         @executables = {
           :ip => '/sbin/ip'
         }
+
+        fail(ArgumentError, 'ip may not be empty') unless name && name.size > 0
+        fail(ArgumentError, 'device may not be empty') unless device && device.size > 0
       end
 
       def construct_exist_command
@@ -40,7 +44,21 @@ module Wire
         exist?
       end
 
+      def construct_add_command
+        "#{@executables[:ip]} addr add #{name} dev #{device}"
+      end
+
       def up
+        LocalExecution.with(construct_add_command, [],
+                            { :b_shell => false, :b_sudo => true }) do |exec_obj|
+          exec_obj.run
+          return (exec_obj.exitstatus == 0)
+        end
+      end
+
+      def construct_delete_command
+        name32 = (name =~ /^[0-9\.]+\32$/) ? name : "#{name}/32"
+        "#{@executables[:ip]} addr del #{name32} dev #{device}"
       end
 
       def down?
@@ -48,6 +66,11 @@ module Wire
       end
 
       def down
+        LocalExecution.with(construct_delete_command, [],
+                            { :b_shell => false, :b_sudo => true }) do |exec_obj|
+          exec_obj.run
+          return (exec_obj.exitstatus == 0)
+        end
       end
 
       def to_s

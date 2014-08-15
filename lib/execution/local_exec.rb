@@ -5,6 +5,7 @@ require 'singleton'
 module Wire
   # Execution module for executing commands
   module Execution
+    # return singleton object
     def self.global_execution_options
       ExecutionOptions.singleton
     end
@@ -40,6 +41,8 @@ module Wire
         @options = options
       end
 
+      # block-style. Creates a LocalExecution object with
+      # given parameters, yields it into a given block.
       def self.with(command, args = nil, options =
           { :b_shell => true, :b_sudo => true })
         obj = LocalExecution.new command, args, options

@@ -2,19 +2,22 @@
 
 # Wire module
 module Wire
-  # Verify Command reads yaml, parses model elements
-  # and checks if given elements are present on the system
-  # params:
-  # - :target_dir
+  # SpecCommand generates a serverspec output for
+  # given model which tests all model elements
+  # optionally runs serverspec
   class SpecCommand < BaseCommand
     attr_accessor :project
     attr_accessor :target_dir
+
+    # spec_code will contain all serverspec
+    # code blocks, ready to be written to file
     attr_accessor :spec_code
 
     def initialize
       @spec_code = []
     end
 
+    # process specification for whole project model
     def run_on_project
       @target_dir = @params[:target_dir]
       zones = @project.get_element('zones')
@@ -31,6 +34,8 @@ module Wire
       run_serverspec(target_specdir) if @params[:auto_run]
     end
 
+    # executes serverspec in its target directory
+    # TODO: stream into stdout instead of Kernel.``
     def run_serverspec(target_specdir)
       $log.debug 'Running serverspec'
       cmd = "cd #{target_specdir} && rake spec"
@@ -43,6 +48,7 @@ module Wire
       zones.select do |zone_name, _|
         $log.debug("Creating specs for zone #{zone_name} ...")
         run_on_zone(zone_name)
+        $log.debug("Done for zone #{zone_name} ...")
       end
     end
 
@@ -56,63 +62,24 @@ module Wire
       networks_in_zone = networks.select do|_, network_data|
         network_data[:zone] == zone_name
       end
-      networks_in_zone.each do |network_name, _|
-        $log.debug("Creating specs for network #{network_name}")
-
+      networks_in_zone.each do |network_name, network_data|
         bridge_name = network_name
 
-        template = SpecTemplates.get_template__bridge_exists(zone_name, bridge_name)
+        $log.debug("Creating specs for network #{bridge_name}")
+
+        template = SpecTemplates.build_template__bridge_exists
         erb = ERB.new(template, nil, '%')
         @spec_code << erb.result(binding)
+
+        ip = network_data[:hostip]
+        if ip
+          template = SpecTemplates.build_template__ip_is_up
+          erb = ERB.new(template, nil, '%')
+          @spec_code << erb.result(binding)
+        end
+
+        $log.debug("Done for network #{bridge_name}")
       end
-    end
-  end
-
-  # stateless erb template methods
-  class SpecTemplates
-    # rubocop:disable Lint/UnusedMethodArgument
-    # :reek:UnusedParameters
-    def self.get_template__bridge_exists(zone_name, bridge_name)
-      <<ERB
-  describe 'In zone <%= zone_name %> we should have an ovs bridge named <%= bridge_name %>' do
-    describe command "sudo ovs-vsctl list-br" do
-      its(:stdout) { should match /<%= bridge_name %>/ }
-    end
-  end
-ERB
-    end
-
-    def self.template_spec_helper
-      <<ERB
-require 'serverspec'
-require 'rspec/its'
-
-include SpecInfra::Helper::Exec
-include SpecInfra::Helper::DetectOS
-
-RSpec.configure do |c|
-  if ENV['ASK_SUDO_PASSWORD']
-    require 'highline/import'
-    c.sudo_password = ask("Enter sudo password: ") { |q| q.echo = false }
-  else
-    c.sudo_password = ENV['SUDO_PASSWORD']
-  end
-end
-ERB
-    end
-
-    def self.template_rakefile
-      <<ERB
-require 'rake'
-require 'rspec/core/rake_task'
-
-RSpec::Core::RakeTask.new(:spec) do |t|
-  t.pattern = 'spec/*/*_spec.rb'
-  t.rspec_opts = '--format documentation --color'
-end
-
-task :default => :spec
-ERB
     end
   end
 

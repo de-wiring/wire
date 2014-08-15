@@ -3,7 +3,8 @@
 # Wire module
 module Wire
   # raised in case of model elements
-  # not running
+  # not running or in other verification
+  # states
   class VerificationError
     attr_accessor	:message, :element_type, :element_name, :element
 
