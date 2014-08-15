@@ -5,12 +5,12 @@ require 'rubygems'
 #
 # modules
 #
-require_relative 'common.rb'
-require_relative 'cli.rb'
-require_relative 'commands.rb'
-require_relative 'model.rb'
-require_relative 'execution.rb'
-require_relative 'resource.rb'
+require_relative 'wire/common.rb'
+require_relative 'wire/cli.rb'
+require_relative 'wire/commands.rb'
+require_relative 'wire/model.rb'
+require_relative 'wire/execution.rb'
+require_relative 'wire/resource.rb'
 
 include Wire
 

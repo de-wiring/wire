@@ -1,16 +1,18 @@
 require 'rubygems'
 
 require 'simplecov'
-SimpleCov.start
+SimpleCov.root './lib'
+SimpleCov.coverage_dir '../coverage'
+SimpleCov.start 
 
 require 'bundler/setup'
 
-require 'common'
-require 'cli'
-require 'commands'
-require 'model'
-require 'execution'
-require 'resource'
+require 'wire/common'
+require 'wire/cli'
+require 'wire/commands'
+require 'wire/model'
+require 'wire/execution'
+require 'wire/resource'
 
 include Wire
 
