@@ -80,8 +80,7 @@ module Wire
       # returns
       # - command as [String]
       def construct_delete_command
-        name32 = (name =~ /^[0-9\.]+\32$/) ? name : "#{name}/32"
-        "#{@executables[:ip]} addr del #{name32} dev #{device}"
+        "#{@executables[:ip]} addr del #{name} dev #{device}"
       end
 
       # thats the opposite of up

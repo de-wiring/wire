@@ -35,6 +35,10 @@ module Wire
         # if we have a host ip on that bridge, take it down first
         hostip = network_data[:hostip]
         if hostip
+          # if the hostip is not in cidr, take netmask
+          # from network entry, add to hostip
+          hostip = ensure_hostip_netmask(hostip, network_data)
+
           success = handle_hostip(network_name, hostip)
           b_result = false unless success
         end

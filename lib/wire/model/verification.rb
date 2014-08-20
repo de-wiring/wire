@@ -17,6 +17,7 @@ module Wire
     attr_accessor	:message, :element_type, :element_name, :element
 
     # initalizes the verification error
+    # params:
     # +message+ verification (error) message
     # +element_type+ element type as string (i.e. 'network')
     # +element_name+ name of element within model

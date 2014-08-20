@@ -29,12 +29,31 @@ module Wire
     # params:
     # +networks+:  array of all networks
     # +zone_name+: name of desired zone
-    # return:
+    # returns:
     # # => [Array] of networks for given zone
     def self.get_networks_for_zone(networks, zone_name)
       # select networks in given zone only
       networks.select do |_, network_data|
         network_data[:zone] == zone_name
+      end
+    end
+
+    # if the hostip is not in cidr, take netmask
+    # from network entry, add to hostip
+    # params:
+    # +host_ip+ i.e. 192.168.10.1
+    # +network_data+ network data object, to take netmask from :network element
+    def ensure_hostip_netmask(host_ip, network_data)
+      return host_ip  if host_ip =~ /[0-9\.]+\/[0-9]+/
+
+      match_data = network_data[:network].match(/[0-9\.]+(\/[0-9]+)/)
+      if match_data && match_data.size >= 2
+        netmask = match_data[1]
+        $log.debug "Adding netmask #{netmask} to host-ip #{host_ip}"
+        return "#{host_ip}#{netmask}"
+      else
+        $log.error "host-ip #{host_ip} is missing netmask, and none given in network."
+        return host_ip
       end
     end
   end

@@ -16,7 +16,7 @@ describe IPAddressOnIntf do
   end
 
   it 'should construct the delete command correctly' do
-    obj = IPAddressOnIntf.new('127.0.0.1', 'lo37')
+    obj = IPAddressOnIntf.new('127.0.0.1/32', 'lo37')
     obj.construct_delete_command.should eq('/sbin/ip addr del 127.0.0.1/32 dev lo37')
   end
 

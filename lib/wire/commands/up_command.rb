@@ -36,7 +36,13 @@ module Wire
         if success
           # go on
           host_ip = network_data[:hostip]
+
           if host_ip
+            # if the hostip is not in cidr, take netmask
+            # from network entry, add to hostip
+            host_ip = ensure_hostip_netmask(host_ip, network_data)
+
+            # try to bring it up
             success = handle_hostip(network_name, host_ip)
 
             b_result = false unless success
