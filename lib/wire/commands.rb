@@ -1,5 +1,9 @@
 # encoding: utf-8
 
+# The MIT License (MIT)
+# Copyright (c) 2014 Andreas Schmidt, andreas@de-wiring.net
+#
+
 require_relative 'commands/base_command.rb'
 require_relative 'commands/init_command.rb'
 require_relative 'commands/init_interactive.rb'

@@ -24,6 +24,8 @@ $log.formatter = proc do |severity, _, _, msg|
 end
 $log.level = Logger::FATAL
 
+# swap stdout/err by replacements
+# => out/err replacement StringIO
 def streams_before
   out_ = $stdout
   err_ = $stderr
@@ -32,6 +34,7 @@ def streams_before
   return out_,err_
 end
 
+# set back stdout to +out_+, stderr to +err_+
 def streams_after(out_,err_)
   $stdout = out_
   $stderr = err_

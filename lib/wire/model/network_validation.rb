@@ -1,9 +1,16 @@
 # encoding: utf-8
 
+# The MIT License (MIT)
+# Copyright (c) 2014 Andreas Schmidt, andreas@de-wiring.net
+#
+
 # Wire module
 module Wire
   # Run validations on network model part
   class NetworksValidation < ValidationBase
+    # run validation steps on network elements
+    # returns
+    # - nil, results in errors of ValidationBase
     def run_validations
       networks_attached_to_zones?
       duplicate_networks_found?
@@ -11,6 +18,7 @@ module Wire
       nonmatching_hostips_found?
     end
 
+    # ensures that all networks are attached to a zone
     def networks_attached_to_zones?
       zones = @project.get_element('zones')
       @project.get_element('networks').each do |network_name, network_data|
@@ -25,6 +33,7 @@ module Wire
       end
     end
 
+    # ensures that all network ranges are unique
     def duplicate_networks_found?
       dup_map = {}
       @project.get_element('networks').each do |network_name, network_data|
@@ -36,6 +45,7 @@ module Wire
       end
     end
 
+    # ensures that all networks have their network range defined
     def missing_network_def_found?
       @project.get_element('networks').each do |network_name, network_data|
         nw = network_data[:network]
@@ -44,6 +54,8 @@ module Wire
       end
     end
 
+    # ensures that all networks with hostips have their hostip
+    # within the network range of its network, i.e. 10.10.1.1 for 10.10.1.0/24
     def nonmatching_hostips_found?
       @project.get_element('networks').each do |network_name, network_data|
         network = network_data[:network]

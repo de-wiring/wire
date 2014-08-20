@@ -69,27 +69,35 @@ describe ValidateCommand do
   let(:vc) { ValidateCommand.new }
 
   it 'should yield no errors on a correct sample project' do
+    out_,err_ = streams_before
     vc.project =  correct_project
     errors = vc.run_on_project
+    streams_after out_,err_
 
     pp(errors) if errors.size != 0
     errors.size.should eq(0)
   end
 
   it 'should fail on incorrect sample projects' do
+    out_,err_ = streams_before
     vc.project =  incorrect_project_dupe_networks
     errors = vc.run_on_project
+    streams_after out_,err_
     errors.size.should eq(1)
 
+    out_,err_ = streams_before
     vc.project =  incorrect_project_no_networks
     errors = vc.run_on_project
+    streams_after out_,err_
     errors.size.should eq(1)
 
   end
 
   it 'should fail on nonmatching hostip' do
+    out_,err_ = streams_before
     vc.project =  incorrect_project_nonmatching_hostip
     errors = vc.run_on_project
+    streams_after out_,err_
     errors.size.should eq(1)
   end
 

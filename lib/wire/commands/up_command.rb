@@ -1,12 +1,16 @@
 # encoding: utf-8
 
+# The MIT License (MIT)
+# Copyright (c) 2014 Andreas Schmidt, andreas@de-wiring.net
+#
+
 # Wire module
 module Wire
   # UpCommand reads yaml, parses model elements
   # and brings all defined model elements "up", that is
   # starting bridges, containers etc.
   class UpCommand < UpDownCommand
-    # run on zones
+    # run on +zones+
     def run_on_project_zones(zones)
       zones.select do |zone_name, _|
         $log.debug("Bringing up zone #{zone_name} ...")
@@ -14,7 +18,7 @@ module Wire
       end
     end
 
-    # run in given zone:
+    # run in given +zone_name+:
     # returns:
     # - bool: true if successful, false otherwise
     def run_on_zone(zone_name)
@@ -44,6 +48,10 @@ module Wire
       b_result
     end
 
+    # bring bridge resource up, identified by
+    # +bridge_name+
+    # Returns
+    # - [Bool] true if hostip if up on bridge
     def handle_bridge(bridge_name)
       b_result = true
 
@@ -64,6 +72,10 @@ module Wire
       b_result
     end
 
+    # bring ip resource up on device identified by
+    # +bridge_name+ and +host_ip+
+    # Returns
+    # - [Bool] true if hostip if up on bridge
     def handle_hostip(bridge_name, hostip)
       b_result = true
 

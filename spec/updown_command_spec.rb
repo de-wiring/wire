@@ -52,6 +52,48 @@ describe DownCommand do
   end
 
 
+  it 'Should bring down a bridge if hostip is down' do
+
+    ovs_bridge_stub = double('OVSBridge')
+    ovs_bridge_stub.stub(:down?).and_return(false)
+    ovs_bridge_stub.stub(:down)
+
+    Wire::Resource::ResourceFactory.instance.stub(:create).and_return(ovs_bridge_stub)
+
+    out_,err_ = streams_before
+    begin
+      vc = DownCommand.new
+      vc.stub(:handle_hostip).and_return(true)
+      vc.project = project
+      vc.run_on_project
+    ensure
+      streams_after(out_,err_)
+    end
+  end
+
+  it 'Should bring down a hostip' do
+
+    ovs_bridge_stub = double('OVSBridge')
+
+    hostip_stub = double('IPAddressOnIntf')
+    hostip_stub.stub(:up?).and_return(true)
+    hostip_stub.stub(:down?).and_return(false)
+    hostip_stub.stub(:down).and_return(true)
+
+    Wire::Resource::ResourceFactory.instance.stub(:create).and_return(ovs_bridge_stub)
+    Wire::Resource::ResourceFactory.instance.stub(:create).and_return(hostip_stub)
+
+    out_,err_ = streams_before
+    begin
+      vc = DownCommand.new
+
+      vc.project = project
+      vc.run_on_project
+    ensure
+      streams_after(out_,err_)
+    end
+  end
+
 end
 
 describe UpCommand do
@@ -104,5 +146,45 @@ describe UpCommand do
     end
   end
 
+
+  it 'Should bring up a bridge' do
+
+    ovs_bridge_stub = double('OVSBridge')
+    ovs_bridge_stub.stub(:up?).and_return(false)
+    ovs_bridge_stub.stub(:up)
+
+    Wire::Resource::ResourceFactory.instance.stub(:create).and_return(ovs_bridge_stub)
+
+    out_,err_ = streams_before
+    begin
+      vc = UpCommand.new
+      vc.project = project
+      vc.run_on_project
+    ensure
+      streams_after(out_,err_)
+    end
+  end
+
+  it 'Should bring up a hostip if bridge is up' do
+
+    ovs_bridge_stub = double('OVSBridge')
+
+    hostip_stub = double('IPAddressOnIntf')
+    hostip_stub.stub(:up?).and_return(false)
+    hostip_stub.stub(:up).and_return(true)
+
+    Wire::Resource::ResourceFactory.instance.stub(:create).and_return(ovs_bridge_stub)
+    Wire::Resource::ResourceFactory.instance.stub(:create).and_return(hostip_stub)
+
+    out_,err_ = streams_before
+    begin
+      vc = UpCommand.new
+      vc.stub(:handle_bridge).and_return(true)
+      vc.project = project
+      vc.run_on_project
+    ensure
+      streams_after(out_,err_)
+    end
+  end
 
 end

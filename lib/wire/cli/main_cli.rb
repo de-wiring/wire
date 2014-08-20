@@ -1,5 +1,9 @@
 # encoding: utf-8
 
+# The MIT License (MIT)
+# Copyright (c) 2014 Andreas Schmidt, andreas@de-wiring.net
+#
+
 # Wire module
 module Wire
   # WireCLI
@@ -25,8 +29,6 @@ module Wire
                              :required => false, :banner => '' }
     class_option :debug, { :desc => 'Show debug output', :banner => '' }
 
-    # init
-    #
     desc 'init [TARGETDIR]', 'create an inital model in TARGETDIR'
     long_desc <<-LONGDESC
       Creates TARGETDIR if necessary, opens an interactive
@@ -34,6 +36,7 @@ module Wire
 
       Writes model files to TARGETDIR.
     LONGDESC
+    # init method, run init in +target_dir+
     def init(target_dir = '.')
       initialize_commands
       apply_globals
@@ -49,6 +52,7 @@ module Wire
       the model and runs consistency checks against the model elements,
       i.e. if every network is attached to a zone.
     LONGDESC
+    # validate method, run model validation in +target_dir+
     def validate(target_dir = '.')
       initialize_commands
       apply_globals
@@ -64,6 +68,7 @@ module Wire
       the model and runs checks to see if everthing in the model
       is present in the current system.
     LONGDESC
+    # verify method, run model verification in +target_dir+
     def verify(target_dir = '.')
       initialize_commands
       apply_globals
@@ -82,6 +87,7 @@ module Wire
       Writes spec helpers if they do not exist.
     LONGDESC
     option :run, { :desc => 'Automatically run serverspec', :banner => '', :type => :boolean }
+    # spec method, generate and optionally run serverspec in +target_dir+
     def spec(target_dir = '.')
       initialize_commands
       apply_globals
@@ -97,6 +103,7 @@ module Wire
       Given a model in TARGETDIR, the up commands reads
       the model. Each model element is brought to live.
     LONGDESC
+    # up method, bring model in +target_dir+ up
     def up(target_dir = '.')
       initialize_commands
       apply_globals
@@ -112,6 +119,7 @@ module Wire
       Given a model in TARGETDIR, the up commands reads
       the model. Each model element is stopped and removed.
     LONGDESC
+    # down method, bring model in +target_dir+ down
     def down(target_dir = '.')
       initialize_commands
       apply_globals

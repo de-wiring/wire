@@ -11,3 +11,4 @@ spec/reports
 tmp
 .vagrant
 coverage
+.inch

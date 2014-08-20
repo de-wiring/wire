@@ -1,22 +1,30 @@
 # encoding: utf-8
 
+# The MIT License (MIT)
+# Copyright (c) 2014 Andreas Schmidt, andreas@de-wiring.net
+#
+
 # Wire module
 module Wire
   # Verify Command reads yaml, parses model elements
   # and checks if given elements are present on the system
   class VerifyCommand < BaseCommand
+    # +project+ to operate upon
+    # +findings+ is an array of potential errors that occured
+    # during verification run
     attr_accessor :project, :findings
 
+    # set up with empty findings arraay
     def initialize
       @findings = []
     end
 
     # add a finding to the findings array
     # params:
-    # - msg   what went wrong
-    # - type  element type, i.e. Network
-    # - element_name  element_name
-    # - element_data  map of details, from model
+    # - +msg+   what went wrong
+    # - +type+  element type, i.e. Network
+    # - +element_name+  element_name
+    # - +element_data+  map of details, from model
     def mark(msg, type, element_name, element_data)
       @findings <<
           VerificationError.new(msg, type,
@@ -27,7 +35,7 @@ module Wire
     # iterates all zones, descend into zone
     # verification
     # returns:
-    # - bool  true = verification ok
+    # - [bool]  true = verification ok
     def run_on_project
       zones = @project.get_element('zones')
 
@@ -43,7 +51,7 @@ module Wire
         end.size > 0)
     end
 
-    # run verification on zones
+    # run verification on given +zones+
     def run_on_project_zones(zones)
       zones.select do |zone_name, _|
         $log.debug("Verifying zone #{zone_name} ...")
@@ -57,7 +65,7 @@ module Wire
       end
     end
 
-    # run verification in given zone:
+    # run verification for given +zone_name+:
     # - check if bridges exist for all networks in
     #   this zone
     def run_on_zone(zone_name)
@@ -71,7 +79,7 @@ module Wire
       verify_networks(networks_in_zone)
     end
 
-    # given an array of network elements, this
+    # given an array of network elements (+networks_in_zone+), this
     # method runs the verification on each network.
     # It checks the availability of a bridge and
     # the optional host ip on that bridge.
@@ -109,6 +117,10 @@ module Wire
       b_verify_ok
     end
 
+    # runs verification for a bridge resource identified by
+    # +bridge_name+
+    # Returns
+    # - [Bool] true if bridge exists
     def handle_bridge(bridge_name)
       bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsbridge, bridge_name)
       if bridge_resource.exist?
@@ -120,6 +132,10 @@ module Wire
       end
     end
 
+    # runs verification for a ip resource identified by
+    # +bridge_name+ and +host_ip+
+    # Returns
+    # - [Bool] true if hostip if up on bridge
     def handle_hostip(bridge_name, hostip)
       hostip_resource = Wire::Resource::ResourceFactory
         .instance.create(:bridgeip, hostip, bridge_name)

@@ -1,6 +1,8 @@
 # encoding: utf-8
 
-# wrap the /sbin/ip binary
+# The MIT License (MIT)
+# Copyright (c) 2014 Andreas Schmidt, andreas@de-wiring.net
+#
 
 # Wire module
 module Wire
@@ -10,6 +12,7 @@ module Wire
     # is able to parse the output and pass it
     # on in a resource style
     class IPBinary < ResourceBase
+      # sets the executables map
       def initialize
         super('undefined')
         @executables = {
@@ -19,6 +22,10 @@ module Wire
 
       # call ip addr show and returns details
       # as a map
+      # params:
+      # +device+ device (i.e. bridge0 to operate on)
+      # returns:
+      # - detail data of device as a map
       def get_ipaddr_data(device)
         fail(ArgumentError, 'Device name not given') unless device && device.size > 0
 
@@ -40,6 +47,9 @@ module Wire
         result
       end
 
+      # given the array of output lines (+arr_lines+)from ip binary call,
+      # this method parses the lines and adds structured detail
+      # data to +result+ map
       def parse_inet_lines(arr_lines, result)
         inet_map = {}
         arr_lines[1..-1].select { |line| line =~ /inet / }.each do |line|
@@ -61,6 +71,13 @@ module Wire
         end
       end
 
+      # runs a set of +matchers+ against given +line+ string,
+      # returns results
+      # params:
+      # +line+: line from command output
+      # +matchers+: map of regexps
+      # returns:
+      # - [HashMap] with keys identical to +matchers+ map
       def generic_match_data(line, matchers)
         result = {}
 
@@ -72,6 +89,11 @@ module Wire
         result
       end
 
+      # retrieve device data from input
+      # params:
+      # +line+: input line from /sbin/ip addr show w/ device data
+      # returns:
+      # [HashMap] with id, devicename, options, mtu, state and group details
       def get_ipaddr_data_device(line)
         device_matchers = {
           :id      => /^([0-9]+):/,
@@ -84,6 +106,11 @@ module Wire
         generic_match_data(line, device_matchers)
       end
 
+      # retrieve link state data from input
+      # params:
+      # +line+: input line from /sbin/ip addr show w/ link data
+      # returns:
+      # [HashMap] with type, mac address and (optional) broadcast
       def get_ipaddr_data_link(line)
         link_matchers = {
           :type    => /link\/(\w+) /,
@@ -93,6 +120,11 @@ module Wire
         generic_match_data(line, link_matchers)
       end
 
+      # retrieve inet state data from input
+      # params:
+      # +line+: input line from /sbin/ip addr show w/ "inet" data
+      # returns:
+      # [HashMap] with ip, broadcast, scope, device
       def get_ipaddr_data_inet(line)
         inet_matchers = {
           :ip      => /inet ([0-9\.]+)\//,

@@ -1,5 +1,9 @@
 # encoding: utf-8
 
+# The MIT License (MIT)
+# Copyright (c) 2014 Andreas Schmidt, andreas@de-wiring.net
+#
+
 # Wire module
 module Wire
   # ProjectYamlLoader is able to load a model

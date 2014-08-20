@@ -1,5 +1,9 @@
 # encoding: utf-8
 
+# The MIT License (MIT)
+# Copyright (c) 2014 Andreas Schmidt, andreas@de-wiring.net
+#
+
 # Wire module
 module Wire
   # stateless erb template methods used by spec_command.rb
@@ -29,6 +33,9 @@ ERB
 ERB
     end
 
+    # generate template part
+    # returns
+    # - erb template for spec_helper.rb file
     def self.template_spec_helper
       <<ERB
 require 'serverspec'
@@ -48,6 +55,9 @@ end
 ERB
     end
 
+    # generate template part
+    # returns
+    # - erb template for Rakefile
     def self.template_rakefile
       <<ERB
 require 'rake'

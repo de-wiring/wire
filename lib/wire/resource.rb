@@ -1,5 +1,9 @@
 # encoding: utf-8
 
+# The MIT License (MIT)
+# Copyright (c) 2014 Andreas Schmidt, andreas@de-wiring.net
+#
+
 require_relative 'resource/resource'
 require_relative 'resource/bridge'
 require_relative 'resource/ipaddr_on_intf'

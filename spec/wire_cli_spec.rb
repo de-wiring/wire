@@ -142,6 +142,109 @@ describe WireCLI do
     end
   end
 
+
+
+  it 'should run a verify command on correct model and return positive output' do
+    begin
+      out_,err_ = streams_before
+      mock_commands = WireCommands.new
+      ver_cmd_double = double('VerifyCommand')
+      mock_commands.stub(:commands).and_return({:verify_command => ver_cmd_double })
+
+      ver_cmd_double.stub(:run).and_return(true)
+      ver_cmd_double.stub(:findings).and_return([])
+      mock_commands.run_verify('./spec/data')
+
+      $stdout.string.should_not match(/ERROR.*/)
+      $stdout.string.should match(/OK/)
+    ensure
+      streams_after out_,err_
+    end
+  end
+
+  it 'should run a verify command on incorrect model and return negative output and findings' do
+    begin
+      out_,err_ = streams_before
+      mock_commands = WireCommands.new
+      ver_cmd_double = double('VerifyCommand')
+      mock_commands.stub(:commands).and_return({:verify_command => ver_cmd_double })
+
+      ver_cmd_double.stub(:run)
+      ver_cmd_double.stub(:findings).and_return(['FooFinding'])
+      mock_commands.run_verify('./spec/data')
+
+      $stdout.string.should match(/ERROR.*/)
+      $stdout.string.should match(/FooFinding/)
+      $stdout.string.should_not match(/OK/)
+    ensure
+      streams_after out_,err_
+    end
+  end
+
+  it 'should handle run_up correctly' do
+    begin
+      out_,err_ = streams_before
+      mock_commands = WireCommands.new
+      cmd_double = double('UpCommand')
+      mock_commands.stub(:commands).and_return({:up_command => cmd_double })
+
+      cmd_double.stub(:run).and_return true
+      mock_commands.run_up('./spec/data')
+
+      $stdout.string.should_not match(/ERROR.*/)
+      $stdout.string.should match(/OK/)
+    ensure
+      streams_after out_,err_
+    end
+
+    begin
+      out_,err_ = streams_before
+      mock_commands = WireCommands.new
+      cmd_double = double('UpCommand')
+      mock_commands.stub(:commands).and_return({:up_command => cmd_double })
+
+      cmd_double.stub(:run).and_return false
+      mock_commands.run_up('./spec/data')
+
+      $stdout.string.should match(/ERROR.*/)
+      $stdout.string.should_not match(/OK/)
+    ensure
+      streams_after out_,err_
+    end
+  end
+
+  it 'should handle run_down correctly' do
+    begin
+      out_,err_ = streams_before
+      mock_commands = WireCommands.new
+      cmd_double = double('DownCommand')
+      mock_commands.stub(:commands).and_return({:down_command => cmd_double })
+
+      cmd_double.stub(:run).and_return true
+      mock_commands.run_down('./spec/data')
+
+      $stdout.string.should_not match(/ERROR.*/)
+      $stdout.string.should match(/OK/)
+    ensure
+      streams_after out_,err_
+    end
+
+    begin
+      out_,err_ = streams_before
+      mock_commands = WireCommands.new
+      cmd_double = double('DownCommand')
+      mock_commands.stub(:commands).and_return({:down_command => cmd_double })
+
+      cmd_double.stub(:run).and_return false
+      mock_commands.run_down('./spec/data')
+
+      $stdout.string.should match(/ERROR.*/)
+      $stdout.string.should_not match(/OK/)
+    ensure
+      streams_after out_,err_
+    end
+  end
+
 end
 
 

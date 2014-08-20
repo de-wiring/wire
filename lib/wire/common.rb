@@ -1,5 +1,9 @@
 # encoding: utf-8
 
+# The MIT License (MIT)
+# Copyright (c) 2014 Andreas Schmidt, andreas@de-wiring.net
+#
+
 require 'thor'
 
 require 'rainbow'
@@ -23,6 +27,11 @@ $log.level = Logger::INFO
 
 # define exit codes
 module Wire
+  # central place for exit codes, given by +id+
+  # Params
+  # +id+ i.e. :init_bad_input
+  # Returns
+  # exitcode as [int]
   def self.cli_exitcode(id)
     codes = {
       :init_bad_input	=> 10,

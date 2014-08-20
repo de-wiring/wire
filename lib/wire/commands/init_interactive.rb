@@ -1,10 +1,16 @@
 # encoding: utf-8
 
+# The MIT License (MIT)
+# Copyright (c) 2014 Andreas Schmidt, andreas@de-wiring.net
+#
+
 # Wire module
 module Wire
   # interactive ask_ commands
   class InitInteractive
     # ask for a comma separated list of zone names
+    # returns
+    # - [Array] of zone names
     def self.ask_for_zone_names
       question = <<-EOF
 Please enter the names of desired system zones,
@@ -18,6 +24,9 @@ as a comma-separated list:
       line.split(',').map { |zone_name| zone_name.strip }
     end
 
+    # Ask for network names in a zone given by +zone_name+
+    # Returns
+    # - [Array] of network names
     def self.ask_for_network_in_zone(zone_name)
       question = <<-EOF
   - Configuring networks in zone #{zone_name}:
@@ -32,6 +41,10 @@ as a comma-separated list:
       line.split(',').map { |network_name| network_name.strip }
     end
 
+    # For a network given by +network_name+, ask for details
+    # i.e. ipaddress etc.
+    # Returns
+    # - [Hash] of details
     def self.ask_detail_data_for_network(network_name)
       question = <<-EOF
     = Configuring network #{network_name}

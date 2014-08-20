@@ -1,18 +1,25 @@
 # encoding: utf-8
 
+# The MIT License (MIT)
+# Copyright (c) 2014 Andreas Schmidt, andreas@de-wiring.net
+#
+
 # Wire module
 module Wire
   # SpecCommand generates a serverspec output for
   # given model which tests all model elements
   # optionally runs serverspec
   class SpecCommand < BaseCommand
+    # +project+ to operate on
     attr_accessor :project
+    # +target_dir+ to read model from (and put specs into)
     attr_accessor :target_dir
 
     # spec_code will contain all serverspec
     # code blocks, ready to be written to file
     attr_accessor :spec_code
 
+    # initializes empty spec
     def initialize
       @spec_code = []
     end
@@ -36,6 +43,8 @@ module Wire
 
     # executes serverspec in its target directory
     # TODO: stream into stdout instead of Kernel.``
+    # params:
+    # +target_dir+ model and output dir
     def run_serverspec(target_specdir)
       $log.debug 'Running serverspec'
       cmd = "cd #{target_specdir} && rake spec"
@@ -43,7 +52,7 @@ module Wire
       puts `#{cmd}`
     end
 
-    # run verification on zones
+    # run verification on +zones+
     def run_on_project_zones(zones)
       zones.select do |zone_name, _|
         $log.debug("Creating specs for zone #{zone_name} ...")
@@ -52,7 +61,7 @@ module Wire
       end
     end
 
-    # run verification in given zone:
+    # run verification in given +zone_name+:
     # - check if bridges exist for all networks in
     #   this zone
     def run_on_zone(zone_name)
@@ -87,12 +96,14 @@ module Wire
   # structure according to basic serverspec
   # needs and fill in the templates
   class SpecWriter
-    # create SpecWriter in target directory
+    # create SpecWriter in +target_dir+ directory
+    # with given +spec_contents+
     def initialize(target_dir, spec_contents)
       @target_dir = target_dir
       @spec_contents = spec_contents
     end
 
+    # writes spec to disk
     def write
       ensure_directory_structure
       ensure_files
@@ -102,13 +113,14 @@ module Wire
       $log.info 'To run automatically, use --run'
     end
 
+    # make sure that we have a rspec-conformant dir structure
     def ensure_directory_structure
       ensure_directory @target_dir
       ensure_directory File.join(@target_dir, 'spec')
       ensure_directory File.join(@target_dir, 'spec', 'localhost')
     end
 
-    # writes template to file
+    # writes erb +template+ to open +file+ object
     def write_template(template, file)
       erb = ERB.new(template, nil, '%')
       file.puts(erb.result(binding))
@@ -146,6 +158,7 @@ ERB
 
     private
 
+    # make sure that +target_dir+ exists
     def ensure_directory(target_dir)
       return if File.exist?(target_dir)
       begin
@@ -155,6 +168,7 @@ ERB
       end
     end
 
+    # checks if +target_file+ exists
     def file?(target_file)
       File.exist?(target_file) && File.file?(target_file)
     end

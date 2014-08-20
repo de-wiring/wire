@@ -1,4 +1,9 @@
 # encoding: utf-8
+
+# The MIT License (MIT)
+# Copyright (c) 2014 Andreas Schmidt, andreas@de-wiring.net
+#
+
 require 'singleton'
 
 # Wire module
@@ -14,10 +19,13 @@ module Wire
     class ExecutionOptions
       include Singleton
 
+      # set default execution options
       def initialize
         @options = { :b_noop => false }
       end
 
+      # returns
+      # - [Boolean] true if no_op mode
       def noop?
         @options[:b_noop]
       end
@@ -26,6 +34,9 @@ module Wire
     # Able to execute commands locally
     # supports sudo and shell wrapping
     class LocalExecution
+      # +exitstatus+  the exit status of a command that we ran
+      # +stdout+ stdout from command as [String]
+      # +stderr+ stderr from command as [String]
       attr_accessor :exitstatus, :stdout, :stderr
 
       # params:
@@ -43,6 +54,12 @@ module Wire
 
       # block-style. Creates a LocalExecution object with
       # given parameters, yields it into a given block.
+      # Params:
+      # +command+ Command string, usually the binary
+      # +args+    argument array
+      # +options+ option map (b_shell, b_sudo flags)
+      # Yields
+      # - LocalExecution object
       def self.with(command, args = nil, options =
           { :b_shell => true, :b_sudo => true })
         obj = LocalExecution.new command, args, options
@@ -51,6 +68,8 @@ module Wire
 
       # constructs the single command line string from
       # given parameters.
+      # Returns
+      # - Command line as [String]
       def construct_command
         cmd_arr = []
         command_args = "#{@command} #{@args}".strip
@@ -82,6 +101,8 @@ module Wire
 
       private
 
+      # converts given +array_or_nil+ object to identity
+      # if array or an empty array if nil
       def array_or_nil_as_str(array_or_nil)
         (array_or_nil || []).join(' ')
       end

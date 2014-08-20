@@ -1,5 +1,9 @@
 # encoding: utf-8
 
+# The MIT License (MIT)
+# Copyright (c) 2014 Andreas Schmidt, andreas@de-wiring.net
+#
+
 include Wire::Execution
 
 # Wire module
@@ -8,10 +12,13 @@ module Wire
   module Resource
     # Open vSwitch Bridge resource
     class OVSBridge < ResourceBase
+      # +type+ of bridge (here: ovs)
+      # +executables+ [Hash] of binaries needed to control
+      # the resource
       attr_accessor	:type, :executables
 
       # initialize the bridge object with
-      # given name and type
+      # given +name+ and type
       # params:
       # - name	bridge name, i.e. "br0"
       def initialize(name)
@@ -23,6 +30,7 @@ module Wire
         }
       end
 
+      # checks if the bridge exists
       def exist?
         LocalExecution.with(@executables[:vsctl],
                             ['br-exists', @name]) do |exec_obj|
@@ -31,10 +39,12 @@ module Wire
         end
       end
 
+      # checks if the bridge exists
       def up?
         exist?
       end
 
+      # adds the bridge  (ovs-vsctl add-br)
       def up
         LocalExecution.with(@executables[:vsctl],
                             ['add-br', @name]) do |up_exec_obj|
@@ -43,10 +53,12 @@ module Wire
         end
       end
 
+      # checks if the bridge is down
       def down?
         !(up?)
       end
 
+      # deletes the bridge (ovs-vsctl del-br)
       def down
         LocalExecution.with(@executables[:vsctl],
                             ['del-br', @name]) do |down_exec_obj|
@@ -55,6 +67,7 @@ module Wire
         end
       end
 
+      # Returns a string representation
       def to_s
         "Bridge:[#{name},type=#{type}]"
       end
