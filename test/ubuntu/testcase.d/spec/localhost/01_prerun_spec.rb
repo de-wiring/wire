@@ -16,7 +16,7 @@ describe 'It should have a valid model' do
 
 	describe command "#{property[:wire_executable]} validate #{property[:model_path]}" do
 		it { should return_exit_status 0 }
-		its(:stdout) { should match /^OK/ }
+		its(:stdout) { should match /OK, model is consistent/ }
 	end
 end
 

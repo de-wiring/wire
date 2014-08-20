@@ -20,17 +20,13 @@ module Wire
     #         :plain (default), :err (red), :ok (green)
     # return
     # - nil
+    #
+    # :reek:ControlParameter
     def outputs(type, msg, style = :plain)
       line = "#{type}> #{msg}"
-      if style == :err
-        $stdout.puts line.color(:red)
-        return
-      end
-
-      if style == :ok
-        $stdout.puts line.color(:green)
-        return
-      end
+      line = line.color(:red) if style == :err
+      line = line.color(:green) if style == :ok
+      line = line.color(:cyan) if style == :ok2
 
       $stdout.puts line
     end

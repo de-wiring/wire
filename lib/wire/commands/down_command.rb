@@ -50,13 +50,13 @@ module Wire
     def handle_bridge(bridge_name)
       bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsbridge, bridge_name)
       if bridge_resource.down?
-        puts "Bridge #{bridge_name} already down.".color(:green)
+        outputs 'DOWN', "Bridge #{bridge_name} already down.", :ok2
       else
         bridge_resource.down
         if bridge_resource.down?
-          puts "Bridge #{bridge_name} down/removed.".color(:green)
+          outputs 'DOWN', "Bridge #{bridge_name} down/removed.", :ok
         else
-          puts "Error bringing down bridge #{bridge_name}.".color(:red)
+          outputs 'DOWN', "Error bringing down bridge #{bridge_name}.", :err
           b_result = false
         end
 
@@ -70,7 +70,7 @@ module Wire
 
       bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsbridge, bridge_name)
       if bridge_resource.down?
-        puts "Bridge #{bridge_name} already down, will not care about ip".color(:green)
+        outputs 'DOWN', "Bridge #{bridge_name} already down, will not care about ip", :ok2
         return b_result
       end
 
@@ -78,13 +78,13 @@ module Wire
       hostip_resource = Wire::Resource::ResourceFactory
       .instance.create(:bridgeip, hostip, bridge_name)
       if hostip_resource.down?
-        puts "IP #{hostip} on bridge #{bridge_name} already down.".color(:green)
+        outputs 'DOWN', "IP #{hostip} on bridge #{bridge_name} already down.", :ok2
       else
         hostip_resource.down
         if hostip_resource.down?
-          puts "IP #{hostip} on bridge #{bridge_name} down/removed.".color(:green)
+          outputs 'DOWN', "IP #{hostip} on bridge #{bridge_name} down/removed.", :ok
         else
-          puts "Error taking down ip #{hostip} on bridge #{bridge_name}.".color(:red)
+          outputs 'DOWN', "Error taking down ip #{hostip} on bridge #{bridge_name}.", :err
           b_result = false
         end
 

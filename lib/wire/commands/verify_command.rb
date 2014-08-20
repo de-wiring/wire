@@ -58,7 +58,7 @@ module Wire
         b_zone_res = run_on_zone(zone_name)
 
         if b_zone_res
-          puts "Zone \'#{zone_name}\' verified successfully".color(:green)
+          outputs 'VERIFY', "Zone \'#{zone_name}\' verified successfully", :ok
         end
 
         b_zone_res == false
@@ -124,10 +124,10 @@ module Wire
     def handle_bridge(bridge_name)
       bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsbridge, bridge_name)
       if bridge_resource.exist?
-        puts "Bridge \'#{bridge_name}\' exists.".color(:green)
+        outputs 'VERIFY', "Bridge \'#{bridge_name}\' exists.", :ok
         return true
       else
-        puts "Bridge \'#{bridge_name}\' does not exist.".color(:red)
+        outputs 'VERIFY', "Bridge \'#{bridge_name}\' does not exist.", :err
         return false
       end
     end
@@ -140,10 +140,10 @@ module Wire
       hostip_resource = Wire::Resource::ResourceFactory
         .instance.create(:bridgeip, hostip, bridge_name)
       if hostip_resource.up?
-        puts "IP \'#{hostip}\' on bridge \'#{bridge_name}\' exists.".color(:green)
+        outputs 'VERIFY', "IP \'#{hostip}\' on bridge \'#{bridge_name}\' exists.", :ok
         return true
       else
-        puts "IP \'#{hostip}\' on bridge \'#{bridge_name}\' does not exist.".color(:red)
+        outputs 'VERIFY', "IP \'#{hostip}\' on bridge \'#{bridge_name}\' does not exist.", :err
         return false
       end
     end

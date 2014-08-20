@@ -35,8 +35,18 @@ module Wire
       # use the specwrite class to write a complete
       # serverspec example in a subdirectory(serverspec)
       target_specdir = File.join(@target_dir, 'serverspec')
-      spec_writer = SpecWriter.new(target_specdir, @spec_code)
-      spec_writer.write
+
+      begin
+        spec_writer = SpecWriter.new(target_specdir, @spec_code)
+        spec_writer.write
+
+        outputs 'SPEC', "Serverspecs written to #{@target_dir}. Run:"
+        outputs 'SPEC', "( cd #{@target_dir}; rake spec )"
+        outputs 'SPEC', 'To run automatically, use --run'
+      rescue => e
+        $log.error "Error writing serverspec files, #{e}"
+        STDERR.puts e.inspect
+      end
 
       run_serverspec(target_specdir) if @params[:auto_run]
     end
@@ -72,23 +82,33 @@ module Wire
         network_data[:zone] == zone_name
       end
       networks_in_zone.each do |network_name, network_data|
-        bridge_name = network_name
+        run_on_network_in_zone zone_name, network_name, network_data
+      end
+    end
 
-        $log.debug("Creating specs for network #{bridge_name}")
+    # given a network object, this generates spec
+    # for it.
+    # params:
+    # +zone_name+  name of zone (needed for erb context)
+    # +bridge_name+  name of network/bridge (needed for erb context)
+    # +network_data+  network details
+    # rubocop:disable Lint/UnusedMethodArgument
+    # :reek:UnusedParameters
+    def run_on_network_in_zone(zone_name, bridge_name, network_data)
+      $log.debug("Creating specs for network #{bridge_name}")
 
-        template = SpecTemplates.build_template__bridge_exists
+      template = SpecTemplates.build_template__bridge_exists
+      erb = ERB.new(template, nil, '%')
+      @spec_code << erb.result(binding)
+
+      ip = network_data[:hostip]
+      if ip
+        template = SpecTemplates.build_template__ip_is_up
         erb = ERB.new(template, nil, '%')
         @spec_code << erb.result(binding)
-
-        ip = network_data[:hostip]
-        if ip
-          template = SpecTemplates.build_template__ip_is_up
-          erb = ERB.new(template, nil, '%')
-          @spec_code << erb.result(binding)
-        end
-
-        $log.debug("Done for network #{bridge_name}")
       end
+
+      $log.debug("Done for network #{bridge_name}")
     end
   end
 
@@ -107,10 +127,6 @@ module Wire
     def write
       ensure_directory_structure
       ensure_files
-
-      $log.info "Serverspecs written to #{@target_dir}. Run:"
-      $log.info "( cd #{@target_dir}; rake spec )"
-      $log.info 'To run automatically, use --run'
     end
 
     # make sure that we have a rspec-conformant dir structure
@@ -164,7 +180,7 @@ ERB
       begin
         FileUtils.mkdir_p(target_dir)
       rescue => excpt
-        $stderr.puts "ERROR: Unable to create #{target_dir}: #{excpt}"
+        $log.error "ERROR: Unable to create #{target_dir}: #{excpt}"
       end
     end
 

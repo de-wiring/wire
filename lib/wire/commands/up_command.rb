@@ -58,13 +58,13 @@ module Wire
       # we should have a bridge with that name.
       bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsbridge, bridge_name)
       if bridge_resource.up?
-        puts "Bridge #{bridge_name} already up.".color(:green)
+        outputs 'UP',  "Bridge #{bridge_name} already up.", :ok2
       else
         bridge_resource.up
         if bridge_resource.up?
-          puts "Bridge #{bridge_name} up.".color(:green)
+          outputs 'UP',  "Bridge #{bridge_name} up.", :ok
         else
-          puts "Error bringing up bridge #{bridge_name}.".color(:red)
+          outputs 'UP',  "Error bringing up bridge #{bridge_name}.", :err
           b_result = false
         end
 
@@ -83,13 +83,13 @@ module Wire
       hostip_resource = Wire::Resource::ResourceFactory
         .instance.create(:bridgeip, hostip, bridge_name)
       if hostip_resource.up?
-        puts "IP #{hostip} on bridge #{bridge_name} already up.".color(:green)
+        outputs 'UP',  "IP #{hostip} on bridge #{bridge_name} already up.", :ok2
       else
         hostip_resource.up
         if hostip_resource.up?
-          puts "IP #{hostip} on bridge #{bridge_name} up.".color(:green)
+          outputs 'UP',  "IP #{hostip} on bridge #{bridge_name} up.", :ok
         else
-          puts "Error bringing up ip #{hostip} on bridge #{bridge_name}.".color(:red)
+          outputs 'UP',  "Error bringing up ip #{hostip} on bridge #{bridge_name}.", :err
           b_result = false
         end
 
