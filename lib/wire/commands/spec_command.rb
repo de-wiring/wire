@@ -40,8 +40,8 @@ module Wire
         spec_writer = SpecWriter.new(target_specdir, @spec_code)
         spec_writer.write
 
-        outputs 'SPEC', "Serverspecs written to #{@target_dir}. Run:"
-        outputs 'SPEC', "( cd #{@target_dir}; rake spec )"
+        outputs 'SPEC', "Serverspecs written to #{target_specdir}. Run:"
+        outputs 'SPEC', "( cd #{target_specdir}; rake spec )"
         outputs 'SPEC', 'To run automatically, use --run'
       rescue => e
         $log.error "Error writing serverspec files, #{e}"
@@ -106,6 +106,17 @@ module Wire
         template = SpecTemplates.build_template__ip_is_up
         erb = ERB.new(template, nil, '%')
         @spec_code << erb.result(binding)
+      end
+
+      dhcp_data = network_data[:dhcp]
+      if dhcp_data
+        ip_start = dhcp_data[:start]
+        ip_end = dhcp_data[:end]
+        hostip = ip
+        template = SpecTemplates.build_template__dhcp_is_valid
+        erb = ERB.new(template, nil, '%')
+        @spec_code << erb.result(binding)
+
       end
 
       $log.debug("Done for network #{bridge_name}")

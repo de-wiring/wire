@@ -18,6 +18,22 @@ echo == Ensure Open vSwitch is installed
       sudo apt-get install -yqq openvswitch-common openvswitch-switch openvswitch-test
 EOS
 
+    # install docker
+    # https://docs.docker.com/installation/ubuntulinux/#ubuntu-trusty-1404-lts-64-bit
+    s.vm.provision "shell", inline: <<EOS
+echo == Ensure docker is installed
+      [ -e /usr/lib/apt/methods/https ] || {
+        sudo apt-get update -yqq
+        sudo apt-get install -yqq apt-transport-https
+      }
+      sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
+      sudo sh -c "echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
+      sudo apt-get update -yqq
+      sudo apt-get install -yqq lxc-docker
+
+      #sudo docker pull ubuntu:14.04
+EOS
+
     # install gem needed by wire (by hand, not using bundler)
     s.vm.provision "shell", inline: <<EOS
 echo == Ensure basic gems are installed, not yet via gem deps/bundler
@@ -49,7 +65,7 @@ EOS
     	[[ -L /home/vagrant/project ]] || ln -s /mnt/project /home/vagrant/project
 EOS
 
-    # run testcase.d test suite^yy
+    # run testcase.d test suite
     s.vm.provision 'shell', inline: <<EOS
 echo == Running testcase
 cd /mnt/project/test/ubuntu/testcase.d

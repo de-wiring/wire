@@ -32,6 +32,17 @@ module Wire
       networks_in_zone.each do |network_name, network_data|
         $log.debug("Bringing down network #{network_name}")
 
+        # if we have dhcp, unconfigure dnsmasq
+        dhcp_data = network_data[:dhcp]
+        if dhcp_data
+          $log.debug 'disabling dhcp ...'
+          success =  handle_dhcp(zone_name, network_name, network_data,
+                                 dhcp_data[:start],
+                                 dhcp_data[:end])
+
+          b_result = false unless success
+        end
+
         # if we have a host ip on that bridge, take it down first
         hostip = network_data[:hostip]
         if hostip
@@ -94,6 +105,33 @@ module Wire
 
       end
       b_result
+    end
+
+    # unconfigures dnsmasq for dhcp
+    # params:
+    # +zone_name+ name of zone
+    # +network_name+ name of network (and bridge)
+    # +network+ network entry
+    # +address_start+ start of address range (i.e.192.168.10.10)
+    # +address_end+ end of dhcp address range (i.e.192.168.10.100)
+    # Returns
+    # - [Bool] true if dhcp setup is valid
+    def handle_dhcp(zone_name, network_name, network_entry, address_start, address_end)
+      resource = Wire::Resource::ResourceFactory
+      .instance.create(:dhcpconfig, "wire__#{zone_name}", network_name, network_entry, address_start, address_end)
+      if resource.down?
+        outputs 'DOWN', "dnsmasq/dhcp config on network \'#{network_name}\' is already down.", :ok2
+        return true
+      else
+        resource.down
+        if resource.down?
+          outputs 'DOWN', "dnsmasq/dhcp config on network \'#{network_name}\' is down.", :ok
+          return true
+        else
+          outputs 'DOWN', "Error unconfiguring dnsmasq/dhcp config on network \'#{network_name}\'.", :err
+          return false
+        end
+      end
     end
   end
 end

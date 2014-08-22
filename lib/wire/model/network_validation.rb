@@ -16,6 +16,7 @@ module Wire
       duplicate_networks_found?
       missing_network_def_found?
       nonmatching_hostips_found?
+      dhcp_address_ranges_valid?
     end
 
     # ensures that all networks are attached to a zone
@@ -68,6 +69,44 @@ module Wire
         mark("Network Host ip #{host_ip} is not within network range" \
           "#{network} of network #{network_name}", 'network', network_name) unless
             host_ip_ip.in_range_of?(network_ip)
+      end
+    end
+
+    # ensures that if a network has dhcp set, its :start/:end address
+    # ranges are within the address range of network, and a hostip is
+    # given (for dnsmasq to udp-listen on it)
+    def dhcp_address_ranges_valid?
+      @project.get_element('networks').each do |network_name, network_data|
+        network = network_data[:network]
+        dhcp_data = network_data[:dhcp]
+        host_ip = network_data[:hostip]
+        next unless network && dhcp_data
+
+        mark("Network #{network_name} wants dhcp, but does not include a hostip.",
+             'network', network_name) unless host_ip
+
+        dhcp_start = dhcp_data[:start]
+        dhcp_end = dhcp_data[:end]
+
+        mark("Network #{network_name} wants dhcp, but does not include an address range. Set :start, :end.",
+             'network', network_name) unless dhcp_start && dhcp_end
+
+        begin
+          dhcp_start_ip = IPAddr.new(dhcp_start)
+          dhcp_end_ip = IPAddr.new(dhcp_end)
+          network_ip = IPAddr.new(network)
+
+          mark("Network dhcp start ip #{dhcp_start} is not within network range" \
+            "#{network} of network #{network_name}", 'network', network_name) unless
+              dhcp_start_ip.in_range_of?(network_ip)
+
+          mark("Network dhcp end ip #{dhcp_end_ip} is not within network range" \
+            "#{network} of network #{network_name}", 'network', network_name) unless
+              dhcp_end_ip.in_range_of?(network_ip)
+        rescue => e
+          mark("Network dhcp ip range is not valid: #{e}", 'network', network_name)
+        end
+
       end
     end
   end

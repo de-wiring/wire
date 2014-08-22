@@ -14,6 +14,28 @@ require 'spec_helper.rb'
     end
   end
 
+  describe 'In zone dmz we should have dhcp service on ip 192.168.10.1 '            'on ovs bridge named dmz-int, serving addresses from 192.168.10.10 to 192.168.10.50' do
+
+    describe file '/etc/dnsmasq.d/wire__dmz.conf' do
+      it { should be_file }
+      its(:content) { should match /192.168.10.10/ }
+      its(:content) { should match /192.168.10.50/ }
+      its(:content) { should match /dmz-int/ }
+    end
+
+    describe process 'dnsmasq' do
+      it { should be_running }
+    end
+
+    describe port(67) do
+      it { should be_listening.with('udp') }
+    end
+
+    describe command '/bin/netstat -nlup' do
+      its(:stdout) { should match /67.*dnsmasq/ }
+    end
+  end
+
   describe 'In zone dmz we should have an ovs bridge named dmz-ext' do
     describe command "sudo ovs-vsctl list-br" do
       its(:stdout) { should match /dmz-ext/ }

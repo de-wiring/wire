@@ -24,7 +24,7 @@ module Wire
     # :reek:ControlParameter
     def outputs(type, msg, style = :plain)
       line = "#{type}> #{msg}"
-      line = line.color(:red) if style == :err
+      line = line.color(:red) if (style == :err) || (style == :error)
       line = line.color(:green) if style == :ok
       line = line.color(:cyan) if style == :ok2
 

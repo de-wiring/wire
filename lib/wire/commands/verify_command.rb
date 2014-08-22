@@ -76,14 +76,14 @@ module Wire
         network_data[:zone] == zone_name
       end
       # verify these networks
-      verify_networks(networks_in_zone)
+      verify_networks(networks_in_zone, zone_name)
     end
 
     # given an array of network elements (+networks_in_zone+), this
     # method runs the verification on each network.
     # It checks the availability of a bridge and
     # the optional host ip on that bridge.
-    def verify_networks(networks_in_zone)
+    def verify_networks(networks_in_zone, zone_name)
       b_verify_ok = true
       networks_in_zone.each do |network_name, network_data|
         $log.debug("Verifying network \'#{network_name}\'")
@@ -92,6 +92,7 @@ module Wire
 
         # we should have a bridge with that name.
         if handle_bridge(bridge_name) == false
+          $log.debug 'checking bridge ...'
           network_data.store :status, :failed
           b_verify_ok = false
           mark("Bridge \'#{bridge_name}\' does not exist.",
@@ -103,10 +104,27 @@ module Wire
           # if we have a host ip, then that bridge should have
           # this ip
           if hostip
+            $log.debug 'checking host-ip ...'
             if handle_hostip(bridge_name, hostip) == false
               network_data.store :status, :failed
               b_verify_ok = false
               mark("Host ip \'#{hostip}\' not up on bridge \'#{bridge_name}\'.",
+                   :network, network_name, network_data)
+            else
+              network_data.store :status, :ok
+            end
+          end
+
+          # if we have dhcp, check this
+          dhcp_data = network_data[:dhcp]
+          if dhcp_data
+            $log.debug 'checking dhcp ...'
+            if handle_dhcp(zone_name, network_name, network_data,
+                           dhcp_data[:start],
+                           dhcp_data[:end]) == false
+              network_data.store :status, :failed
+              b_verify_ok = false
+              mark("dnsmasq/dhcp not configured on network \'#{bridge_name}\'.",
                    :network, network_name, network_data)
             else
               network_data.store :status, :ok
@@ -144,6 +162,21 @@ module Wire
         return true
       else
         outputs 'VERIFY', "IP \'#{hostip}\' on bridge \'#{bridge_name}\' does not exist.", :err
+        return false
+      end
+    end
+
+    # runs verification for dnsmasqs dhcp resource
+    # Returns
+    # - [Bool] true if dhcp setup is valid
+    def handle_dhcp(zone_name, network_name, network_entry, address_start, address_end)
+      resource = Wire::Resource::ResourceFactory
+        .instance.create(:dhcpconfig, "wire__#{zone_name}", network_name, network_entry, address_start, address_end)
+      if resource.up?
+        outputs 'VERIFY', "dnsmasq/dhcp config on network \'#{network_name}\' is valid.", :ok
+        return true
+      else
+        outputs 'VERIFY', "dnsmasq/dhcp config on network \'#{network_name}\' is not valid.", :err
         return false
       end
     end

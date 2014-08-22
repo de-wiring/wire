@@ -38,6 +38,7 @@ module Wire
           host_ip = network_data[:hostip]
 
           if host_ip
+            $log.debug 'bringing up hostip ...'
             # if the hostip is not in cidr, take netmask
             # from network entry, add to hostip
             host_ip = ensure_hostip_netmask(host_ip, network_data)
@@ -47,6 +48,18 @@ module Wire
 
             b_result = false unless success
           end
+
+          # if we have dhcp, configure dnsmasq
+          dhcp_data = network_data[:dhcp]
+          if dhcp_data
+            $log.debug 'enabling dhcp ...'
+            success =  handle_dhcp(zone_name, network_name, network_data,
+                           dhcp_data[:start],
+                           dhcp_data[:end])
+
+            b_result = false unless success
+          end
+
         else
           $log.debug("Will not touch dependant objects of #{network_name}")
         end
@@ -101,6 +114,32 @@ module Wire
 
       end
       b_result
+    end
+
+    # configures dnsmasq for dhcp
+    # +zone_name+ name of zone
+    # +network_name+ name of network (and bridge)
+    # +network+ network entry
+    # +address_start+ start of address range (i.e.192.168.10.10)
+    # +address_end+ end of dhcp address range (i.e.192.168.10.100)
+    # Returns
+    # - [Bool] true if dhcp setup is valid
+    def handle_dhcp(zone_name, network_name, network_entry, address_start, address_end)
+      resource = Wire::Resource::ResourceFactory
+      .instance.create(:dhcpconfig, "wire__#{zone_name}", network_name, network_entry, address_start, address_end)
+      if resource.up?
+        outputs 'UP', "dnsmasq/dhcp config on network \'#{network_name}\' is already up.", :ok2
+        return true
+      else
+        resource.up
+        if resource.up?
+          outputs 'UP', "dnsmasq/dhcp config on network \'#{network_name}\' is up.", :ok
+          return true
+        else
+          outputs 'UP', "Error configuring dnsmasq/dhcp config on network \'#{network_name}\'.", :err
+          return false
+        end
+      end
     end
   end
 end

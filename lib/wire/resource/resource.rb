@@ -38,7 +38,8 @@ module Wire
       def create(resource_symname, *resource_nameargs)
         clazz_map = {
           :ovsbridge => OVSBridge,
-          :bridgeip => IPAddressOnIntf
+          :bridgeip => IPAddressOnIntf,
+          :dhcpconfig => DHCPRangeConfiguration
         }
         clazz = clazz_map[resource_symname]
         fail(ArgumentError, "Unknown resource type #{resource_symname}") unless clazz

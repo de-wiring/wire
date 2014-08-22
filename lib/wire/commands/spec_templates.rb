@@ -33,6 +33,36 @@ ERB
 ERB
     end
 
+    # rubocop:disable Lint/UnusedMethodArgument
+    # :reek:UnusedParameters
+    # requires zone_name, hostip, bridge_name, ip_start, ip_end
+    def self.build_template__dhcp_is_valid
+      <<ERB
+  describe 'In zone <%= zone_name %> we should have dhcp service on ip <%= hostip %> ' \
+           'on ovs bridge named <%= bridge_name %>, serving addresses from <%= ip_start %> to <%= ip_end %>' do
+
+    describe file '/etc/dnsmasq.d/wire__<%= zone_name %>.conf' do
+      it { should be_file }
+      its(:content) { should match /<%= ip_start %>/ }
+      its(:content) { should match /<%= ip_end %>/ }
+      its(:content) { should match /<%= bridge_name %>/ }
+    end
+
+    describe process 'dnsmasq' do
+      it { should be_running }
+    end
+
+    describe port(67) do
+      it { should be_listening.with('udp') }
+    end
+
+    describe command '/bin/netstat -nlup' do
+      its(:stdout) { should match /67.*dnsmasq/ }
+    end
+  end
+ERB
+    end
+
     # generate template part
     # returns
     # - erb template for spec_helper.rb file
