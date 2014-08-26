@@ -40,15 +40,13 @@ echo == Ensure fig is installed
 	PIP_=$(which pip)
 	if [[ -z $PIP_ ]]; then
 		sudo apt-get -yqq install python-pip
-		PIP_=$(which pip)
 	fi 
-	$PIP_ --version
-	$FIG_=$(which fig)
+	pip_ --version
+	FIG_=$(which fig)
 	if [[ -z $FIG_ ]]; then
-		$PIP_ install fig
-		$FIG_=$(which fig)
+		pip install fig
 	fi
-	$FIG_ --version
+	fig --version
 EOS
 
     # install gem needed by wire (by hand, not using bundler)
