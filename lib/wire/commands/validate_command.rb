@@ -18,7 +18,7 @@ module Wire
     # initializes an empty error list
     def initialize
       @errors = []
-      @validations = [NetworksValidation]
+      @validations = [NetworksValidation, AppGroupValidation]
     end
 
     # runs validation on given project
@@ -49,8 +49,8 @@ module Wire
     # the model
     #
     # params:
-    # +project+           project model object, to validate
-    # +validation_class+  class object of validation, i.e. NetworksValidation
+    # +project+::           project model object, to validate
+    # +validation_class+::  class object of validation, i.e. NetworksValidation
     #
     # returns:
     # list of errors from validation object

@@ -44,6 +44,8 @@ module Wire
         }
       end
 
+      # Build file name of dnsmasq file
+      # TODO: make configurable
       def create_dnsmaqs_config_filename
         "/etc/dnsmasq.d/#{@name}.conf"
       end
@@ -62,12 +64,11 @@ module Wire
 
         filename = create_dnsmaqs_config_filename
 
-        #cmd = "/bin/nc -uvzw2 #{network[:hostip]} 67 >/dev/null 2>&1"
         cmd = "/bin/grep #{network_name} #{filename} >/dev/null 2>&1"
         $log.debug("executing cmd=#{cmd}")
         `#{cmd}`
 
-        ($? == 0)
+        ($CHILD_STATUS == 0)
       end
 
       # creates the configuration and restarts dnsmasq
@@ -76,14 +77,14 @@ module Wire
         begin
           filename = create_dnsmaqs_config_filename
           $log.debug("(Over-)writing #{filename}")
-          open(filename,'w') do |f|
+          open(filename, 'w') do |f|
             # TODO: add netmask
             f.puts "dhcp-range=#{@network_name},#{@address_start},#{@address_end}"
           end
 
           $log.debug('Restarting dnsmasq')
           LocalExecution.with(@executables[:service],
-                              ['dnsmasq', 'restart']) do |up_exec_obj|
+                              %w(dnsmasq restart)) do |up_exec_obj|
             up_exec_obj.run
             return (up_exec_obj.exitstatus == 0)
           end
@@ -91,13 +92,12 @@ module Wire
           $log.error("Error writign dnsmasq config file/restarting dnsmasq, #{e}")
           return false
         end
-
       end
 
-      # checks if dnsmasq is NOT service dhcp request on network device
+      # checks if dnsmasq is NOT servicing dhcp request on network device
       def down?
         $log.debug('DHCPRangeConfiguration.down?')
-        false
+        !(up?)
       end
 
       # removes configuration entry and restarts dnsmasq
@@ -111,7 +111,7 @@ module Wire
 
             $log.debug('Restarting dnsmasq')
             LocalExecution.with(@executables[:service],
-                                ['dnsmasq', 'restart']) do |up_exec_obj|
+                                %w(dnsmasq restart)) do |up_exec_obj|
               up_exec_obj.run
               return (up_exec_obj.exitstatus == 0)
             end

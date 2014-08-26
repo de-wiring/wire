@@ -8,6 +8,7 @@
 module Wire
   # Verify Command reads yaml, parses model elements
   # and checks if given elements are present on the system
+  # rubocop:disable ClassLength
   class VerifyCommand < BaseCommand
     # +project+ to operate upon
     # +findings+ is an array of potential errors that occured
@@ -83,6 +84,9 @@ module Wire
     # method runs the verification on each network.
     # It checks the availability of a bridge and
     # the optional host ip on that bridge.
+    # Params:
+    # +networks_in_zone+:: Array of network data elements in desired zone
+    # +zone_name+:: Name of zone
     def verify_networks(networks_in_zone, zone_name)
       b_verify_ok = true
       networks_in_zone.each do |network_name, network_data|
@@ -90,9 +94,9 @@ module Wire
 
         bridge_name = network_name
 
+        $log.debug 'checking bridge ...'
         # we should have a bridge with that name.
         if handle_bridge(bridge_name) == false
-          $log.debug 'checking bridge ...'
           network_data.store :status, :failed
           b_verify_ok = false
           mark("Bridge \'#{bridge_name}\' does not exist.",
@@ -171,7 +175,8 @@ module Wire
     # - [Bool] true if dhcp setup is valid
     def handle_dhcp(zone_name, network_name, network_entry, address_start, address_end)
       resource = Wire::Resource::ResourceFactory
-        .instance.create(:dhcpconfig, "wire__#{zone_name}", network_name, network_entry, address_start, address_end)
+        .instance.create(:dhcpconfig, "wire__#{zone_name}", network_name,
+                         network_entry, address_start, address_end)
       if resource.up?
         outputs 'VERIFY', "dnsmasq/dhcp config on network \'#{network_name}\' is valid.", :ok
         return true

@@ -12,12 +12,19 @@ module Wire
     # loads project model from target_dir
     def load_project(target_dir)
       # ensure target dir exists, is a dir
+      fail(ArgumentError, 'Nonexisting directory') unless File.exist?(target_dir) &&
+          File.directory?(target_dir)
 
       # create project
       project = Project.new(target_dir)
 
+      # iterate all model element types, load if file exists
       MODEL_ELEMENTS.each do |model_element|
         filename = File.join(target_dir, "#{model_element}.yaml")
+
+        # jump out unless file exists
+        next unless File.exist?(filename) && File.readable?(filename)
+
         $log.debug "Loading model file #{filename}"
 
         element_data = load_model_element_file(filename)

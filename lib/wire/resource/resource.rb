@@ -34,11 +34,11 @@ module Wire
       # this creates a resource with given name (i.e. "testbridge")
       # and hands on arguments (+resource_nameargs+, may be 1..n)
       # returns
-      # - a new Resource object
+      # - a new Resource object, depending on type
       def create(resource_symname, *resource_nameargs)
         clazz_map = {
-          :ovsbridge => OVSBridge,
-          :bridgeip => IPAddressOnIntf,
+          :ovsbridge  => OVSBridge,
+          :bridgeip   => IPAddressOnIntf,
           :dhcpconfig => DHCPRangeConfiguration
         }
         clazz = clazz_map[resource_symname]

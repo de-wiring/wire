@@ -14,7 +14,7 @@ require 'spec_helper.rb'
     end
   end
 
-  describe 'In zone dmz we should have dhcp service on ip 192.168.10.1 '            'on ovs bridge named dmz-int, serving addresses from 192.168.10.10 to 192.168.10.50' do
+  describe 'In zone dmz we should have dhcp service on ip 192.168.10.1 '            'on ovs bridge named dmz-int, serving addresses from '            '192.168.10.10 to 192.168.10.50' do
 
     describe file '/etc/dnsmasq.d/wire__dmz.conf' do
       it { should be_file }
@@ -39,6 +39,12 @@ require 'spec_helper.rb'
   describe 'In zone dmz we should have an ovs bridge named dmz-ext' do
     describe command "sudo ovs-vsctl list-br" do
       its(:stdout) { should match /dmz-ext/ }
+    end
+  end
+
+  describe 'In zone dmz we should have fig model file for '           'appgroup dmz_group_1' do
+    describe file '/mnt/project/test/d1/fig/fig_dmz.yaml' do
+      it { should be_file }
     end
   end
 

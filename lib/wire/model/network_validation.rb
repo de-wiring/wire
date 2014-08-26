@@ -40,6 +40,7 @@ module Wire
       @project.get_element('networks').each do |network_name, network_data|
         nw = network_data[:network]
         dupe_name = dup_map[nw]
+
         mark("Network range #{nw} used in more than one network (#{dupe_name})",
              'network', network_name) if dupe_name
         dup_map.store nw, network_name
@@ -75,38 +76,45 @@ module Wire
     # ensures that if a network has dhcp set, its :start/:end address
     # ranges are within the address range of network, and a hostip is
     # given (for dnsmasq to udp-listen on it)
+    # rubocop:disable CyclomaticComplexity
     def dhcp_address_ranges_valid?
       @project.get_element('networks').each do |network_name, network_data|
         network = network_data[:network]
         dhcp_data = network_data[:dhcp]
-        host_ip = network_data[:hostip]
         next unless network && dhcp_data
 
-        mark("Network #{network_name} wants dhcp, but does not include a hostip.",
-             'network', network_name) unless host_ip
+        # do we have a host-ip on this bridge?
+        host_ip = network_data[:hostip]
+        if !host_ip
+          mark("Network #{network_name} wants dhcp, but does not include a hostip.",
+               'network', network_name)
+          return false
+        else
+          if !dhcp_data[:start] || !dhcp_data[:end]
+            mark("Network #{network_name} wants dhcp, but does not include an " \
+                 'address range. Set :start, :end.',
+                 'network', network_name)
+            return false
+          else
+            # check ip ranges
 
-        dhcp_start = dhcp_data[:start]
-        dhcp_end = dhcp_data[:end]
+            begin
+              dhcp_start_ip = IPAddr.new(dhcp_data[:start])
+              dhcp_end_ip = IPAddr.new(dhcp_data[:end])
+              network_ip = IPAddr.new(network)
 
-        mark("Network #{network_name} wants dhcp, but does not include an address range. Set :start, :end.",
-             'network', network_name) unless dhcp_start && dhcp_end
+              mark("Network dhcp start ip #{dhcp_data[:start]} is not within network range" \
+                "#{network} of network #{network_name}", 'network', network_name) unless
+                  dhcp_start_ip.in_range_of?(network_ip)
 
-        begin
-          dhcp_start_ip = IPAddr.new(dhcp_start)
-          dhcp_end_ip = IPAddr.new(dhcp_end)
-          network_ip = IPAddr.new(network)
-
-          mark("Network dhcp start ip #{dhcp_start} is not within network range" \
-            "#{network} of network #{network_name}", 'network', network_name) unless
-              dhcp_start_ip.in_range_of?(network_ip)
-
-          mark("Network dhcp end ip #{dhcp_end_ip} is not within network range" \
-            "#{network} of network #{network_name}", 'network', network_name) unless
-              dhcp_end_ip.in_range_of?(network_ip)
-        rescue => e
-          mark("Network dhcp ip range is not valid: #{e}", 'network', network_name)
+              mark("Network dhcp end ip #{dhcp_data[:end]} is not within network range" \
+                "#{network} of network #{network_name}", 'network', network_name) unless
+                  dhcp_end_ip.in_range_of?(network_ip)
+            rescue => e
+              mark("Network dhcp ip range is not valid: #{e}", 'network', network_name)
+            end
+          end
         end
-
       end
     end
   end

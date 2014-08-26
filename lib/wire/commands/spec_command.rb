@@ -7,7 +7,7 @@
 # Wire module
 module Wire
   # SpecCommand generates a serverspec output for
-  # given model which tests all model elements
+  # given model which tests all model elements.
   # optionally runs serverspec
   class SpecCommand < BaseCommand
     # +project+ to operate on
@@ -71,9 +71,17 @@ module Wire
       end
     end
 
-    # run verification in given +zone_name+:
-    # - check if bridges exist for all networks in
-    #   this zone
+    # retrieve all objects of given +type_name+ in
+    # zone (by +zone_name+)
+    # returns:
+    # [Hash] of model subpart with elements of given type
+    def objects_in_zone(type_name, zone_name)
+      return {} unless @project.element?(type_name)
+      objects = @project.get_element type_name || {}
+      objects.select { |_, data| data[:zone] == zone_name }
+    end
+
+    # run spec steps in given +zone_name+
     def run_on_zone(zone_name)
       networks = @project.get_element('networks')
 
@@ -84,6 +92,11 @@ module Wire
       networks_in_zone.each do |network_name, network_data|
         run_on_network_in_zone zone_name, network_name, network_data
       end
+
+      # select application groups in current zone
+      objects_in_zone('appgroups', zone_name).each do |appgroup_name, appgroup_data|
+        run_on_appgroup_in_zone zone_name, appgroup_name, appgroup_data
+      end
     end
 
     # given a network object, this generates spec
@@ -93,6 +106,7 @@ module Wire
     # +bridge_name+  name of network/bridge (needed for erb context)
     # +network_data+  network details
     # rubocop:disable Lint/UnusedMethodArgument
+    # rubocop:disable Lint/UselessAssignment
     # :reek:UnusedParameters
     def run_on_network_in_zone(zone_name, bridge_name, network_data)
       $log.debug("Creating specs for network #{bridge_name}")
@@ -101,6 +115,7 @@ module Wire
       erb = ERB.new(template, nil, '%')
       @spec_code << erb.result(binding)
 
+      # render template for hostip (if any)
       ip = network_data[:hostip]
       if ip
         template = SpecTemplates.build_template__ip_is_up
@@ -108,6 +123,7 @@ module Wire
         @spec_code << erb.result(binding)
       end
 
+      # render dhcp spec (if any)
       dhcp_data = network_data[:dhcp]
       if dhcp_data
         ip_start = dhcp_data[:start]
@@ -120,6 +136,32 @@ module Wire
       end
 
       $log.debug("Done for network #{bridge_name}")
+    end
+
+    # given an appgroup object, this generates spec
+    # for it.
+    # params:
+    # +zone_name+  name of zone (needed for erb context)
+    # +appgroup_name+  name of appgroup (needed for erb context)
+    # +appgroup_data+  appgroup details
+    # rubocop:disable Lint/UnusedMethodArgument   Lint/UselessAssignment
+    # :reek:UnusedParameters
+    def run_on_appgroup_in_zone(zone_name, appgroup_name, appgroup_data)
+      $log.debug("Creating specs for appgroup #{appgroup_name}")
+
+      # check controller
+      controller_data = appgroup_data[:controller]
+      if controller_data[:type] == 'fig'
+        # get fig file name
+        figfile_part = controller_data[:file] || "#{zone_name}/fig.yaml"
+        figfile = File.join(File.expand_path(@target_dir), figfile_part)
+
+        template = SpecTemplates.build_template__fig_file_is_valid
+        erb = ERB.new(template, nil, '%')
+        @spec_code << erb.result(binding)
+      end
+
+      $log.debug("Done for appgroup #{appgroup_name}")
     end
   end
 

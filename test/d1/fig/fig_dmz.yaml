@@ -1,0 +1,6 @@
+test:
+  image: ubuntu:14.04
+  command: /bin/bash -c "sleep 10"
+  net: "none"
+  volumes:
+    - /vol1

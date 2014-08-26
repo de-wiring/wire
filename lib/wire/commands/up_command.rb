@@ -10,7 +10,7 @@ module Wire
   # and brings all defined model elements "up", that is
   # starting bridges, containers etc.
   class UpCommand < UpDownCommand
-    # run on +zones+
+    # run on all given +zones+
     def run_on_project_zones(zones)
       zones.select do |zone_name, _|
         $log.debug("Bringing up zone #{zone_name} ...")
@@ -21,6 +21,7 @@ module Wire
     # run in given +zone_name+:
     # returns:
     # - bool: true if successful, false otherwise
+    # rubocop:disable CyclomaticComplexity
     def run_on_zone(zone_name)
       b_result = true
 
@@ -54,8 +55,7 @@ module Wire
           if dhcp_data
             $log.debug 'enabling dhcp ...'
             success =  handle_dhcp(zone_name, network_name, network_data,
-                           dhcp_data[:start],
-                           dhcp_data[:end])
+                                   dhcp_data[:start], dhcp_data[:end])
 
             b_result = false unless success
           end
@@ -126,7 +126,8 @@ module Wire
     # - [Bool] true if dhcp setup is valid
     def handle_dhcp(zone_name, network_name, network_entry, address_start, address_end)
       resource = Wire::Resource::ResourceFactory
-      .instance.create(:dhcpconfig, "wire__#{zone_name}", network_name, network_entry, address_start, address_end)
+      .instance.create(:dhcpconfig, "wire__#{zone_name}", network_name,
+                       network_entry, address_start, address_end)
       if resource.up?
         outputs 'UP', "dnsmasq/dhcp config on network \'#{network_name}\' is already up.", :ok2
         return true
@@ -136,7 +137,8 @@ module Wire
           outputs 'UP', "dnsmasq/dhcp config on network \'#{network_name}\' is up.", :ok
           return true
         else
-          outputs 'UP', "Error configuring dnsmasq/dhcp config on network \'#{network_name}\'.", :err
+          outputs 'UP', "Error configuring dnsmasq/dhcp config on network \'#{network_name}\'.",
+                  :err
           return false
         end
       end

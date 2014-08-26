@@ -34,7 +34,25 @@ echo == Ensure docker is installed
       #sudo docker pull ubuntu:14.04
 EOS
 
+    # install pip/fig
+    s.vm.provision "shell", inline: <<EOS
+echo == Ensure fig is installed
+	PIP_=$(which pip)
+	if [[ -z $PIP_ ]]; then
+		sudo apt-get -yqq install python-pip
+		PIP_=$(which pip)
+	fi 
+	$PIP_ --version
+	$FIG_=$(which fig)
+	if [[ -z $FIG_ ]]; then
+		$PIP_ install fig
+		$FIG_=$(which fig)
+	fi
+	$FIG_ --version
+EOS
+
     # install gem needed by wire (by hand, not using bundler)
+    # TODO remove when installing by wire gem
     s.vm.provision "shell", inline: <<EOS
 echo == Ensure basic gems are installed, not yet via gem deps/bundler
 	( gem list --local | grep -wq rainbow ) || sudo gem install rainbow --no-rdoc --no-ri

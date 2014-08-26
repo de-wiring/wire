@@ -40,6 +40,7 @@ module Wire
       @params = params
       target_dir = @params[:target_dir]
       outputs 'model', "Loading model in #{target_dir}"
+
       # load it first
       begin
         loader = ProjectYamlLoader.new
@@ -49,7 +50,7 @@ module Wire
 
         $log.debug? && pp(@project)
       rescue => load_execption
-        $stderr.puts "Unable to load project model from #{target_dir}"
+        $stderr.puts "Unable to process project model in #{target_dir}"
         $log.debug? && puts(load_execption.inspect)
         $log.debug? && puts(load_execption.backtrace)
 

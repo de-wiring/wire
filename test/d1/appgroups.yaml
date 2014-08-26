@@ -1,0 +1,6 @@
+dmz_group_1:
+  :desc: First application group in DMZ
+  :zone: dmz
+  :controller:
+    :type: fig
+    :file: fig/fig_dmz.yaml

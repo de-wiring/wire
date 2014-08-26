@@ -100,6 +100,7 @@ module Wire
           outputs 'DOWN', "IP #{hostip} on bridge #{bridge_name} down/removed.", :ok
         else
           outputs 'DOWN', "Error taking down ip #{hostip} on bridge #{bridge_name}.", :err
+
           b_result = false
         end
 
@@ -118,7 +119,8 @@ module Wire
     # - [Bool] true if dhcp setup is valid
     def handle_dhcp(zone_name, network_name, network_entry, address_start, address_end)
       resource = Wire::Resource::ResourceFactory
-      .instance.create(:dhcpconfig, "wire__#{zone_name}", network_name, network_entry, address_start, address_end)
+      .instance.create(:dhcpconfig, "wire__#{zone_name}", network_name,
+                       network_entry, address_start, address_end)
       if resource.down?
         outputs 'DOWN', "dnsmasq/dhcp config on network \'#{network_name}\' is already down.", :ok2
         return true
@@ -128,7 +130,8 @@ module Wire
           outputs 'DOWN', "dnsmasq/dhcp config on network \'#{network_name}\' is down.", :ok
           return true
         else
-          outputs 'DOWN', "Error unconfiguring dnsmasq/dhcp config on network \'#{network_name}\'.", :err
+          outputs 'DOWN', 'Error unconfiguring dnsmasq/dhcp ' \
+          "config on network \'#{network_name}\'.", :err
           return false
         end
       end

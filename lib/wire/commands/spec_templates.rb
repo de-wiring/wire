@@ -39,7 +39,8 @@ ERB
     def self.build_template__dhcp_is_valid
       <<ERB
   describe 'In zone <%= zone_name %> we should have dhcp service on ip <%= hostip %> ' \
-           'on ovs bridge named <%= bridge_name %>, serving addresses from <%= ip_start %> to <%= ip_end %>' do
+           'on ovs bridge named <%= bridge_name %>, serving addresses from ' \
+           '<%= ip_start %> to <%= ip_end %>' do
 
     describe file '/etc/dnsmasq.d/wire__<%= zone_name %>.conf' do
       it { should be_file }
@@ -58,6 +59,20 @@ ERB
 
     describe command '/bin/netstat -nlup' do
       its(:stdout) { should match /67.*dnsmasq/ }
+    end
+  end
+ERB
+    end
+
+    # rubocop:disable Lint/UnusedMethodArgument
+    # :reek:UnusedParameters
+    # requires figfile, appgroup_name
+    def self.build_template__fig_file_is_valid
+      <<ERB
+  describe 'In zone <%= zone_name %> we should have fig model file for '\
+           'appgroup <%= appgroup_name %>' do
+    describe file '<%= figfile %>' do
+      it { should be_file }
     end
   end
 ERB

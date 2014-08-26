@@ -7,7 +7,7 @@
 # Wire module
 module Wire
   # define model elements for lookup purposes
-  MODEL_ELEMENTS = %w( zones networks )
+  MODEL_ELEMENTS = %w( zones networks appgroups )
 
   # Defines a project with model elements
   # (zones, networks, ...) as open structs
@@ -53,9 +53,11 @@ module Wire
     # - [Hash], key => element type, value => [int] count
     def calc_stats
       result = {}
+
       @data.each do |element_name, element_data|
         result[element_name] = element_data.size
       end
+
       result
     end
   end
