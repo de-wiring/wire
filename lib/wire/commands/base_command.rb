@@ -31,12 +31,21 @@ module Wire
       $stdout.puts line
     end
 
+    #
+    def check_user
+      if ENV['USER'] != 'root'
+        $log.warn "Not running as root. Make sure user #{ENV['USER']} has sudo configured."
+      end
+    end
+
     # runs the command, according to parameters
     # loads project into @project, calls run_on_project
     # (to be defined in subclasses)
     # params
     # +params+  command parameter map, example key i.e. "target_dir"
     def run(params = {})
+      check_user
+
       @params = params
       target_dir = @params[:target_dir]
       outputs 'model', "Loading model in #{target_dir}"

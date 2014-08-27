@@ -76,6 +76,14 @@ module Wire
         $log.debug('DHCPRangeConfiguration.up')
         begin
           filename = create_dnsmaqs_config_filename
+
+          # use sudo'ed touch/chmod to create us the file we need
+          LocalExecution.with("sudo touch #{filename} && " \
+                              "sudo chmod g+rw #{filename} && " \
+                              "sudo chgrp #{ENV['USER']} #{filename}",
+                              [], { :b_sudo => false, :b_shell => true }) do |up_exec_obj|
+            up_exec_obj.run
+          end
           $log.debug("(Over-)writing #{filename}")
           open(filename, 'w') do |f|
             # TODO: add netmask
@@ -84,7 +92,8 @@ module Wire
 
           $log.debug('Restarting dnsmasq')
           LocalExecution.with(@executables[:service],
-                              %w(dnsmasq restart)) do |up_exec_obj|
+                              %w(dnsmasq restart),
+                              { :b_sudo => true, :b_shell => false }) do |up_exec_obj|
             up_exec_obj.run
             return (up_exec_obj.exitstatus == 0)
           end
@@ -111,7 +120,8 @@ module Wire
 
             $log.debug('Restarting dnsmasq')
             LocalExecution.with(@executables[:service],
-                                %w(dnsmasq restart)) do |up_exec_obj|
+                                %w(dnsmasq restart),
+                                { :b_sudo => true, :b_shell => false }) do |up_exec_obj|
               up_exec_obj.run
               return (up_exec_obj.exitstatus == 0)
             end

@@ -44,4 +44,3 @@ $log.info "Result=#{r}"
 $log.info 'Checking if containers are up'
 r = fa.up?
 $log.info "Result=#{r}"
-
