@@ -52,14 +52,12 @@ module Wire
 
       # check if configuration entry exists
       def exist?
-        $log.debug('DHCPRangeConfiguration.exist?')
         filename = create_dnsmaqs_config_filename
         File.exist?(filename) && File.readable?(filename) && File.file?(filename)
       end
 
       # check if dnsmasq is listening on the network device
       def up?
-        $log.debug('DHCPRangeConfiguration.up?')
         return false unless exist?
 
         filename = create_dnsmaqs_config_filename
@@ -73,21 +71,46 @@ module Wire
 
       # creates the configuration and restarts dnsmasq
       def up
-        $log.debug('DHCPRangeConfiguration.up')
-        begin
-          filename = create_dnsmaqs_config_filename
+        filename = create_dnsmaqs_config_filename
 
-          # use sudo'ed touch/chmod to create us the file we need
-          LocalExecution.with("sudo touch #{filename} && " \
-                              "sudo chmod g+rw #{filename} && " \
-                              "sudo chgrp #{ENV['USER']} #{filename}",
+        # use sudo'ed touch/chmod to create us the file we need
+        LocalExecution.with("sudo touch #{filename} && " \
+                            "sudo chmod u+rw #{filename} && " \
+                            "sudo chown #{ENV['USER']} #{filename}",
+                            [], { :b_sudo => false, :b_shell => true }) do |up_exec_obj|
+          up_exec_obj.run
+        end
+        $log.debug("(Over-)writing #{filename}")
+        open(filename, 'w') do |f|
+          # TODO: add netmask
+          f.puts "dhcp-range=#{@network_name},#{@address_start},#{@address_end}"
+        end
+
+        $log.debug('Restarting dnsmasq')
+        LocalExecution.with(@executables[:service],
+                            %w(dnsmasq restart),
+                            { :b_sudo => true, :b_shell => false }) do |up_exec_obj|
+          up_exec_obj.run
+          return (up_exec_obj.exitstatus == 0)
+        end
+      rescue => e
+        $log.error("Error writign dnsmasq config file/restarting dnsmasq, #{e}")
+        return false
+      end
+
+      # checks if dnsmasq is NOT servicing dhcp request on network device
+      def down?
+        !(up?)
+      end
+
+      # removes configuration entry and restarts dnsmasq
+      def down
+        filename = create_dnsmaqs_config_filename
+        if File.exist?(filename) && File.readable?(filename) && File.file?(filename)
+          $log.debug("Deleting #{filename}")
+          LocalExecution.with("sudo rm #{filename}",
                               [], { :b_sudo => false, :b_shell => true }) do |up_exec_obj|
             up_exec_obj.run
-          end
-          $log.debug("(Over-)writing #{filename}")
-          open(filename, 'w') do |f|
-            # TODO: add netmask
-            f.puts "dhcp-range=#{@network_name},#{@address_start},#{@address_end}"
           end
 
           $log.debug('Restarting dnsmasq')
@@ -97,39 +120,10 @@ module Wire
             up_exec_obj.run
             return (up_exec_obj.exitstatus == 0)
           end
-        rescue => e
-          $log.error("Error writign dnsmasq config file/restarting dnsmasq, #{e}")
-          return false
         end
-      end
-
-      # checks if dnsmasq is NOT servicing dhcp request on network device
-      def down?
-        $log.debug('DHCPRangeConfiguration.down?')
-        !(up?)
-      end
-
-      # removes configuration entry and restarts dnsmasq
-      def down
-        $log.debug('DHCPRangeConfiguration.down')
-        begin
-          filename = create_dnsmaqs_config_filename
-          if File.exist?(filename) && File.readable?(filename) && File.file?(filename)
-            $log.debug("Deleting #{filename}")
-            File.delete(filename)
-
-            $log.debug('Restarting dnsmasq')
-            LocalExecution.with(@executables[:service],
-                                %w(dnsmasq restart),
-                                { :b_sudo => true, :b_shell => false }) do |up_exec_obj|
-              up_exec_obj.run
-              return (up_exec_obj.exitstatus == 0)
-            end
-          end
-        rescue => e
-          $log.error("Error deleting dnsmasq config file/restarting dnsmasq, #{e}")
-          return false
-        end
+      rescue => e
+        $log.error("Error deleting dnsmasq config file/restarting dnsmasq, #{e}")
+        return false
       end
 
       # Returns a string representation

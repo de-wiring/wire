@@ -39,7 +39,8 @@ module Wire
         clazz_map = {
           :ovsbridge  => OVSBridge,
           :bridgeip   => IPAddressOnIntf,
-          :dhcpconfig => DHCPRangeConfiguration
+          :dhcpconfig => DHCPRangeConfiguration,
+          :figadapter => FigAdapter
         }
         clazz = clazz_map[resource_symname]
         fail(ArgumentError, "Unknown resource type #{resource_symname}") unless clazz

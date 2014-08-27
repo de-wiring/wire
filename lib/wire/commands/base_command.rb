@@ -33,9 +33,18 @@ module Wire
 
     #
     def check_user
-      if ENV['USER'] != 'root'
-        $log.warn "Not running as root. Make sure user #{ENV['USER']} has sudo configured."
-      end
+      (ENV['USER'] != 'root') &&
+          $log.warn("Not running as root. Make sure user #{ENV['USER']} has sudo configured.")
+    end
+
+    # retrieve all objects of given +type_name+ in
+    # zone (by +zone_name+)
+    # returns:
+    # [Hash] of model subpart with elements of given type
+    def objects_in_zone(type_name, zone_name)
+      return {} unless @project.element?(type_name)
+      objects = @project.get_element type_name || {}
+      objects.select { |_, data| data[:zone] == zone_name }
     end
 
     # runs the command, according to parameters

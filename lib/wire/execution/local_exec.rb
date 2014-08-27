@@ -96,7 +96,6 @@ module Wire
         @stdout = `#{cmd}`
         @stderr = nil
         @exitstatus = $CHILD_STATUS.exitstatus
-        # @exitstatus = $?.exitstatus
       end
 
       private

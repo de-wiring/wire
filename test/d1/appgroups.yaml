@@ -3,4 +3,4 @@ dmz_group_1:
   :zone: dmz
   :controller:
     :type: fig
-    :file: fig/fig_dmz.yaml
+    :file: fig/dmz/fig.yml

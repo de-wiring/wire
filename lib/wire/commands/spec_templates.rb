@@ -78,6 +78,20 @@ ERB
 ERB
     end
 
+    # rubocop:disable Lint/UnusedMethodArgument
+    # :reek:UnusedParameters
+    # requires zone_name, figfile, appgroup_name
+    def self.build_template__fig_containers_are_up
+      <<ERB
+  describe 'In zone <%= zone_name %> we should have containers managed '\
+           'by fig for appgroup <%= appgroup_name %>' do
+    describe command 'sudo fig -p <%= appgroup_name %> -f <%= figfile %> ps' do
+      its(:stdout) { should match /Up/ }
+    end
+  end
+ERB
+    end
+
     # generate template part
     # returns
     # - erb template for spec_helper.rb file

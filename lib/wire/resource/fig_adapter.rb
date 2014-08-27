@@ -22,7 +22,7 @@ module Wire
       # params:
       # - name	fig filename name, i.e. "backend.yaml"
       def initialize(name, figfile)
-        super(name)
+        super(name.tr('_-', ''))
         @figfile = figfile
 
         # TODO: make configurable
@@ -60,6 +60,7 @@ module Wire
 
             num_up += 1
           end
+          $log.debug 'No containers found in fig ps output' if num_up == 0
 
           return (exec_obj.exitstatus == 0 && num_up > 0)
         end

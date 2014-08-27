@@ -60,6 +60,8 @@ module Wire
 
         if b_zone_res
           outputs 'VERIFY', "Zone \'#{zone_name}\' verified successfully", :ok
+        else
+          outputs 'VERIFY', "Zone \'#{zone_name}\' NOT verified successfully", :err
         end
 
         b_zone_res == false
@@ -72,12 +74,20 @@ module Wire
     def run_on_zone(zone_name)
       networks = @project.get_element('networks')
 
+      b_verify_ok = true
+
       # select networks in current zone only
       networks_in_zone = networks.select do |_, network_data|
         network_data[:zone] == zone_name
       end
       # verify these networks
-      verify_networks(networks_in_zone, zone_name)
+      b_verify_ok = false unless verify_networks(networks_in_zone, zone_name)
+
+      # select appgroups in this zone and verify them
+      appgroups_in_zone = objects_in_zone('appgroups', zone_name)
+      b_verify_ok = false unless verify_appgroups(appgroups_in_zone, zone_name)
+
+      b_verify_ok
     end
 
     # given an array of network elements (+networks_in_zone+), this
@@ -139,6 +149,26 @@ module Wire
       b_verify_ok
     end
 
+    # Given a +zone_name+ and an array of +appgroups+ entries
+    # this methods verifies if these appgroups are up and running
+    def verify_appgroups(appgroups, zone_name)
+      b_verify_ok = true
+
+      appgroups.each do |appgroup_name, appgroup_data|
+        $log.debug("Verifying appgroup \'#{appgroup_name}\'")
+
+        if handle_appgroup(zone_name, appgroup_name, appgroup_data) == false
+          appgroup_data.store :status, :failed
+          b_verify_ok = false
+          mark("Appgroup \'#{appgroup_name}\' does not run correctly.",
+               :appgroup, appgroup_name, appgroup_data)
+        else
+          appgroup_data.store :status, :ok
+        end
+      end
+      b_verify_ok
+    end
+
     # runs verification for a bridge resource identified by
     # +bridge_name+
     # Returns
@@ -184,6 +214,31 @@ module Wire
         outputs 'VERIFY', "dnsmasq/dhcp config on network \'#{network_name}\' is not valid.", :err
         return false
       end
+    end
+
+    # runs verification for appgroups
+    # Returns
+    # - [Bool] true if appgroup setup is ok
+    def handle_appgroup(_zone_name, appgroup_name, appgroup_entry)
+      # get path
+      controller_entry = appgroup_entry[:controller]
+
+      if controller_entry[:type] == 'fig'
+        fig_path = File.join(File.expand_path(@project.target_dir), controller_entry[:file])
+
+        resource = Wire::Resource::ResourceFactory
+          .instance.create(:figadapter, "#{appgroup_name}", fig_path)
+        if resource.up?
+          outputs 'VERIFY', "appgroup \'#{appgroup_name}\' is running.", :ok
+          return true
+        else
+          outputs 'VERIFY', "appgroup \'#{appgroup_name}\' is not running.", :err
+          return false
+        end
+      end
+
+      $log.error "Appgroup not handled, unknown controller type #{controller_entry[:type]}"
+      false
     end
   end
 end

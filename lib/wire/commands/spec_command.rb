@@ -41,7 +41,7 @@ module Wire
         spec_writer.write
 
         outputs 'SPEC', "Serverspecs written to #{target_specdir}. Run:"
-        outputs 'SPEC', "( cd #{target_specdir}; rake spec )"
+        outputs 'SPEC', "( cd #{target_specdir}; sudo rake spec )"
         outputs 'SPEC', 'To run automatically, use --run'
       rescue => e
         $log.error "Error writing serverspec files, #{e}"
@@ -57,7 +57,7 @@ module Wire
     # +target_dir+ model and output dir
     def run_serverspec(target_specdir)
       $log.debug 'Running serverspec'
-      cmd = "cd #{target_specdir} && rake spec"
+      cmd = "cd #{target_specdir} && sudo rake spec"
       $log.debug "cmd=#{cmd}"
       puts `#{cmd}`
     end
@@ -69,16 +69,6 @@ module Wire
         run_on_zone(zone_name)
         $log.debug("Done for zone #{zone_name} ...")
       end
-    end
-
-    # retrieve all objects of given +type_name+ in
-    # zone (by +zone_name+)
-    # returns:
-    # [Hash] of model subpart with elements of given type
-    def objects_in_zone(type_name, zone_name)
-      return {} unless @project.element?(type_name)
-      objects = @project.get_element type_name || {}
-      objects.select { |_, data| data[:zone] == zone_name }
     end
 
     # run spec steps in given +zone_name+
@@ -157,6 +147,10 @@ module Wire
         figfile = File.join(File.expand_path(@target_dir), figfile_part)
 
         template = SpecTemplates.build_template__fig_file_is_valid
+        erb = ERB.new(template, nil, '%')
+        @spec_code << erb.result(binding)
+
+        template = SpecTemplates.build_template__fig_containers_are_up
         erb = ERB.new(template, nil, '%')
         @spec_code << erb.result(binding)
       end
