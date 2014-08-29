@@ -11,6 +11,9 @@ module Wire
   # stopping and removing bridges, containers etc.
   # - :target_dir
   class DownCommand < UpDownCommand
+    # allow to get access to handler object
+    attr_reader :handler
+
     # initializes DownCommand, creates handler
     def initialize
       super
@@ -89,6 +92,7 @@ module Wire
         bridge_resource.down
         if bridge_resource.down?
           outputs 'DOWN', "Bridge #{bridge_name} down/removed.", :ok
+          state.update(:bridge, bridge_name, :down)
         else
           outputs 'DOWN', "Error bringing down bridge #{bridge_name}.", :err
           b_result = false
@@ -117,6 +121,7 @@ module Wire
         hostip_resource.down
         if hostip_resource.down?
           outputs 'DOWN', "IP #{hostip} on bridge #{bridge_name} down/removed.", :ok
+          state.update(:hostip, hostip, :down)
         else
           outputs 'DOWN', "Error taking down ip #{hostip} on bridge #{bridge_name}.", :err
 
@@ -147,6 +152,7 @@ module Wire
         resource.down
         if resource.down?
           outputs 'DOWN', "dnsmasq/dhcp config on network \'#{network_name}\' is down.", :ok
+          state.update(:dnsmasq, network_name, :down)
           return true
         else
           outputs 'DOWN', 'Error unconfiguring dnsmasq/dhcp ' \
@@ -180,6 +186,7 @@ module Wire
           resource.down
           if resource.down?
             outputs 'DOWN', "appgroup \'#{appgroup_name}\' is down.", :ok
+            state.update(:appgroup, appgroup_name, :down)
             return true
           else
             outputs 'DOWN', "Error taking down appgroup \'#{appgroup_name}\'.",

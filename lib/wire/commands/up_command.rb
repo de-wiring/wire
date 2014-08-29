@@ -10,6 +10,10 @@ module Wire
   # and brings all defined model elements "up", that is
   # starting bridges, containers etc.
   class UpCommand < UpDownCommand
+    # allow to get access to handler object
+    attr_reader :handler
+
+    # initialize
     def initialize
       @handler = UpCommandHandler.new
     end
@@ -102,6 +106,7 @@ module Wire
         bridge_resource.up
         if bridge_resource.up?
           outputs 'UP',  "Bridge #{bridge_name} up.", :ok
+          state.update(:bridge, bridge_name, :up)
         else
           outputs 'UP',  "Error bringing up bridge #{bridge_name}.", :err
           b_result = false
@@ -127,6 +132,7 @@ module Wire
         hostip_resource.up
         if hostip_resource.up?
           outputs 'UP',  "IP #{hostip} on bridge #{bridge_name} up.", :ok
+          state.update(:hostip, hostip, :up)
         else
           outputs 'UP',  "Error bringing up ip #{hostip} on bridge #{bridge_name}.", :err
           b_result = false
@@ -155,6 +161,7 @@ module Wire
         resource.up
         if resource.up?
           outputs 'UP', "dnsmasq/dhcp config on network \'#{network_name}\' is up.", :ok
+          state.update(:dnsmasq, network_name, :up)
           return true
         else
           outputs 'UP', "Error configuring dnsmasq/dhcp config on network \'#{network_name}\'.",
@@ -188,6 +195,7 @@ module Wire
           resource.up
           if resource.up?
             outputs 'UP', "appgroup \'#{appgroup_name}\' is up.", :ok
+            state.update(:appgroup, appgroup_name, :up)
             return true
           else
             outputs 'UP', "Error bringing up appgroup \'#{appgroup_name}\'.",

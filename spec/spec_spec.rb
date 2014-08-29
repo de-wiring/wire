@@ -28,7 +28,12 @@ describe SpecCommand do
                     { 'z1' => { } }
     )
     p.merge_element(:networks,
-                    { 'n1' => { :zone => 'z1', :network => '10.0.0.0/8', :hostip => '10.20.30.1'} }
+                    { 'n1' => { :zone => 'z1', :network => '10.0.0.0/8', :hostip => '10.10.1.1',
+                                :dhcp => { :start => '10.10.1.10', :end => '10.10.1.250'}}
+                    }
+    )
+    p.merge_element(:appgroups,
+                    { 'g1' => { :zone => 'z1', :controller => { :type => 'fig'}} }
     )
     p
   }
@@ -57,6 +62,15 @@ describe SpecCommand do
       # remove the directory.
       FileUtils.remove_entry_secure dir
     end
+
+  end
+
+  it 'should call serverspec' do
+
+    sc.should_receive(:"`").with(/cd nonexisting_project_for_spec \&\& sudo rake spec/).and_return(true)
+
+    res = sc.run_serverspec('nonexisting_project_for_spec' )
+    res.should eq(nil)
 
   end
 end

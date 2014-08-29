@@ -59,7 +59,8 @@ module Wire
       $log.debug 'Running serverspec'
       cmd = "cd #{target_specdir} && sudo rake spec"
       $log.debug "cmd=#{cmd}"
-      puts `#{cmd}`
+      result = `#{cmd}`
+      puts result
     end
 
     # run verification on +zones+

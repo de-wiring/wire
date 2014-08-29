@@ -1,0 +1,17 @@
+---
+! '%test%TEST': !ruby/object:Wire::StateEntry
+  type: :test
+  name: TEST
+  state: :up
+! '%test%TEST2': !ruby/object:Wire::StateEntry
+  type: :test
+  name: TEST2
+  state: :down
+! '%bridge%n1': !ruby/object:Wire::StateEntry
+  type: :bridge
+  name: n1
+  state: :up
+! '%hostip%10.10.20.1': !ruby/object:Wire::StateEntry
+  type: :hostip
+  name: 10.10.20.1
+  state: :up

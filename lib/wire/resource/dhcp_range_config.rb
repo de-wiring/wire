@@ -81,7 +81,7 @@ module Wire
           up_exec_obj.run
         end
         $log.debug("(Over-)writing #{filename}")
-        open(filename, 'w') do |f|
+        File.open(filename, 'w') do |f|
           # TODO: add netmask
           f.puts "dhcp-range=#{@network_name},#{@address_start},#{@address_end}"
         end

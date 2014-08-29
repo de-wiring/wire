@@ -177,9 +177,11 @@ module Wire
       bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsbridge, bridge_name)
       if bridge_resource.exist?
         outputs 'VERIFY', "Bridge \'#{bridge_name}\' exists.", :ok
+        state.update(:bridge, bridge_name, :up)
         return true
       else
         outputs 'VERIFY', "Bridge \'#{bridge_name}\' does not exist.", :err
+        state.update(:bridge, bridge_name, :down)
         return false
       end
     end
@@ -193,9 +195,11 @@ module Wire
         .instance.create(:bridgeip, hostip, bridge_name)
       if hostip_resource.up?
         outputs 'VERIFY', "IP \'#{hostip}\' on bridge \'#{bridge_name}\' exists.", :ok
+        state.update(:hostip, hostip, :up)
         return true
       else
         outputs 'VERIFY', "IP \'#{hostip}\' on bridge \'#{bridge_name}\' does not exist.", :err
+        state.update(:hostip, hostip, :down)
         return false
       end
     end
@@ -209,9 +213,11 @@ module Wire
                          network_entry, address_start, address_end)
       if resource.up?
         outputs 'VERIFY', "dnsmasq/dhcp config on network \'#{network_name}\' is valid.", :ok
+        state.update(:dnsmasq, network_name, :up)
         return true
       else
         outputs 'VERIFY', "dnsmasq/dhcp config on network \'#{network_name}\' is not valid.", :err
+        state.update(:dnsmasq, network_name, :down)
         return false
       end
     end
@@ -230,9 +236,11 @@ module Wire
           .instance.create(:figadapter, "#{appgroup_name}", fig_path)
         if resource.up?
           outputs 'VERIFY', "appgroup \'#{appgroup_name}\' is running.", :ok
+          state.update(:appgroup, appgroup_name, :up)
           return true
         else
           outputs 'VERIFY', "appgroup \'#{appgroup_name}\' is not running.", :err
+          state.update(:appgroup, appgroup_name, :down)
           return false
         end
       end
