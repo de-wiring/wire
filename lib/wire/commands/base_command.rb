@@ -6,7 +6,7 @@
 
 # Wire module
 module Wire
-  # (empty) Base command
+  # (Empty) Base command
   class BaseCommand
     # +params+ object and +project+ to operate upon
     attr_accessor :params, :project
@@ -16,6 +16,7 @@ module Wire
       State.instance
     end
 
+    # debugs a single line state
     def dump_state
       $log.debug "State: [#{state.to_pretty_s}]"
     end

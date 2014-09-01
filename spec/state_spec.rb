@@ -11,6 +11,8 @@ end
 describe State do
   it 'should update state' do
     s = State.instance
+    s.clean
+
 
     s.state.size.should eq(0)
     s.state?(:test,'TEST').should eq(false)

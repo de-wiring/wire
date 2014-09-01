@@ -9,6 +9,7 @@ require 'singleton'
 # Wire module
 module Wire
   # +State+ is a container for a state model
+  # :reek:DataClump
   class State
     # [Hash] of all +state+ entries, key=name, value=StateEntry
     attr_accessor :state
@@ -19,6 +20,11 @@ module Wire
 
     # creates an empty state
     def initialize
+      clean
+    end
+
+    # cleans the state
+    def clean
       @state = {}
       # +b_changed+ indicates wether state has changed
       @b_changed = false
@@ -30,10 +36,10 @@ module Wire
     # +state+, one of :up, :down, :unknown
     def update(type, name, state)
       key = (make_key(type, name))
-      e = @state[key]
-      if e
-        (e.state != state) && @b_changed = true
-        e.state = state
+      entry = @state[key]
+      if entry
+        (entry.state != state) && @b_changed = true
+        entry.state = state
       else
         @state.store(key, StateEntry.new(type, name, state))
         @b_changed = true
@@ -51,24 +57,29 @@ module Wire
       @state.key?(make_key(type, name))
     end
 
+    # returns true if state changed since
+    # creation or last load/save call
     def changed?
       b_changed
     end
 
+    # checks if +type+ resource +name+
+    # is in state +state_to_check+
+    def check(type, name, state_to_check)
+      key = (make_key(type, name))
+      entry = @state[key]
+      return entry.state == state_to_check if entry
+      false
+    end
+
     # checks if resource +type+ +name+ is up
     def up?(type, name)
-      key = (make_key(type, name))
-      e = @state[key]
-      return e.state == :up if e
-      false
+      check(type, name, :up)
     end
 
     # checks if resource +type+ +name+ is down
     def down?(type, name)
-      key = (make_key(type, name))
-      e = @state[key]
-      return e.state == :down if e
-      false
+      check(type, name, :down)
     end
 
     # calls to_pretty_s on a state entries
@@ -86,9 +97,10 @@ module Wire
       end
       statefile_filename = state_filename
       $log.debug "Saving state to #{statefile_filename}"
-      File.open(statefile_filename, 'w') do |f|
-        f.puts state.to_yaml
+      File.open(statefile_filename, 'w') do |file|
+        file.puts state.to_yaml
       end
+      @b_changed = false
     end
 
     # load  state from statefile (within project target dir)
@@ -102,6 +114,7 @@ module Wire
       else
         $log.debug 'No statefile found.'
       end
+      @b_changed = false
     end
 
     # construct name of state file
@@ -121,10 +134,10 @@ module Wire
     # initializes the state entry
     # with given +type+ and +name+ and +state+
     # sets :unknown state if +state+ not given
-    def initialize(type, name, state = nil)
+    def initialize(type, name, state = :unknown)
       self.type = type
       self.name = name
-      self.state = state || :unknown
+      self.state = state
     end
 
     # string representation

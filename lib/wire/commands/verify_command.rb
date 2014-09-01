@@ -10,8 +10,8 @@ module Wire
   # and checks if given elements are present on the system
   # rubocop:disable ClassLength
   class VerifyCommand < BaseCommand
-    # +project+ to operate upon
-    # +findings+ is an array of potential errors that occured
+    # +project+:: to operate upon
+    # +findings+:: is an array of potential errors that occured
     # during verification run
     attr_accessor :project, :findings
 
@@ -22,10 +22,10 @@ module Wire
 
     # add a finding to the findings array
     # params:
-    # - +msg+   what went wrong
-    # - +type+  element type, i.e. Network
-    # - +element_name+  element_name
-    # - +element_data+  map of details, from model
+    # +msg+::           what went wrong
+    # +type+::          element type, i.e. Network
+    # +element_name+::  element_name
+    # +element_data+::  map of details, from model
     def mark(msg, type, element_name, element_data)
       @findings <<
           VerificationError.new(msg, type,

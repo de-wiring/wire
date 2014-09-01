@@ -43,8 +43,8 @@ module Wire
         outputs 'SPEC', "Serverspecs written to #{target_specdir}. Run:"
         outputs 'SPEC', "( cd #{target_specdir}; sudo rake spec )"
         outputs 'SPEC', 'To run automatically, use --run'
-      rescue => e
-        $log.error "Error writing serverspec files, #{e}"
+      rescue => exception
+        $log.error "Error writing serverspec files, #{exception}"
         STDERR.puts e.inspect
       end
 

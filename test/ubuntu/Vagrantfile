@@ -7,10 +7,19 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "wire-testing_vm", primary: true do |s|
 
+    # hostname
+
     s.vm.synced_folder "../../lib", "/mnt/project/lib"
     s.vm.synced_folder "../../bin", "/mnt/project/bin"
     s.vm.synced_folder "../../test", "/mnt/project/test"
     config.ssh.pty = true
+
+    # uninstall pkgs we do not need, update existing stuff afterwards
+    s.vm.provision "shell", inline: <<EOS
+        sudo apt-get remove --purge -yqq juju-core juju
+        sudo apt-get remove --purge -yqq libgl1-mesa-dri
+        sudo apt-get update -yqq
+EOS
 
     # install open vswitch parts ne weed
     s.vm.provision "shell", inline: <<EOS
@@ -26,7 +35,6 @@ EOS
     s.vm.provision "shell", inline: <<EOS
 echo == Ensure docker is installed
       [ -e /usr/lib/apt/methods/https ] || {
-        sudo apt-get update -yqq
         sudo apt-get install -yqq apt-transport-https
       }
       sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9

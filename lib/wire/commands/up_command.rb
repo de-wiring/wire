@@ -18,14 +18,6 @@ module Wire
       @handler = UpCommandHandler.new
     end
 
-    # run on all given +zones+
-    def run_on_project_zones(zones)
-      zones.select do |zone_name, _|
-        $log.debug("Bringing up zone #{zone_name} ...")
-        run_on_zone(zone_name) == false
-      end
-    end
-
     # run in given +zone_name+:
     # returns:
     # - bool: true if successful, false otherwise
@@ -43,46 +35,17 @@ module Wire
         success = @handler.handle_bridge(network_name)
         b_result &= success
         if success
-          # go on
-          host_ip = network_data[:hostip]
-
-          if host_ip
-            $log.debug 'bringing up hostip ...'
-            # if the hostip is not in cidr, take netmask
-            # from network entry, add to hostip
-            host_ip = ensure_hostip_netmask(host_ip, network_data)
-
-            # try to bring it up
-            success = @handler.handle_hostip(network_name, host_ip)
-
-            b_result &= success
-          end
+          # if we have a host ip on that bridge, take it down first
+          b_result &= default_handle_hostip(network_name, network_data, @handler)
 
           # if we have dhcp, configure dnsmasq
-          dhcp_data = network_data[:dhcp]
-          if dhcp_data
-            $log.debug 'enabling dhcp ...'
-            success =  @handler.handle_dhcp(zone_name,
-                                            network_name, network_data,
-                                            dhcp_data[:start], dhcp_data[:end])
+          b_result &= default_handle_dhcp(zone_name, network_name, network_data, @handler)
 
-            b_result &= success
-          end
-
+          # select appgroups in this zone and bring them up
+          b_result &= default_run_on_appgroup_in_zone(zone_name, @handler)
         else
-          $log.debug("Will not touch dependant objects of #{network_name}")
+          $log.debug("Will not touch dependant objects of #{network_name} due to previous error(s)")
         end
-      end
-
-      # select appgroups in this zone and bring them up
-      appgroups_in_zone = objects_in_zone('appgroups', zone_name)
-      appgroups_in_zone.each do |appgroup_name, appgroup_data|
-        $log.debug("Bringing up appgroup \'#{appgroup_name}\'")
-
-        success = @handler.handle_appgroup(zone_name,
-                                           appgroup_name, appgroup_data,
-                                           @project.target_dir)
-        b_result &= success
       end
 
       b_result
@@ -178,35 +141,48 @@ module Wire
     # +zone_name+:: Name of zone
     # +appgroup_name+:: Name of Appgroup
     # +appgroup_entry+:: Appgroup data from model
-    def handle_appgroup(_zone_name, appgroup_name, appgroup_entry, target_dir)
+    def handle_appgroup(zone_name, appgroup_name, appgroup_entry, target_dir)
       # get path
       controller_entry = appgroup_entry[:controller]
 
       if controller_entry[:type] == 'fig'
-        fig_path = File.join(File.expand_path(target_dir), controller_entry[:file])
-
-        resource = Wire::Resource::ResourceFactory
-        .instance.create(:figadapter, "#{appgroup_name}", fig_path)
-
-        if resource.up?
-          outputs 'UP', "appgroup \'#{appgroup_name}\' is already up.", :ok2
-          return true
-        else
-          resource.up
-          if resource.up?
-            outputs 'UP', "appgroup \'#{appgroup_name}\' is up.", :ok
-            state.update(:appgroup, appgroup_name, :up)
-            return true
-          else
-            outputs 'UP', "Error bringing up appgroup \'#{appgroup_name}\'.",
-                    :err
-            return false
-          end
-        end
+        return handle_appgroup__fig(zone_name, appgroup_name, appgroup_entry, target_dir)
       end
 
       $log.error "Appgroup not handled, unknown controller type #{controller_entry[:type]}"
       false
+    end
+
+    # implement appgroup handling for fig controller
+    # Params:
+    # +zone_name+:: Name of zone
+    # +appgroup_name+:: Name of Appgroup
+    # +appgroup_entry+:: Appgroup data from model
+    # +target_dir+:: Target directory (where fig file is located)
+    def handle_appgroup__fig(zone_name, appgroup_name, appgroup_entry, target_dir)
+      # get path
+      controller_entry = appgroup_entry[:controller]
+
+      fig_path = File.join(File.expand_path(target_dir), controller_entry[:file])
+
+      resource = Wire::Resource::ResourceFactory
+      .instance.create(:figadapter, "#{appgroup_name}", fig_path)
+
+      if resource.up?
+        outputs 'UP', "appgroup \'#{appgroup_name}\' in zone #{zone_name} is already up.", :ok2
+        return true
+      else
+        resource.up
+        if resource.up?
+          outputs 'UP', "appgroup \'#{appgroup_name}\' in zone #{zone_name} is up.", :ok
+          state.update(:appgroup, appgroup_name, :up)
+          return true
+        else
+          outputs 'UP', "Error bringing up appgroup \'#{appgroup_name}\' in zone #{zone_name} .",
+                  :err
+          return false
+        end
+      end
     end
   end
 end

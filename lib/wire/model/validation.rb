@@ -48,5 +48,19 @@ module Wire
     def mark(message, element_type, element_name)
       @errors << ValidationError.new(message, element_type, element_name)
     end
+
+    # ensures that objects of given +type_as_string+ (i.e. networks)
+    # are attached to zones
+    def objects_attached_to_zones?(type_as_string)
+      zones = @project.get_element('zones')
+      @project.get_element(type_as_string).each do |name, data|
+        zone = data[:zone]    # assume that this object contains ref to a zone
+        if !zone
+          mark("#{type_as_string} is not attached to a zone", type_as_string, name)
+        else
+          mark("#{type_as_string} has invalid zone", type_as_string, name) unless zones.key?(zone)
+        end
+      end
+    end
   end
 end

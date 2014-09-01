@@ -9,7 +9,7 @@ module Wire
   # Run validations on network model part
   class NetworksValidation < ValidationBase
     # run validation steps on network elements
-    # returns
+    # returns:
     # - nil, results in errors of ValidationBase
     def run_validations
       networks_attached_to_zones?
@@ -21,17 +21,7 @@ module Wire
 
     # ensures that all networks are attached to a zone
     def networks_attached_to_zones?
-      zones = @project.get_element('zones')
-      @project.get_element('networks').each do |network_name, network_data|
-        zone = network_data[:zone]
-        type = 'network'
-        name = network_name
-        if !zone
-          mark('Network is not attached to a zone', type, name)
-        else
-          mark('Network has invalid zone', type, name) unless zones.key?(zone)
-        end
-      end
+      objects_attached_to_zones? 'networks'
     end
 
     # ensures that all network ranges are unique

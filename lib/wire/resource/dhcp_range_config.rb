@@ -69,6 +69,17 @@ module Wire
         ($CHILD_STATUS == 0)
       end
 
+      # restart dnsmasq service
+      def restart_dnsmasq
+        $log.debug('Restarting dnsmasq')
+        LocalExecution.with(@executables[:service],
+                            %w(dnsmasq restart),
+                            { :b_sudo => true, :b_shell => false }) do |up_exec_obj|
+          up_exec_obj.run
+          return (up_exec_obj.exitstatus == 0)
+        end
+      end
+
       # creates the configuration and restarts dnsmasq
       def up
         filename = create_dnsmaqs_config_filename
@@ -81,20 +92,14 @@ module Wire
           up_exec_obj.run
         end
         $log.debug("(Over-)writing #{filename}")
-        File.open(filename, 'w') do |f|
+        File.open(filename, 'w') do |file|
           # TODO: add netmask
-          f.puts "dhcp-range=#{@network_name},#{@address_start},#{@address_end}"
+          file.puts "dhcp-range=#{@network_name},#{@address_start},#{@address_end}"
         end
 
-        $log.debug('Restarting dnsmasq')
-        LocalExecution.with(@executables[:service],
-                            %w(dnsmasq restart),
-                            { :b_sudo => true, :b_shell => false }) do |up_exec_obj|
-          up_exec_obj.run
-          return (up_exec_obj.exitstatus == 0)
-        end
-      rescue => e
-        $log.error("Error writign dnsmasq config file/restarting dnsmasq, #{e}")
+        restart_dnsmasq
+      rescue => exception
+        $log.error("Error writign dnsmasq config file/restarting dnsmasq, #{exception}")
         return false
       end
 
@@ -113,16 +118,10 @@ module Wire
             up_exec_obj.run
           end
 
-          $log.debug('Restarting dnsmasq')
-          LocalExecution.with(@executables[:service],
-                              %w(dnsmasq restart),
-                              { :b_sudo => true, :b_shell => false }) do |up_exec_obj|
-            up_exec_obj.run
-            return (up_exec_obj.exitstatus == 0)
-          end
+          restart_dnsmasq
         end
-      rescue => e
-        $log.error("Error deleting dnsmasq config file/restarting dnsmasq, #{e}")
+      rescue => exception
+        $log.error("Error deleting dnsmasq config file/restarting dnsmasq, #{exception}")
         return false
       end
 

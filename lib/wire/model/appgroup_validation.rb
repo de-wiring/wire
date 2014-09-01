@@ -20,19 +20,7 @@ module Wire
 
     # ensures that all application groups are attached to a zone
     def appgroups_attached_to_zones?
-      zones = @project.get_element('zones')
-
-      @project.get_element('appgroups').each do |appgroup_name, appgroup_data|
-        zone = appgroup_data[:zone]
-        type = 'appgroup'
-        name = appgroup_name
-
-        if !zone
-          mark('Appgroup is not attached to a zone', type, name)
-        else
-          mark('Appgroup has invalid zone', type, name) unless zones.key?(zone)
-        end
-      end
+      objects_attached_to_zones? 'appgroups'
     end
 
     # ensures that all application groups have a known controller
