@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'wire/version'
 
 Gem::Specification.new do |s|
-  s.name        = 'wire'
+  s.name        = 'dewiring'
   s.platform    = Gem::Platform::RUBY
   s.version     = Wire::WireVersion::VERSION
   s.date        = '2014-09-02'
