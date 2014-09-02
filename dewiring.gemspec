@@ -23,5 +23,5 @@ Gem::Specification.new do |s|
 
   root_path      = File.dirname(__FILE__)
   s.require_path = 'lib'
-  s.files        = Dir.chdir(root_path) { Dir.glob('lib/{*,.*}') }
+  s.files        = Dir.chdir(root_path) { Dir.glob('lib/**/*') }
 end

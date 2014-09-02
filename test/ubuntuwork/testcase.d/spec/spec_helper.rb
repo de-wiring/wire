@@ -5,8 +5,8 @@ include SpecInfra::Helper::DetectOS
 include SpecInfra::Helper::Properties
 
 properties      = {
-	:wire_executable => 'wire',
-	:model_path 	 => '/home/vagrant/test/d1'
+	:wire_executable => '/mnt/project/bin/wire',
+	:model_path 	 => '/mnt/project/test/d1'
 }
 
 RSpec.configure do |c|

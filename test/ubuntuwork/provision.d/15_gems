@@ -1,0 +1,3 @@
+echo == Ensure basic gems are installed, not yet via gem deps/bundler
+( gem list --local | grep -wq rainbow ) || sudo gem install rainbow --no-rdoc --no-ri
+( gem list --local | grep -wq thor ) || sudo gem install thor --no-rdoc --no-ri

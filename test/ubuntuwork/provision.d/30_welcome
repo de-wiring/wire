@@ -1,0 +1,2 @@
+[[ -L /home/vagrant/project ]] || ln -s /mnt/project /home/vagrant/project
+

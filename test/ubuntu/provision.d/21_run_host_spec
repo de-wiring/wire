@@ -1,0 +1,4 @@
+echo == Ensure serverspec host test passes
+cd ./spec.d
+rake spec
+

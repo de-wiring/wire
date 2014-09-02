@@ -9,13 +9,10 @@ Vagrant.configure("2") do |config|
 
     # hostname
 
-#    s.vm.synced_folder "../../lib", "/mnt/project/lib"
-#    s.vm.synced_folder "../../bin", "/mnt/project/bin"
-#    s.vm.synced_folder "../../test", "/mnt/project/test"
- 
-	  s.vm.synced_folder 'testcase.d', '/home/vagrant/testcase.d'
-	  s.vm.synced_folder 'spec.d', '/home/vagrant/spec.d'
-	  s.vm.synced_folder '../../test', '/home/vagrant/test'
+    s.vm.synced_folder "../../lib", "/mnt/project/lib"
+    s.vm.synced_folder "../../bin", "/mnt/project/bin"
+    s.vm.synced_folder "../../test", "/mnt/project/test"
+    s.vm.synced_folder "spec.d", "/mnt/spec.d"
 
     s.vm.provision "shell", path: "provision.d/01_os_pkg_defaults"
     s.vm.provision "shell", path: "provision.d/05_network"

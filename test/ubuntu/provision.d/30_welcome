@@ -1,0 +1,19 @@
+
+# add comments to login 
+echo '[ -f ~/dewiring.txt ] && cat ~/dewiring.txt' >>/home/vagrant/.bashrc
+
+cat >/home/vagrant/dewiring.txt <<EOS
+
+== dewiring testing vm
+
+Welcome to the Ubuntu 14.04 testing vm of de-wiring.
+
+=== automated test case
+To run the full test case, you'll need a clean system meaning there
+may be no bridges, containers etc. be present, otherwise rspec tests
+will be confused.
+
+ $ cd testcase.d
+ $ rake spec
+
+EOS

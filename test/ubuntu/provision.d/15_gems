@@ -1,0 +1,2 @@
+echo == Ensure wire gem
+( gem list --local | grep -wq dewiring ) || sudo gem install dewiring --no-rdoc --no-ri
