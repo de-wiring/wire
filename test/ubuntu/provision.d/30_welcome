@@ -16,4 +16,34 @@ will be confused.
  $ cd testcase.d
  $ rake spec
 
+=== Manual testing
+
+~/test/d1 contains a small testcase, which is used by the automated
+test case above. 
+
+ $ wire --help
+ $ cd /home/vagrant/test/d1
+ 
+Validate the model for logical correctness (i.e. no typos, ip ranges match etc.)
+ 
+ $ wire validate
+
+Verify that model is alive (should fail)
+
+ $ wire verify
+
+Bring model up
+
+ $ wire up
+
+Verify again, play around with docker ps, /sbin/ip, ovs-vsctl show.
+Have a serverspec generated and executed:
+
+ $ wire spec --run
+
+Take it down, verify, spec, see a clean system
+
+ $ wire down
+
+
 EOS

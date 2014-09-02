@@ -127,3 +127,5 @@ tmp
 coverage
 .inch
 projectFilesBackup
+.state.yaml
+

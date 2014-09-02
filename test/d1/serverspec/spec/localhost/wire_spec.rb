@@ -43,13 +43,13 @@ require 'spec_helper.rb'
   end
 
   describe 'In zone dmz we should have fig model file for '           'appgroup dmz_group_1' do
-    describe file '/mnt/project/test/d1/fig/dmz/fig.yml' do
+    describe file '/home/vagrant/test/d1/fig/dmz/fig.yml' do
       it { should be_file }
     end
   end
 
   describe 'In zone dmz we should have containers managed '           'by fig for appgroup dmz_group_1' do
-    describe command 'sudo fig -p dmz_group_1 -f /mnt/project/test/d1/fig/dmz/fig.yml ps' do
+    describe command 'sudo fig -p dmz_group_1 -f /home/vagrant/test/d1/fig/dmz/fig.yml ps' do
       its(:stdout) { should match /Up/ }
     end
   end
