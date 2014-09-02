@@ -16,6 +16,7 @@ describe IPAddressOnIntf do
 
     LocalExecution.stub(:with).with(cmd_match, [], {:b_shell=>false, :b_sudo=>false}).and_yield(localexec_stub)
 
+
     obj.exist?.should eq(true)
   end
 

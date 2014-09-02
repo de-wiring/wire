@@ -7,13 +7,13 @@ Gem::Specification.new do |s|
   s.name        = 'wire'
   s.platform    = Gem::Platform::RUBY
   s.version     = Wire::WireVersion::VERSION
-  s.date        = '2014-08-15'
+  s.date        = '2014-09-02'
   s.summary     = 'Wire command line tool'
   s.description = 'System and Network architecture generator'
   s.authors     = ['Andreas Schmidt', 'Dustin Huptas']
   s.email       = 'gem@de-wiring.net'
   s.executables << 'wire'
-  s.homepage    = 'http://www.de-wiring.net'
+  s.homepage    = 'https://github.com/de-wiring/wire'
   s.license     = 'MIT'
 
   s.required_ruby_version     = '>= 1.9.3'

@@ -15,6 +15,8 @@ module Wire
     attr_accessor :state
     # backref to project
     attr_accessor :project
+    # did something change? since last change or load/save
+    attr_reader :changed
 
     include Singleton
 
@@ -26,8 +28,8 @@ module Wire
     # cleans the state
     def clean
       @state = {}
-      # +b_changed+ indicates wether state has changed
-      @b_changed = false
+      # +changed+ indicates wether state has changed
+      @changed = false
     end
 
     # adds or updates state
@@ -38,11 +40,11 @@ module Wire
       key = (make_key(type, name))
       entry = @state[key]
       if entry
-        (entry.state != state) && @b_changed = true
+        (entry.state != state) && @changed = true
         entry.state = state
       else
         @state.store(key, StateEntry.new(type, name, state))
-        @b_changed = true
+        @changed = true
       end
     end
 
@@ -55,12 +57,6 @@ module Wire
     # given by +type+ and +name+
     def state?(type, name)
       @state.key?(make_key(type, name))
-    end
-
-    # returns true if state changed since
-    # creation or last load/save call
-    def changed?
-      b_changed
     end
 
     # checks if +type+ resource +name+
@@ -82,6 +78,11 @@ module Wire
       check(type, name, :down)
     end
 
+    # returns changed flad
+    def changed?
+      changed
+    end
+
     # calls to_pretty_s on a state entries
     def to_pretty_s
       @state.reduce([]) do |arr, entry|
@@ -91,7 +92,7 @@ module Wire
 
     # save current state to statefile (within project target dir)
     def save
-      unless @b_changed
+      unless @changed
         $log.debug 'Not saving state, nothing changed'
         return
       end
@@ -100,7 +101,7 @@ module Wire
       File.open(statefile_filename, 'w') do |file|
         file.puts state.to_yaml
       end
-      @b_changed = false
+      @changed = false
     end
 
     # load  state from statefile (within project target dir)
@@ -114,7 +115,7 @@ module Wire
       else
         $log.debug 'No statefile found.'
       end
-      @b_changed = false
+      @changed = false
     end
 
     # construct name of state file

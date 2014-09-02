@@ -7,7 +7,6 @@
 # Wire module
 module Wire
   # Base class for up/down commands
-  # :reek:DuplicateCode
   class UpDownCommand < BaseCommand
     # generic method, calls run_on_project_zones for
     # all zones in model
@@ -26,6 +25,7 @@ module Wire
     end
 
     # run on all given +zones+
+    # Returns [Hash] of zones that failed.
     def run_on_project_zones(zones)
       zones.select do |zone_name, _|
         $log.debug("Processing zone #{zone_name} ...")

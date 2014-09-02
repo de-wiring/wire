@@ -45,6 +45,19 @@ EOS
     result[:device].should eq('lo')
   end
 
+  it 'should construct command correctly' do
+    localexec_stub = double('LocalExecution')
+    localexec_stub.stub(:run).and_return(true)
+    localexec_stub.stub(:exitstatus).and_return(0)
+
+    LocalExecution.stub(:with).with('/sbin/ip', ['addr','show','lo'], {:b_shell=>false, :b_sudo=>false}).and_yield(localexec_stub)
+
+
+    lambda {
+      ipb.get_ipaddr_data('lo')
+    }.should raise_error
+  end
+
   it 'should fail on empty input' do
     expect(ipb).to receive(:call_addr_show).and_return('')
 

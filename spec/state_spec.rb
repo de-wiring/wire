@@ -13,7 +13,6 @@ describe State do
     s = State.instance
     s.clean
 
-
     s.state.size.should eq(0)
     s.state?(:test,'TEST').should eq(false)
 
@@ -32,6 +31,25 @@ describe State do
     s.up?(:test,'NONEX').should eq(false)
     s.down?(:test,'TEST2').should eq(true)
     s.down?(:test,'NONEX').should eq(false)
+
+  end
+
+  it 'should handle changed? correctly' do
+    s = State.instance
+    s.clean
+    s.project = Object.new
+    s.project.stub(:target_dir).and_return('/tmp')
+
+    s.changed?.should eq(false)
+
+    s.update(:test,'TEST',:up)
+    s.changed?.should eq(true)
+
+    #
+    File.stub(:open).and_return(true)
+    s.save
+
+    s.changed?.should eq(false)
 
   end
 end

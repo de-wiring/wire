@@ -8,16 +8,16 @@
 module Wire
   # raised in case of invalid model
   class ValidationError
-    # +message+   Validation Error message
-    # +element_type+  Model element type of this error, i.e. 'Network'
-    # +element_name+  Model element name
+    # +message+::   Validation Error message
+    # +element_type+::  Model element type of this error, i.e. 'Network'
+    # +element_name+::  Model element name
     attr_accessor	:message, :element_type, :element_name
 
     # Initializes the error object
     # Params:
-    # +message+   Validation Error message
-    # +element_type+  Model element type of this error, i.e. 'Network'
-    # +element_name+  Model element name
+    # +message+::   Validation Error message
+    # +element_type+::  Model element type of this error, i.e. 'Network'
+    # +element_name+::  Model element name
     def initialize(message, element_type, element_name)
       @message = message
       @element_type = element_type
