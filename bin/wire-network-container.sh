@@ -141,6 +141,7 @@ function container_process() {
 #           1: Container Process ID
 # ----------------------------------------------------------------------------
 function link_netns() {
+	$MODE sudo mkdir -p /var/run/netns
 	local PID="$1"
 	$MODE sudo ln -s /proc/$PID/ns/net /var/run/netns/$PID
 }
@@ -217,6 +218,7 @@ function remove_device_from_switch() {
 # -- FUNCTION ----------------------------------------------------------------
 #        Name: configure_interfaces
 # Description: brings container interfaces up, sets namespace and names
+#         see: https://docs.docker.com/articles/networking/#how-docker-networks-a-container
 # Parameters
 #           1: Host interface name
 #           2: Container Interface name (peer)
@@ -302,9 +304,11 @@ function has_interfaces() {
 function dhcp_container() {
 	local NS=$1
 	local DEVICE=$2
-	$MODE sudo $IP netns exec $NS dhclient $DEVICE
+	$MODE sudo $IP netns exec $NS dhclient -v -1 $DEVICE
 	return $?
 }
+
+# == AGGREGATE FUNCTIONS =====================================================
 
 # -- FUNCTION ----------------------------------------------------------------
 #        Name: handle_verify
@@ -318,6 +322,7 @@ function dhcp_container() {
 function handle_verify() {
 	local RES=0
 
+	# ensure there are containers running before continuing
 	CURRENT_IDS=$(sudo $DOCKER ps -q --no-trunc)
 	if [[ -z "$CURRENT_IDS" ]]; then
 		log_error No running containers found.
@@ -366,7 +371,7 @@ function handle_verify() {
 
 					has_interfaces $HOST_IFNAME $CONTAINER_IFNAME $PID $INTF 
 					if [[ $? -eq 0 ]]; then
-						log_ok "$ID"/"$PID" has a "$CONTAINER_IFNAME"
+						log_ok "$ID"/"$PID" has a "$CONTAINER_IFNAME", host has a "$HOST_IFNAME"
 					else 
 						log_error "$ID"/"$PID" does not have correct devices
 						RES=1

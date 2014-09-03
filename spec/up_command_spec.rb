@@ -58,6 +58,7 @@ describe UpCommand do
     expect(dch).to receive(:handle_hostip).and_return(true)
     expect(dch).to receive(:handle_dhcp).and_return(true)
     expect(dch).to receive(:handle_appgroup).and_return(true)
+    expect(dch).to receive(:handle_network_attachments).and_return(true)
 
     dc.run_on_project_zones(%W(z1))
 
@@ -70,6 +71,7 @@ describe UpCommand do
     expect(dch).to receive(:handle_hostip).and_return(true)
     expect(dch).to receive(:handle_dhcp).and_return(true)
     expect(dch).to receive(:handle_appgroup__fig).and_return(true)
+    expect(dch).to receive(:handle_network_attachments).and_return(true)
 
     dc.run_on_project_zones(%W(z1))
   end
@@ -83,6 +85,7 @@ describe UpCommand do
     expect(dch).to receive(:handle_bridge).and_return(true)
     expect(dch).to receive(:handle_hostip).and_return(true)
     expect(dch).to receive(:handle_dhcp).and_return(true)
+    expect(dch).to receive(:handle_network_attachments).and_return(true)
 
     dc.run_on_project_zones(%W(z1))
   end
@@ -124,6 +127,7 @@ describe UpCommand do
     figadapter_stub.stub(:exist?).and_return(true)
     figadapter_stub.stub(:up?).and_return(true)
     figadapter_stub.stub(:up).and_return(true)
+    figadapter_stub.stub(:up_ids).and_return([])
 
     Wire::Resource::ResourceFactory.instance.stub(:create).and_return(ovs_bridge_stub)
     Wire::Resource::ResourceFactory.instance.stub(:create).and_return(hostip_stub)

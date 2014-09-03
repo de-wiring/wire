@@ -14,10 +14,13 @@ module Wire
     # +findings+:: is an array of potential errors that occured
     # during verification run
     attr_accessor :project, :findings
+    # allow to get access to handler object
+    attr_reader :handler
 
     # set up with empty findings arraay
     def initialize
       @findings = []
+      @handler = VerifyCommandHandler.new
     end
 
     # add a finding to the findings array
@@ -106,7 +109,7 @@ module Wire
 
         $log.debug 'checking bridge ...'
         # we should have a bridge with that name.
-        if handle_bridge(bridge_name) == false
+        if @handler.handle_bridge(bridge_name) == false
           network_data.store :status, :failed
           b_verify_ok = false
           mark("Bridge \'#{bridge_name}\' does not exist.",
@@ -119,7 +122,12 @@ module Wire
           # this ip
           if hostip
             $log.debug 'checking host-ip ...'
-            if handle_hostip(bridge_name, hostip) == false
+
+            # if the hostip is not in cidr, take netmask
+            # from network entry, add to hostip
+            hostip = ensure_hostip_netmask(hostip, network_data)
+
+            if @handler.handle_hostip(bridge_name, hostip) == false
               network_data.store :status, :failed
               b_verify_ok = false
               mark("Host ip \'#{hostip}\' not up on bridge \'#{bridge_name}\'.",
@@ -133,9 +141,9 @@ module Wire
           dhcp_data = network_data[:dhcp]
           if dhcp_data
             $log.debug 'checking dhcp ...'
-            if handle_dhcp(zone_name, network_name, network_data,
-                           dhcp_data[:start],
-                           dhcp_data[:end]) == false
+            if @handler.handle_dhcp(zone_name, network_name, network_data,
+                                    dhcp_data[:start],
+                                    dhcp_data[:end]) == false
               network_data.store :status, :failed
               b_verify_ok = false
               mark("dnsmasq/dhcp not configured on network \'#{bridge_name}\'.",
@@ -151,13 +159,15 @@ module Wire
 
     # Given a +zone_name+ and an array of +appgroups+ entries
     # this methods verifies if these appgroups are up and running
+    # It also checks container's network attachments
     def verify_appgroups(appgroups, zone_name)
       b_verify_ok = true
 
       appgroups.each do |appgroup_name, appgroup_data|
         $log.debug("Verifying appgroup \'#{appgroup_name}\'")
 
-        if handle_appgroup(zone_name, appgroup_name, appgroup_data) == false
+        if @handler.handle_appgroup(zone_name, appgroup_name,
+                                    appgroup_data, @project.target_dir) == false
           appgroup_data.store :status, :failed
           b_verify_ok = false
           mark("Appgroup \'#{appgroup_name}\' does not run correctly.",
@@ -165,10 +175,27 @@ module Wire
         else
           appgroup_data.store :status, :ok
         end
+
+        next unless b_verify_ok
+
+        zone_networks = objects_in_zone('networks', zone_name)
+        if @handler.handle_network_attachments(zone_name, zone_networks,
+                                               appgroup_name, appgroup_data,
+                                               @project.target_dir) == false
+          appgroup_data.store :status, :failed
+          b_verify_ok = false
+          mark("Appgroup \'#{appgroup_name}\' has missing network attachments",
+               :appgroup, appgroup_name, appgroup_data)
+        else
+          appgroup_data.store :status, :ok
+        end
       end
       b_verify_ok
     end
+  end
 
+  # handle_xxx methods for VerifyCommand
+  class VerifyCommandHandler < BaseCommand
     # runs verification for a bridge resource identified by
     # +bridge_name+
     # Returns
@@ -225,12 +252,12 @@ module Wire
     # runs verification for appgroups
     # Returns
     # - [Bool] true if appgroup setup is ok
-    def handle_appgroup(_zone_name, appgroup_name, appgroup_entry)
+    def handle_appgroup(_zone_name, appgroup_name, appgroup_entry, target_dir)
       # get path
       controller_entry = appgroup_entry[:controller]
 
       if controller_entry[:type] == 'fig'
-        fig_path = File.join(File.expand_path(@project.target_dir), controller_entry[:file])
+        fig_path = File.join(File.expand_path(target_dir), controller_entry[:file])
 
         resource = Wire::Resource::ResourceFactory
           .instance.create(:figadapter, "#{appgroup_name}", fig_path)
@@ -247,6 +274,49 @@ module Wire
 
       $log.error "Appgroup not handled, unknown controller type #{controller_entry[:type]}"
       false
+    end
+
+    # runs verification for container network attachment
+    # Params:
+    # ++_zone_name++: Name of zone
+    # ++networks++: Array of networks names, what to attach
+    # ++appgroup_name++: Name of appgroup
+    # ++appgroup_entry++: appgroup hash
+    # ++target_dir++: project target dir
+    # Returns
+    # - [Bool] true if appgroup setup is ok
+    def handle_network_attachments(_zone_name, networks, appgroup_name,
+                                   appgroup_entry, target_dir)
+      # query container ids of containers running here
+      # get path
+      controller_entry = appgroup_entry[:controller]
+
+      container_ids = []
+
+      if controller_entry[:type] == 'fig'
+        fig_path = File.join(File.expand_path(target_dir), controller_entry[:file])
+
+        resource = Wire::Resource::ResourceFactory
+        .instance.create(:figadapter, "#{appgroup_name}", fig_path)
+
+        container_ids = resource.up_ids || []
+        $log.debug "Got #{container_ids.size} container id(s) from adapter"
+      end
+
+      #
+      resource = Wire::Resource::ResourceFactory
+      .instance.create(:networkinjection, appgroup_name, networks.keys, container_ids)
+      if resource.up?
+        outputs 'VERIFY', "appgroup \'#{appgroup_name}\' has network(s) " \
+        "\'#{networks.keys.join(',')}\' attached.", :ok
+        state.update(:appgroup, appgroup_name, :up)
+        return true
+      else
+        outputs 'VERIFY', "appgroup \'#{appgroup_name}\' does not have " \
+        "all networks \'#{networks.keys.join(',')}\' attached.", :err
+        state.update(:appgroup, appgroup_name, :down)
+        return false
+      end
     end
   end
 end

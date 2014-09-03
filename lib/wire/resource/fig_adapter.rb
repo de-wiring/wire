@@ -67,6 +67,7 @@ module Wire
       end
 
       # returns the container ids of currently running containers
+      # as [Array] of ids
       def up_ids
         with_fig(%w(ps -q)) do |exec_obj|
           exec_obj.run

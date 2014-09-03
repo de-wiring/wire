@@ -47,7 +47,7 @@ module Wire
       # Build file name of dnsmasq file
       # TODO: make configurable
       def create_dnsmaqs_config_filename
-        "/etc/dnsmasq.d/#{@name}.conf"
+        "/etc/dnsmasq.d/#{@name}__#{@network_name}.conf"
       end
 
       # check if configuration entry exists

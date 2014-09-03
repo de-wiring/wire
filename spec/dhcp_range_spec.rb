@@ -8,7 +8,7 @@ describe Wire::Resource::DHCPRangeConfiguration do
   }
 
   it 'should create a valid config file name' do
-    target.create_dnsmaqs_config_filename.should eq('/etc/dnsmasq.d/TEST.conf')
+    target.create_dnsmaqs_config_filename.should eq('/etc/dnsmasq.d/TEST__NETWORK.conf')
   end
 
   it 'should check if file exists' do

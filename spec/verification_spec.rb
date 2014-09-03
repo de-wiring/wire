@@ -20,6 +20,7 @@ describe VerifyCommand do
      figadapter_stub.stub(:exist?).and_return(true)
      figadapter_stub.stub(:up?).and_return(true)
      figadapter_stub.stub(:up).and_return(true)
+     figadapter_stub.stub(:up_ids).and_return(%w(1 2 3 4))
 
      Wire::Resource::ResourceFactory.instance.stub(:create).and_return(ovs_bridge_stub)
      Wire::Resource::ResourceFactory.instance.stub(:create).and_return(hostip_stub)
