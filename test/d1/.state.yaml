@@ -3,35 +3,47 @@
   type: :bridge
   name: dmz-int
   state: :down
-! '%hostip%192.168.10.1': !ruby/object:Wire::StateEntry
+! '%hostip%192.168.10.1/24': !ruby/object:Wire::StateEntry
   type: :hostip
-  name: 192.168.10.1
-  state: :up
+  name: 192.168.10.1/24
+  state: :down
 ! '%dnsmasq%dmz-int': !ruby/object:Wire::StateEntry
   type: :dnsmasq
   name: dmz-int
-  state: :down
-! '%bridge%dmz-ext': !ruby/object:Wire::StateEntry
-  type: :bridge
-  name: dmz-ext
   state: :down
 ! '%appgroup%dmz_group_1': !ruby/object:Wire::StateEntry
   type: :appgroup
   name: dmz_group_1
   state: :down
+! '%bridge%dmz-ext': !ruby/object:Wire::StateEntry
+  type: :bridge
+  name: dmz-ext
+  state: :down
 ! '%bridge%backend-int': !ruby/object:Wire::StateEntry
   type: :bridge
   name: backend-int
   state: :down
+! '%hostip%192.168.30.1/24': !ruby/object:Wire::StateEntry
+  type: :hostip
+  name: 192.168.30.1/24
+  state: :down
+! '%hostip%192.168.10.1': !ruby/object:Wire::StateEntry
+  type: :hostip
+  name: 192.168.10.1
+  state: :up
 ! '%hostip%192.168.30.1': !ruby/object:Wire::StateEntry
   type: :hostip
   name: 192.168.30.1
   state: :up
-! '%hostip%192.168.10.1/24': !ruby/object:Wire::StateEntry
-  type: :hostip
-  name: 192.168.10.1/24
+! '%dnsmasq%dmz-ext': !ruby/object:Wire::StateEntry
+  type: :dnsmasq
+  name: dmz-ext
   state: :down
-! '%hostip%192.168.30.1/24': !ruby/object:Wire::StateEntry
+! '%dnsmasq%backend-int': !ruby/object:Wire::StateEntry
+  type: :dnsmasq
+  name: backend-int
+  state: :down
+! '%hostip%192.168.20.1/24': !ruby/object:Wire::StateEntry
   type: :hostip
-  name: 192.168.30.1/24
+  name: 192.168.20.1/24
   state: :down

@@ -9,6 +9,6 @@ module Wire
   # Wire Version information
   module WireVersion
     # current version
-    VERSION = '0.1.1'
+    VERSION = '0.1.2'
   end
 end

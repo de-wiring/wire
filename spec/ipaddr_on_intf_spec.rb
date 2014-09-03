@@ -18,6 +18,8 @@ describe IPAddressOnIntf do
 
 
     obj.exist?.should eq(true)
+    obj.up?.should eq(true)
+    obj.down?.should eq(false)
   end
 
   it 'should construct the add command correctly' do
@@ -47,6 +49,7 @@ describe IPAddressOnIntf do
     LocalExecution.stub(:with).with(cmd_match, [], {:b_shell=>false, :b_sudo=>true}).and_yield(localexec_stub)
 
     obj.down.should eq(true)
+    obj.to_s.should eq('IPAddressOnIntf:[127.0.0.1/32,device=lo37]')
   end
 
   it 'should fail on missing params' do
