@@ -80,7 +80,7 @@ module Wire
 
         run_on_project
 
-        $log.debug? && pp(@project)
+        $log.debug? && puts(@project.to_yaml)
 
         handle_state_save
 
