@@ -43,10 +43,11 @@ module Wire
 
       # calls helper executable with correct +action+
       # and given +command_arr+ array
-      def with_helper(action, params)
+      def with_helper(action, params, options = '')
         # puts "#{@executables[:network]} #{action} --debug -- #{params.join(' ')}"
+        dbg_param = ($log.level == Logger::DEBUG ? '--debug' : '')
         LocalExecution.with(@executables[:network],
-                            [action, '--debug', '--', params].flatten,
+                            [action, dbg_param, options, '--', params].flatten,
                             { :b_sudo => false, :b_shell => false }) do |exec_obj|
           yield exec_obj
         end
@@ -75,7 +76,7 @@ module Wire
       # same as exist?
       def up?
         with_helper('verify', [construct_helper_params,
-                               containers.join(' ')]) do |exec_obj|
+                               containers.join(' ')], '--quiet') do |exec_obj|
           exec_obj.run
 
           return (exec_obj.exitstatus == 0 && count_errors(exec_obj) == 0)

@@ -5,6 +5,10 @@ include Wire::Resource
 
 
 describe IPAddressOnIntf do
+  before(:all) do
+    Object.any_instance.stub(:"`").and_return('')
+  end
+
   it 'should construct the exists? command correctly' do
     obj = IPAddressOnIntf.new('127.0.0.1/32', 'lo37')
     cmd_match = '/sbin/ip addr show lo37 | grep -wq -E "^\W*inet 127.0.0.1/32.*lo37"'
@@ -69,6 +73,10 @@ describe IPAddressOnIntf do
 end
 
 describe IPAddr do
+  before(:all) do
+    Object.any_instance.stub(:"`").and_return('')
+  end
+
   let(:ip) { IPAddr.new('10.1.0.0/16') }
   it 'should answer in_range_of? correctly' do
     %w(10.1.0.1/32  10.1.10.0/24 10.1.10.10/32).each do |a|

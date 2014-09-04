@@ -16,7 +16,6 @@ require 'wire/resource'
 
 include Wire
 
-
 $log = Logger.new STDOUT
 # parametrize
 $log.formatter = proc do |severity, _, _, msg|

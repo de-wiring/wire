@@ -3,6 +3,9 @@ require 'spec_helper'
 include Wire::Execution
 
 describe LocalExecution do
+  before(:all) do
+    Object.any_instance.stub(:"`").and_return('')
+  end
 
   it 'should construct a simple command correctly' do
     cmd = 'echo HelloWorld'
@@ -79,7 +82,5 @@ describe LocalExecution do
       e.stdout.chomp.should eq('HelloWorld')
       e.exitstatus.should eq(0)
     end
-
   end
-
 end

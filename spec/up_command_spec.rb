@@ -2,6 +2,10 @@ require 'spec_helper.rb'
 
 
 describe UpCommand do
+  before(:all) do
+    Object.any_instance.stub(:"`").and_return('')
+  end
+
   let(:project) {
     p = Project.new(".")
     p.merge_element(:zones,
@@ -163,7 +167,6 @@ describe UpCommand do
   end
 
   it 'Should bring up a hostip if bridge is up' do
-
     ovs_bridge_stub = double('OVSBridge')
 
     hostip_stub = double('IPAddressOnIntf')

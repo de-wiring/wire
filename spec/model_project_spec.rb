@@ -1,12 +1,20 @@
 require 'spec_helper'
 
 describe Project do
-	
-	let(:project) { Project.new(".") }
+  before(:all) do
+    Object.any_instance.stub(:"`").and_return('')
+  end
+
+
+  let(:project) { Project.new(".") }
 	subject { project }
 
 	describe 'project' do
-		it 'should handle model elements correctly' do
+    before(:all) do
+      Object.any_instance.stub(:"`").and_return('')
+    end
+
+    it 'should handle model elements correctly' do
 			test_elem = { :key => :elem }
 			project.merge_element('test',test_elem)
 

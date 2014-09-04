@@ -1,6 +1,10 @@
 require 'spec_helper'
 
 describe VerificationError do
+  before(:all) do
+    Object.any_instance.stub(:"`").and_return('')
+  end
+
 
   it 'should display VerificationErrors correctly' do
     error = VerificationError.new 'FooMessage', 'FooType', 'FooObject', Object.new
@@ -9,7 +13,11 @@ describe VerificationError do
 end
 
 describe VerifyCommand do
-   it 'should not yield errors on correct sample project' do
+  before(:all) do
+    Object.any_instance.stub(:"`").and_return('')
+  end
+
+  it 'should not yield errors on correct sample project' do
 
      ovs_bridge_stub = double('OVSBridge')
      ovs_bridge_stub.stub(:exist?).and_return(true)

@@ -8,10 +8,14 @@ describe Wire::Resource::FigAdapter do
   }
 
   it 'should mange fig project names' do
+    Object.any_instance.stub(:"`").and_return('')
+
     target.name.should eq('TEST')
   end
 
   it 'should handle up? correctly' do
+    Object.any_instance.stub(:"`").and_return('')
+
     localexec_stub = double('LocalExecution')
     localexec_stub.stub(:run).and_return(true)
     localexec_stub.stub(:exitstatus).and_return(0)
@@ -33,6 +37,8 @@ describe Wire::Resource::FigAdapter do
   end
 
   it 'should return container ids from fig output ' do
+    Object.any_instance.stub(:"`").and_return('')
+
     localexec_stub = double('LocalExecution')
     localexec_stub.stub(:run).and_return(true)
     localexec_stub.stub(:exitstatus).and_return(0)
@@ -44,8 +50,9 @@ describe Wire::Resource::FigAdapter do
 
   end
 
-
   it 'should handle up correctly' do
+    Object.any_instance.stub(:"`").and_return('')
+
     localexec_stub = double('LocalExecution')
     localexec_stub.stub(:run).and_return(true)
     localexec_stub.stub(:exitstatus).and_return(0)
@@ -57,6 +64,8 @@ describe Wire::Resource::FigAdapter do
 
 
   it 'should handle up correctly' do
+    Object.any_instance.stub(:"`").and_return('')
+
     localexec_stub = double('LocalExecution')
     localexec_stub.stub(:run).and_return(true)
     localexec_stub.stub(:exitstatus).and_return(0)
@@ -65,6 +74,4 @@ describe Wire::Resource::FigAdapter do
 
     target.down.should eq(true)
   end
-
-
 end

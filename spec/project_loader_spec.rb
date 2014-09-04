@@ -2,13 +2,16 @@ require 'spec_helper.rb'
 
 
 describe ProjectYamlLoader do
+  before(:all) do
+    Object.any_instance.stub(:"`").and_return('')
+  end
+
 
   it 'load_project should fail on nonexisting directory' do
     pyl = ProjectYamlLoader.new
     lambda {
       pyl.load_project('./spec/data-nonexisting')
     }.should raise_error
-
   end
 
   it 'load_project should print stats on existing project' do

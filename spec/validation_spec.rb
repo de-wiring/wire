@@ -1,6 +1,10 @@
 require 'spec_helper'
 
 describe ValidationError do
+  before(:all) do
+    Object.any_instance.stub(:"`").and_return('')
+  end
+
 
   it 'should display ValidationErrors correctly' do
     error = ValidationError.new 'FooMessage', 'FooType', 'FooObject'
@@ -18,6 +22,10 @@ describe ValidationError do
 end
 
 describe ValidateCommand do
+  before(:all) do
+    Object.any_instance.stub(:"`").and_return('')
+  end
+
   let(:correct_project) {
     p = Project.new(".")
     p.merge_element(:zones,
@@ -237,7 +245,6 @@ describe ValidateCommand do
     res.should eq(false)
     streams_after out_,err_
   end
-
 end
 
 

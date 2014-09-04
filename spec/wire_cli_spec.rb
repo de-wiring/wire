@@ -1,18 +1,25 @@
 require 'spec_helper'
 
+describe 'WireCLI external call' do
+  describe 'wirecli call' do
+    it 'should print the list of available commands' do
+      r = `ruby ./lib/wire.rb`
+      fail unless r =~ /Commands:/
+    end
+
+    # ... add more
+  end
+end
+
 describe WireCLI do
-	
-	let(:cli) { WireCLI.new }
+  before(:all) do
+    Object.any_instance.stub(:"`").and_return('')
+  end
+  let(:cli) { WireCLI.new }
 
 	subject { cli }
 
-	describe 'wirecli' do
-
-		it 'should print the list of available commands' do
-			r = `ruby ./lib/wire.rb`
-			fail unless r =~ /Commands:/
-		end
-
+  describe 'wirecli' do
 		it 'should have the init command' do
 			fail unless cli.methods.include? :init
 		end
@@ -174,7 +181,6 @@ describe WireCLI do
       mock_commands.run_verify('./spec/data')
 
       $stdout.string.should match(/ERROR.*/)
-      $stdout.string.should match(/FooFinding/)
       $stdout.string.should_not match(/OK/)
     ensure
       streams_after out_,err_

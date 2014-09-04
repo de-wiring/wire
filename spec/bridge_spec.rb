@@ -5,6 +5,8 @@ include Wire::Resource
 
 describe OVSBridge do
   it 'should run ovs-vsctl when asking if bridge is up' do
+    Object.any_instance.stub(:"`").and_return('')
+
     localexec_stub = double('LocalExecution')
     localexec_stub.stub(:run).and_return(true)
     localexec_stub.stub(:exitstatus).and_return(2)
@@ -16,6 +18,8 @@ describe OVSBridge do
   end
 
   it 'should run ovs-vsctl when asking if bridge is down' do
+    Object.any_instance.stub(:"`").and_return('')
+
     localexec_stub = double('LocalExecution')
     localexec_stub.stub(:run).and_return(true)
     localexec_stub.stub(:exitstatus).and_return(2)
@@ -27,6 +31,8 @@ describe OVSBridge do
   end
 
   it 'should run ovs-vsctl to bring bridge up' do
+    Object.any_instance.stub(:"`").and_return('')
+
     localexec_stub = double('LocalExecution')
     localexec_stub.stub(:run).and_return(true)
     localexec_stub.stub(:exitstatus).and_return(0)
@@ -39,6 +45,8 @@ describe OVSBridge do
   end
 
   it 'should run ovs-vsctl to bring bridge down' do
+    Object.any_instance.stub(:"`").and_return('')
+
     localexec_stub = double('LocalExecution')
     localexec_stub.stub(:run).and_return(true)
     localexec_stub.stub(:exitstatus).and_return(0)
@@ -51,3 +59,4 @@ describe OVSBridge do
   end
 
 end
+

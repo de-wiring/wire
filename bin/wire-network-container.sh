@@ -1,10 +1,16 @@
 #!/bin/bash
 #
-# attach-container.sh
+# wire-network-container.sh
 # MIT License
 # 
 # attaches multiple containers to multiple ovs bridges
-#
+# exit codes:
+# 0     action completed successfully
+# 1     unknown option/action or no action given
+# 2     No device/bridge part specified.
+# 3     No container ids specified.
+# 10    No running containers found.
+# 100   action failed
 
 # Display usage and help
 function usage() {
@@ -13,13 +19,15 @@ function usage() {
         echo '    verify        verify given container/device/bridge options'
         echo '    attach        attach devices to bridges and containers'
         echo '    detach        detach devices from bridges and containers'
-	echo '  where OPTIONS are'
- 	echo '    -n/--noop 	only print commands, do not change'
- 	echo '    -d/--debug 	show debug output'
-	echo '  Examples:'
-	echo '   attach-containers.sh attach -- eth1:br1 eth2:br2 02978729 12673482'
-	echo '   attach-containers.sh verify -- eth1:br1 eth2:br2 02978729 12673482'
-	echo '   attach-containers.sh detach -- eth1:br1 eth2:br2 02978729 12673482'
+	    echo '  where OPTIONS are'
+ 	    echo '    -n/--noop 	only print commands, do not change'
+ 	    echo '    -d/--debug 	show debug output'
+ 	    echo '    -q/--quiet 	be quiet'
+ 	    # echo '    -s/--state <FILE>   write state to <FILE>'  # TODO
+	    echo '  Examples:'
+	    echo '   attach-containers.sh attach --debug -- eth1:br1 eth2:br2 02978729 12673482'
+	    echo '   attach-containers.sh verify -- eth1:br1 eth2:br2 02978729 12673482'
+	    echo '   attach-containers.sh detach -q -- eth1:br1 eth2:br2 02978729 12673482'
 }
 
 
@@ -45,7 +53,7 @@ function debug() {
 	[[ "$QUIET" != "1" ]] && echo DEBUG $* 
 }
 function log_error() {
-	echo ERROR $* >&2
+	[[ "$QUIET" != "1" ]] && echo ERROR $* >&2
 }
 function log_ok() {
 	[[ "$QUIET" != "1" ]] && echo OK $* 
@@ -55,6 +63,7 @@ NOOP=
 MODE=
 ACTION=
 DEBUG=nodebug
+QUIET=
 
 while :
 do
@@ -69,15 +78,19 @@ do
           ;;
       -n | --noop)
           NOOP=1
-	  shift
+	      shift
           ;;
       -d | --debug)
           DEBUG=debug
-	  shift
+	      shift
+          ;;
+      -q | --quiet)
+          QUIET=1
+	      shift
           ;;
       --) # End of all options
           shift
-	  break
+	      break
           ;;
       -*)
           echo "Error: Unknown option: $1" >&2
@@ -102,6 +115,8 @@ if [[ -z "$DEVICE_ARR" ]]; then
 	log_error No device/bridge part specified.
 	usage
 	exit 2
+else
+    $DEBUG Attaching devices/bridges "$DEVICE_ARR"
 fi
 if [[ -z "$ID_ARR" ]]; then
 	log_error No container ids specified.
@@ -119,6 +134,7 @@ PS4='+|${BASH_SOURCE##*/} ${LINENO}${FUNCNAME[0]:+ ${FUNCNAME[0]}}| '
 IP=$(which ip)
 OVS_VSCTL=$(which ovs-vsctl)
 DOCKER=$(which docker)
+DHCLIENT=$(which dhclient)
 
 # -- FUNCTION ----------------------------------------------------------------
 #        Name: container_process
@@ -304,7 +320,7 @@ function has_interfaces() {
 function dhcp_container() {
 	local NS=$1
 	local DEVICE=$2
-	$MODE sudo $IP netns exec $NS dhclient -v -1 $DEVICE
+	$MODE sudo "$IP" netns exec "$NS" "$DHCLIENT" -v -1 "$DEVICE"
 	return $?
 }
 
@@ -323,20 +339,20 @@ function handle_verify() {
 	local RES=0
 
 	# ensure there are containers running before continuing
-	CURRENT_IDS=$(sudo $DOCKER ps -q --no-trunc)
+	CURRENT_IDS=$(sudo "$DOCKER" ps -q --no-trunc)
 	if [[ -z "$CURRENT_IDS" ]]; then
 		log_error No running containers found.
 		exit 10
 	fi
 
 	for DEVICE_PAIR in $DEVICE_ARR; do
-		BRIDGE=$(echo $DEVICE_PAIR | awk -F':' '{ print $2 }' )
-		$DEBUG Checking $BRIDGE
-		sudo $OVS_VSCTL br-exists $BRIDGE 
+		BRIDGE=$(echo "$DEVICE_PAIR" | awk -F':' '{ print $2 }' )
+		$DEBUG Checking "$BRIDGE"
+		sudo "$OVS_VSCTL" br-exists "$BRIDGE"
 		if [[ $? -eq 0 ]]; then
-			log_ok $BRIDGE
+			log_ok "$BRIDGE"
 		else
-			log_error Unable to find ovs bridge $BRIDGE
+			log_error Unable to find ovs bridge "$BRIDGE"
 			RES=1
 		fi
 	done
@@ -400,9 +416,9 @@ function handle_attach() {
 		$DEBUG Attaching $TARGET
 	
 		TARGET_PID=$(container_process $TARGET)
-        	$DEBUG PID of $TARGET is $TARGET_PID
+        $DEBUG PID of $TARGET is $TARGET_PID
         
-        	link_netns ${TARGET_PID}
+        link_netns "${TARGET_PID}"
         
 		# iterate given devices
 		for DEVICE_PAIR in $DEVICE_ARR; do
@@ -417,12 +433,12 @@ function handle_attach() {
 				break	
 			fi
 
-        		HOST_IFNAME=v${INTF}h${TARGET_PID}
-        		CONTAINER_IFNAME=v${INTF}c${TARGET_PID}
-        		$DEBUG - interface pair names are ${HOST_IFNAME}/${CONTAINER_IFNAME}
+            HOST_IFNAME=v${INTF}h${TARGET_PID}
+            CONTAINER_IFNAME=v${INTF}c${TARGET_PID}
+            $DEBUG - interface pair names are ${HOST_IFNAME}/${CONTAINER_IFNAME}
 
 			$DEBUG - creating peer interfaces
-        		add_peer_interfaces $HOST_IFNAME $CONTAINER_IFNAME $BRIDGEDEV_MTU
+        	add_peer_interfaces "$HOST_IFNAME" "$CONTAINER_IFNAME" "$BRIDGEDEV_MTU"
 			if [[ $? -ne 0 ]]; then	
 				log_error creating peer interfaces. aborting
 				RES=1
@@ -430,7 +446,7 @@ function handle_attach() {
 			fi
         
 			$DEBUG - adding $HOST_IFNAME to $BRIDGE
-        		add_device_to_switch $HOST_IFNAME $BRIDGE
+        	add_device_to_switch "$HOST_IFNAME" "$BRIDGE"
 			if [[ $? -ne 0 ]]; then	
 				log_error adding device to bridge. aborting
 				RES=1
@@ -438,7 +454,7 @@ function handle_attach() {
 			fi
         
 			$DEBUG - configuring interfaces
-        		configure_interfaces $HOST_IFNAME $CONTAINER_IFNAME $TARGET_PID $INTF
+        	configure_interfaces "$HOST_IFNAME" "$CONTAINER_IFNAME" "$TARGET_PID" "$INTF"
 			if [[ $? -ne 0 ]]; then	
 				log_error configuring interfaces. aborting
 				RES=1
@@ -446,7 +462,7 @@ function handle_attach() {
 			fi
         	
 			$DEBUG - dhcp requesting address
-        		dhcp_container $TARGET_PID $INTF
+        	dhcp_container "$TARGET_PID" "$INTF"
 			if [[ $? -ne 0 ]]; then	
 				log_error running dhcp. aborting
 				RES=1
@@ -454,7 +470,7 @@ function handle_attach() {
 			fi
         	done
 
-        	unlink_netns $TARGET_PID
+        	unlink_netns "$TARGET_PID"
 	done
 
 	return $RES
@@ -483,12 +499,12 @@ function handle_detach() {
 			INTF=$(echo $DEVICE_PAIR | awk -F':' '{ print $1 }' )
 			BRIDGE=$(echo $DEVICE_PAIR | awk -F':' '{ print $2 }' )
         	
-        		HOST_IFNAME=v${INTF}h${TARGET_PID}
-        		CONTAINER_IFNAME=v${INTF}c${TARGET_PID}
-        		$DEBUG - interface pair names are ${HOST_IFNAME}/${CONTAINER_IFNAME}
+            HOST_IFNAME=v${INTF}h${TARGET_PID}
+            CONTAINER_IFNAME=v${INTF}c${TARGET_PID}
+            $DEBUG - interface pair names are ${HOST_IFNAME}/${CONTAINER_IFNAME}
 
 			$DEBUG - removing $HOST_IFNAME from $BRIDGE
-        		remove_device_from_switch $HOST_IFNAME $BRIDGE
+        	remove_device_from_switch "$HOST_IFNAME" "$BRIDGE"
 			if [[ $? -ne 0 ]]; then	
 				log_error removing device from bridge. aborting
 				RES=1
@@ -496,7 +512,7 @@ function handle_detach() {
 			fi
 
 			$DEBUG - delete interfaces 
-        		delete_interfaces $HOST_IFNAME $CONTAINER_IFNAME $TARGET_PID $INTF
+        	delete_interfaces "$HOST_IFNAME" "$CONTAINER_IFNAME" "$TARGET_PID" "$INTF"
 			if [[ $? -ne 0 ]]; then	
 				log_error deleting interfaces
 				RES=1
@@ -504,7 +520,7 @@ function handle_detach() {
 			fi
         	done
 
-        	unlink_netns $TARGET_PID
+        	unlink_netns "$TARGET_PID"
 	done
 
 	return $RES

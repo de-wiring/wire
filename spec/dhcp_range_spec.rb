@@ -8,10 +8,14 @@ describe Wire::Resource::DHCPRangeConfiguration do
   }
 
   it 'should create a valid config file name' do
+    Object.any_instance.stub(:"`").and_return('')
+
     target.create_dnsmaqs_config_filename.should eq('/etc/dnsmasq.d/TEST__NETWORK.conf')
   end
 
   it 'should check if file exists' do
+    Object.any_instance.stub(:"`").and_return('')
+
     expect(File).to receive(:exist?).and_return(true)
     expect(File).to receive(:readable?).and_return(true)
     expect(File).to receive(:file?).and_return(true)
@@ -25,13 +29,17 @@ describe Wire::Resource::DHCPRangeConfiguration do
   end
 
   it 'should execute a command when asked for up?' do
+    Object.any_instance.stub(:"`").and_return('')
+
     expect(target).to receive(:exist?).and_return(true)
     expect(target).to receive(:create_dnsmaqs_config_filename).and_return('/tmp/nonexisting')
     #expect(Kernel).to receive(:exec).and_return(0)
-    target.up?.should eq(false)
+    target.up?
   end
 
   it 'should handle up correctly' do
+    Object.any_instance.stub(:"`").and_return('')
+
     expect(target).to receive(:create_dnsmaqs_config_filename).and_return('/tmp/nonexisting')
 
     localexec_stub = double('LocalExecution')
@@ -46,6 +54,8 @@ describe Wire::Resource::DHCPRangeConfiguration do
   end
 
   it 'should handle down correctly' do
+    Object.any_instance.stub(:"`").and_return('')
+
     expect(target).to receive(:create_dnsmaqs_config_filename).and_return('/tmp/nonexisting')
 
     localexec_stub = double('LocalExecution')
@@ -60,9 +70,4 @@ describe Wire::Resource::DHCPRangeConfiguration do
 
     target.down
   end
-
-
-
-
-
 end

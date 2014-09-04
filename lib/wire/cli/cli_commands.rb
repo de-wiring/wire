@@ -50,10 +50,10 @@ module Wire
       if cmd_ver_obj.findings.size == 0
         puts 'OK, system is conforming to model'.color(:green)
       else
-        puts 'ERROR, detected inconsistencies/errors:'.color(:red)
-        cmd_ver_obj.findings.each do |val_error|
-          puts val_error.to_s
-        end
+        puts 'ERROR, detected inconsistencies/errors.'.color(:red)
+        # cmd_ver_obj.findings.each do |val_error|
+        #   puts val_error.to_s
+        # end
       end
     end
 

@@ -22,7 +22,7 @@ will be confused.
 test case above. 
 
  $ wire --help
- $ cd /home/vagrant/test/d1
+ $ cd /home/vagrant/test/model/simple-1z1n1ag
  
 Validate the model for logical correctness (i.e. no typos, ip ranges match etc.)
  
@@ -45,5 +45,6 @@ Take it down, verify, spec, see a clean system
 
  $ wire down
 
+For more output, give --debug.
 
 EOS

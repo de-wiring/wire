@@ -19,6 +19,8 @@ EOS
   let(:lo_inet_out2) { "inet 192.168.0.1/24 brd 255.255.255.0 scope host ethX:Y" }
 
   it 'should parse the link line correctly' do
+    Object.any_instance.stub(:"`").and_return('')
+
     result = ipb.get_ipaddr_data_link(lo_link_out)
     result[:type].should eq('loopback')
     result[:mac].should eq('00:00:00:00:00:00')
@@ -26,6 +28,8 @@ EOS
   end
 
   it 'should parse the device line correctly' do
+    Object.any_instance.stub(:"`").and_return('')
+
     result = ipb.get_ipaddr_data_device(lo_device_out)
     result[:id].should eq('1')
     result[:device].should eq('lo')
@@ -36,6 +40,8 @@ EOS
   end
 
   it 'should parse the inet line correctly' do
+    Object.any_instance.stub(:"`").and_return('')
+
     result = ipb.get_ipaddr_data_inet(lo_inet_out)
     result[:ip].should eq('127.0.0.1')
     result[:cidr].should eq('127.0.0.1/8')
@@ -46,6 +52,8 @@ EOS
   end
 
   it 'should construct command correctly' do
+    Object.any_instance.stub(:"`").and_return('')
+
     localexec_stub = double('LocalExecution')
     localexec_stub.stub(:run).and_return(true)
     localexec_stub.stub(:exitstatus).and_return(0)
@@ -59,6 +67,8 @@ EOS
   end
 
   it 'should fail on empty input' do
+    Object.any_instance.stub(:"`").and_return('')
+
     expect(ipb).to receive(:call_addr_show).and_return('')
 
     lambda {
@@ -67,6 +77,8 @@ EOS
   end
 
   it 'should parse the inet line correctly' do
+    Object.any_instance.stub(:"`").and_return('')
+
     result = ipb.get_ipaddr_data_inet(lo_inet_out2)
     result[:ip].should eq('192.168.0.1')
     result[:cidr].should eq('192.168.0.1/24')
@@ -77,6 +89,8 @@ EOS
   end
 
   it 'should return a correct device details on test data' do
+    Object.any_instance.stub(:"`").and_return('')
+
     expect(ipb).to receive(:call_addr_show).and_return(lo_out)
 
     result = ipb.get_ipaddr_data('lo')
@@ -89,6 +103,8 @@ EOS
   end
 
   it 'should return a correct inet details on test data' do
+    Object.any_instance.stub(:"`").and_return('')
+
     expect(ipb).to receive(:call_addr_show).and_return(lo_out)
 
     result = ipb.get_ipaddr_data('lo')

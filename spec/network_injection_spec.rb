@@ -3,6 +3,10 @@
 require 'spec_helper'
 
 describe Wire::Resource::NetworkInjection do
+  before(:all) do
+    Object.any_instance.stub(:"`").and_return('')
+  end
+
   let(:ni) { Wire::Resource::NetworkInjection.new('TEST',%w(NETWORK_A NETWORK_B), %w(4711 4712 4713)) }
   let(:params) { ['NETWORK_A:NETWORK_A NETWORK_B:NETWORK_B', '4711 4712 4713'] }
   it 'should initialize correctly' do
@@ -15,7 +19,7 @@ describe Wire::Resource::NetworkInjection do
   end
 
   it 'should call helper with verify action' do
-    ni.stub(:with_helper).with('verify', params).and_return(true)
+    ni.stub(:with_helper).with('verify', params, '--quiet').and_return(true)
     ni.up?.should eq(true)
   end
 

@@ -30,7 +30,10 @@ describe DownCommand do
     p
   }
 
+
   it 'Should run on all zones' do
+    Object.any_instance.stub(:"`").and_return('')
+
     dc = DownCommand.new
     dc.project = project
 
@@ -52,6 +55,7 @@ describe DownCommand do
 
 
   it 'Should leave an already downed model as it is' do
+    Object.any_instance.stub(:"`").and_return('')
 
     ovs_bridge_stub = double('OVSBridge')
     ovs_bridge_stub.stub(:down?).and_return(true)
@@ -76,6 +80,7 @@ describe DownCommand do
 
 
   it 'Should bring down a bridge if hostip is down' do
+    Object.any_instance.stub(:"`").and_return('')
 
     ovs_bridge_stub = double('OVSBridge')
     ovs_bridge_stub.stub(:down?).and_return(false)
@@ -95,6 +100,7 @@ describe DownCommand do
   end
 
   it 'Should bring down a hostip' do
+    Object.any_instance.stub(:"`").and_return('')
 
     ovs_bridge_stub = double('OVSBridge')
 
@@ -118,6 +124,7 @@ describe DownCommand do
   end
 
   it 'should use the FigAdapter resource' do
+    Object.any_instance.stub(:"`").and_return('')
 
     ovs_bridge_stub = double('OVSBridge')
     ovs_bridge_stub.stub(:exist?).and_return(true)

@@ -3,12 +3,20 @@ require 'spec_helper'
 include Wire::Resource
 
 describe Resource do
+  before(:all) do
+    Object.any_instance.stub(:"`").and_return('')
+  end
+
   it 'should construct correctly' do
     (ResourceBase.new('Test')).to_s.should eq('Resource:[Test]')
   end
 end
 
 describe ResourceFactory do
+  before(:all) do
+    Object.any_instance.stub(:"`").and_return('')
+  end
+
   it 'should be able to create an ovs bridge' do
     x = ResourceFactory.instance.create(:ovsbridge,'testbridge')
     x.class.should eq(OVSBridge)
@@ -23,6 +31,10 @@ describe ResourceFactory do
 end
 
 describe IPAddr do
+  before(:all) do
+    Object.any_instance.stub(:"`").and_return('')
+  end
+
   let(:ip1) { IPAddr.new('192.168.10.0/24') }
   let(:ip2) { IPAddr.new('192.168.10.2') }
   let(:ip3) { IPAddr.new('192.168.20.2') }

@@ -4,6 +4,10 @@ include Wire
 include Wire::Resource
 
 describe SpecCommand do
+  before(:all) do
+    Object.any_instance.stub(:"`").and_return('')
+  end
+
   def streams_before
     out_ = $stdout
     err_ = $stderr
@@ -76,6 +80,10 @@ describe SpecCommand do
 end
 
 describe SpecWriter do
+  before(:all) do
+    Object.any_instance.stub(:"`").and_return('')
+  end
+
   def streams_before
     out_ = $stdout
     err_ = $stderr
