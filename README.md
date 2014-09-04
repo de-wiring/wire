@@ -1,5 +1,7 @@
 # "wire up"
 
+[![Gem Version](https://badge.fury.io/rb/dewiring.svg)](http://badge.fury.io/rb/dewiring)
+
 ## In a nutshell
 
 **wire** is a model-based approach to virtualized system and network architecture.
