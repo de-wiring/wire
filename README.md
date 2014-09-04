@@ -1,38 +1,115 @@
-wire
-====
+# "wire up"
 
-Wiring up your containers.
+## In a nutshell
 
-So you are all over Docker and want to implement it throughout your stages, from development to production. But your organization challenges you with security concerns, migrating your environments from physical/virtual to Docker seems like a tedious task and those shell scripts that you started to write are reengineered on a weekly basis because more and more requirements are coming in. Suddenly the hoped for simplicity of the Docker approach is gone and you are close to reverting back to the old way of running things, keeping Docker in the development corner at max.
+**wire** is a model-based approach to virtualized system and network architecture.
+It lets you define your architecture in YAML and instantiate it on a host. 
+Combining the power of [Docker](https://docker.com), [fig](fig.sh), [serverspec](serverspec.org), 
+[Open vSwitch](http://openvswitch.org) and [dnsmasq](http://dnsmasq.org), 
+it serves as a simple orchestration tool for both network- and container-related things.
 
-What is de-wiring?
-Make your development envs look like production. Build your environments with a model approach and have Dev|Prod-Parity in reach. Instantiate them, from a single Developer VM to multiple hosts in a production enviroment. Specify and document your system, making it testable and audit-proof. Integration with tools from the Test Driven Infrastructure world offer the ability to automatically test what you've specified, including a proper documentation for IT- and Security-Audits.
+## What
 
-Why would I want to use it?
+Consider a (very small) architecture consisting of a single network (let's call it "DMZ")
+with an ip on the bridge device, dnsmasq on the host and a container attached to it. A model 
+might look like this:
 
-Specific uses cases for wire could be:
-- Datacenter migration
-- Audit and documentation
-- Security
+```yaml
+:zones:
+  dmz:
+    :desc: Sample demilitarized zone
+:networks:
+  dmz-net:
+    :zone: dmz
+    :network: 192.168.10.0/24
+    :hostip: 192.168.10.1
+    :dhcp:
+      :start: 192.168.10.10
+      :end: 192.168.10.50
+:appgroups:
+  dmz_group_1:
+    :desc: First application group in DMZ
+    :zone: dmz
+    :controller:
+      :type: fig
+      :file: fig/dmz/fig.yml
+```
+with a additional fig.yml, where a simple    container has been modeled. 
 
-build-vm
-========
+Now, "wire it up":
 
 ```bash
-$ cd build
+$ wire up
+model> Loading model in .
+1 zones(s), 1 networks(s), 1 appgroups(s)
+UP> Bridge dmz-net up.
+UP> IP 192.168.10.1/24 on bridge dmz-net up.
+UP> dnsmasq/dhcp config on network 'dmz-net' is up.
+Creating dmzgroup1_test_1...
+UP> appgroup 'dmz_group_1' in zone dmz is up.
+UP> appgroup 'dmz_group_1' attached networks dmz-net.
+OK
+```
+
+This in sum has 
+* created an Open vSwitch bridge named "dmz-net",
+* assigned the ip 192.168.10.1/24 to it,
+* configured dnsmasq to serve ip addresses on the bridge device,
+* called "fig up" on fig project/file (which in turn starts a container),
+* attached the container to the ovs bridge and
+* assigned an ip address to the new container interface via dhcp
+
+Just like "up", additional commands are in place to validate models, to verify
+the state on a host, to bring components down in a defined way, and to generate
+a clean specification that describes and tests the system.
+
+## Why
+
+So you are all over Docker and want to implement it throughout your stages, from 
+development to production. At the same time you are challenged with security concerns, 
+migrating your environments from physical to virtual, and scale it over multiple
+hosts. IP networks, whether they are physical or virtual, are an essential part of
+the equation when building more complex system architectures.
+
+What is de-wiring? It helps you to make your development environments look like production. 
+Build your environments with a model approach and have Dev|Prod-Parity in reach. 
+Instantiate them, from a single Developer VM to multiple hosts in a production enviroment. 
+Specify and document your system, making it testable and audit-proof. 
+
+Integration with tools 
+from the Test Driven Infrastructure world offer the ability to automatically test what 
+you've specified, including a proper documentation for IT- and Security-Audits.
+
+## How
+
+### Requirements
+
+To fully instantiate models, a host needs
+
+* ruby (=> 1.9.3)
+* Open vSwitch
+* Docker
+* fig
+* dnsmasq
+
+Preconfigured Vagrantfiles are available under `test/` subfolder. The easiest way to try
+it out:
+
+```
+$ cd test/ubuntu
 $ vagrant up
 $ vagrant ssh
-...
-$ cd build
-$ rake -T
-$ vim
 ```
 
-test-vm
-=======
+The login shell will show an introduction how-to. 
 
-```bash
-$ cd test
-$ cd ubuntu
-$ vagrant up
-```
+**For a more detailed description, see our Wiki and the 
+[Simple Test Case introduction](https://github.com/de-wiring/wire/wiki/SimpleTestCase)**
+
+ 
+# LICENSE
+
+The MIT License (MIT) Copyright (c) 2014 Andreas Schmidt, Dustin Huptas
+
+* andreas@de-wiring.net
+* dustin@de-wiring.net
