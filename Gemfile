@@ -7,8 +7,8 @@ gem 'thor'
 gem 'rake'
 
 group :development do
-	gem 'rspec'
-	gem 'rspec-mocks'
+	gem 'rspec', '~>2.14'
+	gem 'rspec-mocks', '~>2.14'
 	gem 'rubycritic', :require => false
 	gem 'guard'
 	gem 'guard-rubycritic', :require => false
