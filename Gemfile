@@ -17,6 +17,7 @@ group :development do
 	gem 'guard-rubocop'
 	gem 'simplecov', :require => false
 	gem 'inch', :require => false
+	gem 'coveralls', require: false
 end
 
 

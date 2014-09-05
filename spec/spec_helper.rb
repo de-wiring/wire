@@ -5,6 +5,9 @@ SimpleCov.root './lib'
 SimpleCov.coverage_dir '../coverage'
 SimpleCov.start 
 
+require 'coveralls'
+Coveralls.wear!
+
 require 'bundler/setup'
 
 require 'wire/common'
