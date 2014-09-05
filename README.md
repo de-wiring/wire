@@ -3,6 +3,7 @@
 [![Gem Version](https://badge.fury.io/rb/dewiring.svg)](http://badge.fury.io/rb/dewiring)
 [![inch](http://inch-ci.org/github/de-wiring/wire.png?branch=master)](http://inch-ci.org/github/de-wiring/wire)
 [![Build Status](https://travis-ci.org/de-wiring/wire.svg?branch=master)](https://travis-ci.org/de-wiring/wire)
+[![Coverage Status](https://img.shields.io/coveralls/de-wiring/wire.svg)](https://coveralls.io/r/de-wiring/wire?branch=master)
 
 ## In a nutshell
 
@@ -66,6 +67,9 @@ This in sum has
 Just like "up", additional commands are in place to validate models, to verify
 the state on a host, to bring components down in a defined way, and to generate
 a clean specification that describes and tests the system.
+
+Of course it can wire up multiple zones with multiple networks and multiple fig 
+application groups.
 
 ## Why
 
