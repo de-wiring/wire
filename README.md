@@ -2,6 +2,7 @@
 
 [![Gem Version](https://badge.fury.io/rb/dewiring.svg)](http://badge.fury.io/rb/dewiring)
 [![inch](http://inch-ci.org/github/de-wiring/wire.png?branch=master)](http://inch-ci.org/github/de-wiring/wire)
+[![Build Status](https://travis-ci.org/de-wiring/wire.svg?branch=master)](https://travis-ci.org/de-wiring/wire)
 
 ## In a nutshell
 
