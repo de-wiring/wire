@@ -4,6 +4,7 @@ source 'https://rubygems.org'
 
 gem 'rainbow'
 gem 'thor'
+gem 'rake'
 
 group :development do
 	gem 'rspec'
