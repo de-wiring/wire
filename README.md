@@ -1,6 +1,7 @@
 # "wire up"
 
 [![Gem Version](https://badge.fury.io/rb/dewiring.svg)](http://badge.fury.io/rb/dewiring)
+[![inch](http://inch-ci.org/github/de-wiring/wire.png?branch=master)](http://inch-ci.org/github/de-wiring/wire)
 
 ## In a nutshell
 
