@@ -42,7 +42,7 @@ ERB
            'on ovs bridge named <%= bridge_name %>, serving addresses from ' \
            '<%= ip_start %> to <%= ip_end %>' do
 
-    describe file '/etc/dnsmasq.d/wire__<%= zone_name %>.conf' do
+    describe file '/etc/dnsmasq.d/wire__<%= zone_name %>__<%= bridge_name %>.conf' do
       it { should be_file }
       its(:content) { should match /<%= ip_start %>/ }
       its(:content) { should match /<%= ip_end %>/ }

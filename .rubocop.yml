@@ -5,6 +5,7 @@ AllCops:
     - 'spec/**/*'
     - 'test/**/*'
     - 'bin/**/*'
+    - 'lib/**/*.sh'
     - 'build/**/*'
     - 'tmp/**/*'
     - 'Rakefile'

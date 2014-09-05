@@ -1,6 +1,9 @@
 
 # add comments to login 
-echo '[ -f ~/dewiring.txt ] && cat ~/dewiring.txt' >>/home/vagrant/.bashrc
+grep -wq dewiring /home/vagrant/.bashrc
+if [[ $? -ne 0 ]]; then
+	echo '[ -f ~/dewiring.txt ] && cat ~/dewiring.txt' >>/home/vagrant/.bashrc
+fi
 
 cat >/home/vagrant/dewiring.txt <<EOS
 

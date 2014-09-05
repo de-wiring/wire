@@ -35,10 +35,20 @@ module Wire
         self.containers = containers
         self.networks = networks
 
-        # TODO: make configurable
-        @executables = {
-          :network => '/usr/local/bin/wire-network-container.sh'
-        }
+        begin
+          # try to locate the gem base path and find shell script
+          gem 'dewiring'
+          gem_base_dir = Gem.datadir('dewiring').split('/')[0..-3].join('/')
+          @executables = {
+            :network => File.join(gem_base_dir, 'lib/wire-network-container.sh')
+          }
+        rescue LoadError
+          # use fallback
+          @executables = {
+            :network => '/usr/local/bin/wire-network-container.sh'
+          }
+        end
+        $log.debug "Using network injection script #{@executables[:network]}"
       end
 
       # calls helper executable with correct +action+

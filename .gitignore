@@ -124,4 +124,4 @@ coverage
 .inch
 projectFilesBackup
 .state.yaml
-
+/test/models/*/serverspec

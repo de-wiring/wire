@@ -1,0 +1,18 @@
+---
+test-ext:
+  :zone: test
+  :network: 192.168.1.0/24
+test-int:
+  :zone: test
+  :network: 192.168.10.0/24
+  :hostip: 192.168.10.1
+  :dhcp:
+    :start: 192.168.10.10
+    :end: 192.168.10.50
+test-backend:
+  :zone: test
+  :network: 192.168.20.0/24
+  :hostip: 192.168.20.1
+  :dhcp:
+    :start: 192.168.20.10
+    :end: 192.168.20.20
