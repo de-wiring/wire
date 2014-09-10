@@ -1,7 +1,7 @@
 # "wire up"
 
 [![Gem Version](https://badge.fury.io/rb/dewiring.svg)](http://badge.fury.io/rb/dewiring)
-[![inch](http://inch-ci.org/github/de-wiring/wire.png?branch=master)](http://inch-ci.org/github/de-wiring/wire)
+[![Inline docs](http://inch-ci.org/github/de-wiring/wire.svg?branch=master)](http://inch-ci.org/github/de-wiring/wire)
 [![Build Status](https://travis-ci.org/de-wiring/wire.svg?branch=master)](https://travis-ci.org/de-wiring/wire)
 [![Coverage Status](https://img.shields.io/coveralls/de-wiring/wire.svg)](https://coveralls.io/r/de-wiring/wire?branch=master)
 [![Code Climate](https://codeclimate.com/github/de-wiring/wire/badges/gpa.svg)](https://codeclimate.com/github/de-wiring/wire)
