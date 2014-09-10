@@ -8,21 +8,32 @@
 module Wire
   # handle_xxx methods for VerifyCommand
   class VerifyCommandHandler < BaseCommand
+    # asks given +resource+ if it is up. Writes states, outputs state
+    # Params:
+    # ++resource++: Resource object, i.e. BridgeResource
+    # ++resource_type++: Resource type symbol, i.e. :bridge
+    # ++resource_desc_str++: Description to dump out
+    # Returns
+    # [Bool] true = resource is up, false otherwise
+    def default_handle_resource(resource, resource_type, resource_desc_str)
+      if resource.up?
+        outputs 'VERIFY', "#{resource_desc_str} is up.", :ok
+        state.update(resource_type, resource.name, :up)
+        return true
+      else
+        outputs 'VERIFY', "#{resource_desc_str} is not up.", :err
+        state.update(resource_type, resource.name, :down)
+        return false
+      end
+    end
+
     # runs verification for a bridge resource identified by
     # +bridge_name+
     # Returns
     # - [Bool] true if bridge exists
     def handle_bridge(bridge_name)
       bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsbridge, bridge_name)
-      if bridge_resource.exist?
-        outputs 'VERIFY', "Bridge \'#{bridge_name}\' exists.", :ok
-        state.update(:bridge, bridge_name, :up)
-        return true
-      else
-        outputs 'VERIFY', "Bridge \'#{bridge_name}\' does not exist.", :err
-        state.update(:bridge, bridge_name, :down)
-        return false
-      end
+      default_handle_resource(bridge_resource, :bridge, "Bridge \'#{bridge_name}\'")
     end
 
     # runs verification for a ip resource identified by
@@ -32,15 +43,8 @@ module Wire
     def handle_hostip(bridge_name, hostip)
       hostip_resource = Wire::Resource::ResourceFactory
         .instance.create(:bridgeip, hostip, bridge_name)
-      if hostip_resource.up?
-        outputs 'VERIFY', "IP \'#{hostip}\' on bridge \'#{bridge_name}\' exists.", :ok
-        state.update(:hostip, hostip, :up)
-        return true
-      else
-        outputs 'VERIFY', "IP \'#{hostip}\' on bridge \'#{bridge_name}\' does not exist.", :err
-        state.update(:hostip, hostip, :down)
-        return false
-      end
+      default_handle_resource(hostip_resource, :hostip,
+                              "IP \'#{hostip}\' on bridge \'#{bridge_name}\'")
     end
 
     # runs verification for dnsmasqs dhcp resource
@@ -50,15 +54,8 @@ module Wire
       resource = Wire::Resource::ResourceFactory
         .instance.create(:dhcpconfig, "wire__#{zone_name}", network_name,
                          network_entry, address_start, address_end)
-      if resource.up?
-        outputs 'VERIFY', "dnsmasq/dhcp config on network \'#{network_name}\' is valid.", :ok
-        state.update(:dnsmasq, network_name, :up)
-        return true
-      else
-        outputs 'VERIFY', "dnsmasq/dhcp config on network \'#{network_name}\' is not valid.", :err
-        state.update(:dnsmasq, network_name, :down)
-        return false
-      end
+      default_handle_resource(resource, :dnsmasq,
+                              "dnsmasq/dhcp config on network \'#{network_name}\'")
     end
 
     # runs verification for appgroups
@@ -73,15 +70,8 @@ module Wire
 
         resource = Wire::Resource::ResourceFactory
           .instance.create(:figadapter, "#{appgroup_name}", fig_path)
-        if resource.up?
-          outputs 'VERIFY', "appgroup \'#{appgroup_name}\' is running.", :ok
-          state.update(:appgroup, appgroup_name, :up)
-          return true
-        else
-          outputs 'VERIFY', "appgroup \'#{appgroup_name}\' is not running.", :err
-          state.update(:appgroup, appgroup_name, :down)
-          return false
-        end
+        return default_handle_resource(resource, :appgroup,
+                                       "Fig Appgroup \'#{appgroup_name}\'")
       end
 
       $log.error "Appgroup not handled, unknown controller type #{controller_entry[:type]}"
@@ -118,17 +108,9 @@ module Wire
       #
       resource = Wire::Resource::ResourceFactory
       .instance.create(:networkinjection, appgroup_name, networks.keys, container_ids)
-      if resource.up?
-        outputs 'VERIFY', "appgroup \'#{appgroup_name}\' has network(s) " \
-        "\'#{networks.keys.join(',')}\' attached.", :ok
-        state.update(:appgroup, appgroup_name, :up)
-        return true
-      else
-        outputs 'VERIFY', "appgroup \'#{appgroup_name}\' does not have " \
-        "all networks \'#{networks.keys.join(',')}\' attached.", :err
-        state.update(:appgroup, appgroup_name, :down)
-        return false
-      end
+      default_handle_resource(resource, :network_injection,
+                              "Network(s) \'#{networks.keys.join(',')}\' in " \
+                              "appgroup \'#{appgroup_name}\'")
     end
   end
 end

@@ -62,6 +62,7 @@ describe DownCommand do
     ovs_bridge_stub.stub(:down).and_return(true)
     hostip_stub = double('IPAddressOnIntf')
     ovs_bridge_stub.stub(:down?).and_return(false)
+    hostip_stub.stub(:name).and_return('Namedummy')
     hostip_stub.stub(:down?).and_return(true)
     hostip_stub.stub(:down).and_return(true)
 

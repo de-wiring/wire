@@ -95,14 +95,15 @@ describe UpCommand do
   end
 
   it 'Should leave an already upped model as it is' do
-
     ovs_bridge_stub = double('OVSBridge')
     ovs_bridge_stub.stub(:exist?).and_return(true)
     ovs_bridge_stub.stub(:up?).and_return(true)
+    ovs_bridge_stub.stub(:name).and_return('Namedummy')
     hostip_stub = double('IPAddressOnIntf')
     hostip_stub.stub(:exist?).and_return(true)
     hostip_stub.stub(:up?).and_return(true)
     hostip_stub.stub(:up).and_return(true)
+    hostip_stub.stub(:name).and_return('Namedummy')
 
     Wire::Resource::ResourceFactory.instance.stub(:create).and_return(ovs_bridge_stub)
     Wire::Resource::ResourceFactory.instance.stub(:create).and_return(hostip_stub)
@@ -128,6 +129,7 @@ describe UpCommand do
     hostip_stub.stub(:up?).and_return(false)
     hostip_stub.stub(:up).and_return(true)
     figadapter_stub = double('FigAdapter')
+    figadapter_stub.stub(:name).and_return('Namedummy')
     figadapter_stub.stub(:exist?).and_return(true)
     figadapter_stub.stub(:up?).and_return(true)
     figadapter_stub.stub(:up).and_return(true)

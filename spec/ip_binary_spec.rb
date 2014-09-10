@@ -74,6 +74,7 @@ EOS
     lambda {
       ipb.get_ipaddr_data('lo')
     }.should raise_error
+
   end
 
   it 'should parse the inet line correctly' do

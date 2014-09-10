@@ -68,7 +68,6 @@ describe IPAddressOnIntf do
     lambda {
       IPAddressOnIntf.new('', nil)
     }.should raise_error
-
   end
 end
 
@@ -78,6 +77,7 @@ describe IPAddr do
   end
 
   let(:ip) { IPAddr.new('10.1.0.0/16') }
+
   it 'should answer in_range_of? correctly' do
     %w(10.1.0.1/32  10.1.10.0/24 10.1.10.10/32).each do |a|
       IPAddr.new(a).in_range_of?(ip).should eq(true)

@@ -12,7 +12,7 @@ module Wire
   module Execution
     # return singleton object
     def self.global_execution_options
-      ExecutionOptions.singleton
+      ExecutionOptions.instance
     end
 
     # Global execution options, such as noop mode etc.

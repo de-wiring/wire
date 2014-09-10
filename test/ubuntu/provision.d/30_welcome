@@ -25,7 +25,7 @@ will be confused.
 test case above. 
 
  $ wire --help
- $ cd /home/vagrant/test/model/simple-1z1n1ag
+ $ cd /home/vagrant/test/models/simple-1z1n1ag
  
 Validate the model for logical correctness (i.e. no typos, ip ranges match etc.)
  

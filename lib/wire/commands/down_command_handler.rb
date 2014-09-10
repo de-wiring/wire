@@ -7,32 +7,17 @@
 # Wire module
 module Wire
   # implements handle_xxx methods for DownCommand
+  # delegates to BaseCommand.default_handle_resource for most parts
   # rubocop:disable ClassLength
   class DownCommandHandler < BaseCommand
     # take bridge down
     def handle_bridge(bridge_name)
       bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsbridge, bridge_name)
-      if bridge_resource.down?
-        outputs 'DOWN', "Bridge #{bridge_name} already down.", :ok2
-        return true
-      end
-
-      bridge_resource.down
-      if bridge_resource.down?
-        outputs 'DOWN', "Bridge #{bridge_name} down/removed.", :ok
-        state.update(:bridge, bridge_name, :down)
-      else
-        outputs 'DOWN', "Error bringing down bridge #{bridge_name}.", :err
-        b_result = false
-      end
-
-      b_result
+      default_handle_resource(bridge_resource, :bridge, "Bridge \'#{bridge_name}\'", :down)
     end
 
     # remove ip from bridge interface
     def handle_hostip(bridge_name, hostip)
-      b_result = true
-
       bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsbridge, bridge_name)
       if bridge_resource.down?
         outputs 'DOWN', "Bridge #{bridge_name} already down, will not care about ip", :ok2
@@ -42,22 +27,8 @@ module Wire
       # we should have a bridge with that name.
       hostip_resource = Wire::Resource::ResourceFactory
       .instance.create(:bridgeip, hostip, bridge_name)
-      if hostip_resource.down?
-        outputs 'DOWN', "IP #{hostip} on bridge #{bridge_name} already down.", :ok2
-        return
-      end
-
-      hostip_resource.down
-      if hostip_resource.down?
-        outputs 'DOWN', "IP #{hostip} on bridge #{bridge_name} down/removed.", :ok
-        state.update(:hostip, hostip, :down)
-      else
-        outputs 'DOWN', "Error taking down ip #{hostip} on bridge #{bridge_name}.", :err
-
-        b_result = false
-      end
-
-      b_result
+      default_handle_resource(hostip_resource, :hostip,
+                              "IP \'#{hostip}\' on bridge \'#{bridge_name}\'", :down)
     end
 
     # unconfigures dnsmasq for dhcp
@@ -73,21 +44,8 @@ module Wire
       resource_dhcp = Wire::Resource::ResourceFactory
       .instance.create(:dhcpconfig, "wire__#{zone_name}", network_name,
                        network_entry, address_start, address_end)
-      if resource_dhcp.down?
-        outputs 'DOWN', "dnsmasq/dhcp config on network \'#{network_name}\' is already down.", :ok2
-        return true
-      end
-
-      resource_dhcp.down
-      if resource_dhcp.down?
-        outputs 'DOWN', "dnsmasq/dhcp config on network \'#{network_name}\' is down.", :ok
-        state.update(:dnsmasq, network_name, :down)
-        return true
-      else
-        outputs 'DOWN', 'Error unconfiguring dnsmasq/dhcp ' \
-        "config on network \'#{network_name}\'.", :err
-        return false
-      end
+      default_handle_resource(resource_dhcp, :dnsmasq,
+                              "dnsmasq/dhcp config on network \'#{network_name}\'", :down)
     end
 
     # take the appgroups' controller and directs methods to
@@ -126,24 +84,8 @@ module Wire
       resource_fig = Wire::Resource::ResourceFactory
       .instance.create(:figadapter, "#{appgroup_name}", fig_path)
 
-      if resource_fig.down?
-        outputs 'DOWN', "appgroup \'#{appgroup_name}\' for zone #{zone_name} is already down.", :ok2
-        return true
-      end
-
-      b_result = false
-      resource_fig.down
-      if resource_fig.down?
-        outputs 'DOWN', "appgroup \'#{appgroup_name}\' for zone #{zone_name} is down.", :ok
-        state.update(:appgroup, appgroup_name, :down)
-        b_result = true
-      else
-        outputs 'DOWN', "Error taking down appgroup \'#{appgroup_name}\' for zone #{zone_name}.",
-                :err
-        b_result = false
-      end
-
-      b_result
+      default_handle_resource(resource_fig, :appgroup,
+                              "appgroup \'#{appgroup_name}\' for zone \'#{zone_name}\'", :down)
     end
 
     # detaches networks to containers of appgroup
@@ -176,24 +118,10 @@ module Wire
       #
       resource_nw = Wire::Resource::ResourceFactory
       .instance.create(:networkinjection, appgroup_name, networks.keys, container_ids)
-      if resource_nw.down?
-        outputs 'DOWN', "appgroup \'#{appgroup_name}\' network " \
-                'attachments already detached.', :ok2
-        state.update(:appgroup, appgroup_name, :down)
-        return true
-      else
-        resource_nw.down
-        if resource_nw.down?
-          outputs 'DOWN', "appgroup \'#{appgroup_name}\' detached " \
-                  "networks #{networks.keys.join(',')}.", :ok
-          state.update(:appgroup, appgroup_name, :down)
-          return true
-        else
-          outputs 'DOWN', "Error detaching networks to appgroup \'#{appgroup_name}\'.",
-                  :err
-          return false
-        end
-      end
+
+      default_handle_resource(resource_nw, :network_injection,
+                              "Network(s) \'#{networks.keys.join(',')}\' in "\
+                              "appgroup \'#{appgroup_name}\'", :down)
     end
   end
 end

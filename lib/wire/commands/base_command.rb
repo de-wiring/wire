@@ -113,6 +113,37 @@ module Wire
       end
     end
 
+    # brings given +resource+ up by first asking if its up?.
+    # If not, call up. Writes states, outputs state
+    # Params:
+    # ++resource++: Resource object, i.e. BridgeResource
+    # ++resource_type++: Resource type symbol, i.e. :bridge
+    # ++resource_desc_str++: Description to dump out
+    # ++action++: one of :up, :down
+    def default_handle_resource(resource, resource_type, resource_desc_str, action)
+      question = "#{action}?".to_sym
+      output_method = action.to_s.upcase
+
+      b_ok = false
+
+      if resource.send(question)
+        outputs output_method, "#{resource_desc_str} is already #{action}.", :ok2
+        b_ok = true
+      else
+        resource.send(action)
+
+        if resource.send(question)
+          outputs output_method, "#{resource_desc_str} is #{action}.", :ok
+          b_ok = true
+        else
+          outputs output_method, "#{resource_desc_str} could not be brought #{action}.", :err
+        end
+      end
+
+      state.update(resource_type, resource.name, action) if b_ok
+      b_ok
+    end
+
     private
 
     # Save state to state file
@@ -122,18 +153,15 @@ module Wire
       state.save
     rescue => save_exception
       $stderr.puts "Error saving state, #{save_exception}"
-      $log.debug? && puts(save_exception.inspect)
-      $log.debug? && puts(save_exception.backtrace)
     end
 
+    # Load state from state file
     def handle_state_load
       state.load
       # dump state
       $log.debug? && dump_state
     rescue => load_exception
       $stderr.puts "Error loading state, #{load_exception}"
-      $log.debug? && puts(load_exception.inspect)
-      $log.debug? && puts(load_exception.backtrace)
     end
   end
 end

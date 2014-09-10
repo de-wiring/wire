@@ -20,14 +20,14 @@ describe VerifyCommand do
   it 'should not yield errors on correct sample project' do
 
      ovs_bridge_stub = double('OVSBridge')
-     ovs_bridge_stub.stub(:exist?).and_return(true)
+     ovs_bridge_stub.stub(:up?).and_return(true)
      hostip_stub = double('IPAddressOnIntf')
-     hostip_stub.stub(:exist?).and_return(true)
      hostip_stub.stub(:up?).and_return(true)
      figadapter_stub = double('FigAdapter')
      figadapter_stub.stub(:exist?).and_return(true)
      figadapter_stub.stub(:up?).and_return(true)
      figadapter_stub.stub(:up).and_return(true)
+     figadapter_stub.stub(:name).and_return('FigAdapterTest')
      figadapter_stub.stub(:up_ids).and_return(%w(1 2 3 4))
 
      Wire::Resource::ResourceFactory.instance.stub(:create).and_return(ovs_bridge_stub)
@@ -63,9 +63,9 @@ describe VerifyCommand do
    it 'should yield errors on valid sample project but bad state' do
 
      ovs_bridge_stub = double('OVSBridge')
-     ovs_bridge_stub.stub(:exist?).and_return(false)
+     ovs_bridge_stub.stub(:name).and_return('namedummy')
+     ovs_bridge_stub.stub(:up?).and_return(false)
      hostip_stub = double('IPAddressOnIntf')
-     hostip_stub.stub(:exist?).and_return(false)
      hostip_stub.stub(:up?).and_return(false)
 
      Wire::Resource::ResourceFactory.instance.stub(:create).and_return(ovs_bridge_stub)
@@ -95,8 +95,8 @@ describe VerifyCommand do
    it 'should yield errors on valid sample project but bad state (2)' do
 
      ovs_bridge_stub = double('OVSBridge')
-     ovs_bridge_stub.stub(:exist?).and_return(true)
      ovs_bridge_stub.stub(:up?).and_return(true)
+     ovs_bridge_stub.stub(:name).and_return('namedummy')
      hostip_stub = double('IPAddressOnIntf')
      hostip_stub.stub(:exist?).and_return(false)
      hostip_stub.stub(:up?).and_return(false)

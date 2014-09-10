@@ -9,6 +9,14 @@ describe StateEntry do
 end
 
 describe State do
+  it 'should produce string representations' do
+    s = State.instance
+    s.clean
+    s.update(:test,'TEST',:up)
+    s.update(:test2,'TEST2',:down)
+    s.to_pretty_s.should eq('test:TEST is up,test2:TEST2 is down')
+  end
+
   it 'should update state' do
     s = State.instance
     s.clean
@@ -50,6 +58,5 @@ describe State do
     s.save
 
     s.changed?.should eq(false)
-
   end
 end

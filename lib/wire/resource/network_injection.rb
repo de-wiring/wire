@@ -93,15 +93,20 @@ module Wire
         end
       end
 
-      # attaches containers to networks
-      def up
-        $log.debug 'Attaching containers to networks ...'
-        with_helper('attach', [construct_helper_params,
+      # Params:
+      # ++cmd++: One of :attach, :detach
+      def updown_command(cmd)
+        $log.debug "About to #{cmd.to_s.capitalize} containers to networks ..."
+        with_helper(cmd.to_s, [construct_helper_params,
                                containers.join(' ')]) do |exec_obj|
           exec_obj.run
-
           return (exec_obj.exitstatus == 0 && count_errors(exec_obj) == 0)
         end
+      end
+
+      # attaches containers to networks
+      def up
+        updown_command :attach
       end
 
       # checks if the bridge is down
@@ -111,13 +116,7 @@ module Wire
 
       # detaches network interfaces form containers and bridges
       def down
-        $log.debug 'Taking down container network attachments ...'
-        with_helper('detach', [construct_helper_params,
-                               containers.join(' ')]) do |exec_obj|
-          exec_obj.run
-
-          return (exec_obj.exitstatus == 0 && count_errors(exec_obj) == 0)
-        end
+        updown_command :detach
       end
 
       # Returns a string representation

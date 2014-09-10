@@ -1,15 +1,16 @@
 require 'rubygems'
 
-require 'simplecov'
-SimpleCov.root './lib'
-SimpleCov.coverage_dir '../coverage'
-SimpleCov.start 
-
 require 'coveralls'
 Coveralls.wear!
 
-require 'bundler/setup'
+unless ENV['TRAVIS']
+  require 'simplecov'
+  SimpleCov.root './lib'
+  SimpleCov.coverage_dir '../coverage'
+  SimpleCov.start
+end
 
+require 'bundler/setup'
 require 'wire/common'
 require 'wire/cli'
 require 'wire/commands'

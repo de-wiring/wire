@@ -62,6 +62,7 @@ describe LocalExecution do
   it 'should construct a complex command with sudo and shell option correctly' do
     cmd = 'echo'
     args = [ 'Hello', 'World', '| wc -l']
+
     e = LocalExecution.new(cmd,args,{ :b_sudo => true, :b_shell => true })
 
     e.construct_command.should eq('/bin/sh -c \'sudo echo Hello World | wc -l\'')
@@ -82,5 +83,9 @@ describe LocalExecution do
       e.stdout.chomp.should eq('HelloWorld')
       e.exitstatus.should eq(0)
     end
+  end
+
+  it '#global_execution_options' do
+    Wire::Execution.global_execution_options.noop?.should eq(false)
   end
 end

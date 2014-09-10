@@ -11,6 +11,7 @@ describe Wire::Resource::FigAdapter do
     Object.any_instance.stub(:"`").and_return('')
 
     target.name.should eq('TEST')
+
   end
 
   it 'should handle up? correctly' do
@@ -60,6 +61,18 @@ describe Wire::Resource::FigAdapter do
     target.stub(:with_fig).and_yield(localexec_stub)
 
     target.up.should eq(true)
+  end
+
+  it 'should handle down correctly' do
+    Object.any_instance.stub(:"`").and_return('')
+
+    localexec_stub = double('LocalExecution')
+    localexec_stub.stub(:run).and_return(true)
+    localexec_stub.stub(:exitstatus).and_return(0)
+
+    target.stub(:with_fig).and_yield(localexec_stub)
+
+    target.down.should eq(true)
   end
 
 
