@@ -14,6 +14,8 @@ Combining the power of [Docker](https://docker.com), [fig](fig.sh), [serverspec]
 [Open vSwitch](http://openvswitch.org) and [dnsmasq](http://dnsmasq.org), 
 it serves as a simple orchestration tool for both network- and container-related things.
 
+![Wire example model](https://raw.githubusercontent.com/de-wiring/wire/master/supplemental/images/readme_sample.png)
+
 ## What
 
 Consider a (very small) architecture consisting of a single network (let's call it "DMZ")
@@ -91,7 +93,7 @@ you've specified, including a proper documentation for IT- and Security-Audits.
 
 ## How
 
-### Requirements
+### Prerequisites
 
 To fully instantiate models, a host needs
 
