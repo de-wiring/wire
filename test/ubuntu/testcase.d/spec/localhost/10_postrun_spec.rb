@@ -10,6 +10,15 @@ describe 'It should end in a clean state' do
 			it { should return_stdout('0') }
 		end
 	end
+
+  describe 'There should be no docker containers around' do
+    describe command 'sudo docker ps -q | wc -l' do
+      it { should return_stdout('0') }
+    end
+  end
+
+  # TODO: There should be no veth interfaces around
+
 end
 
 

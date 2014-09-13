@@ -3,21 +3,18 @@
 
 Vagrant.configure("2") do |config|
   config.vm.box = "trusty64"
-  config.vm.box_url = "http://cloud-images.ubuntu.com/vagrant/trusty/20140723/trusty-server-cloudimg-amd64-vagrant-disk1.box"
   config.vm.box_url = "http://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
 
   config.vm.define "wire-testing_vm", primary: true do |s|
 
     # hostname
 
-#    s.vm.synced_folder "../../lib", "/mnt/project/lib"
-#    s.vm.synced_folder "../../bin", "/mnt/project/bin"
-#    s.vm.synced_folder "../../test", "/mnt/project/test"
- 
+    # sync in specs and test cases
 	  s.vm.synced_folder 'testcase.d', '/home/vagrant/testcase.d'
 	  s.vm.synced_folder 'spec.d', '/home/vagrant/spec.d'
 	  s.vm.synced_folder '../../test', '/home/vagrant/test'
 
+    # provision steps
     s.vm.provision "shell", path: "provision.d/01_os_pkg_defaults"
     s.vm.provision "shell", path: "provision.d/05_network"
     s.vm.provision "shell", path: "provision.d/10_docker"

@@ -1,0 +1,18 @@
+dmz:
+  :desc: DMZ Application group (i.e. for web servers)
+  :zone: gateway
+  :controller:
+    :type: fig
+    :file: fig/dmz/fig.yml
+frontend:
+  :desc: Frontend Application group (i.e. for app servers)
+  :zone: frontend
+  :controller:
+    :type: fig
+    :file: fig/frontend/fig.yml
+backend:
+  :desc: Backend Application group (i.e. for databases)
+  :zone: gateway
+  :controller:
+    :type: fig
+    :file: fig/backend/fig.yml

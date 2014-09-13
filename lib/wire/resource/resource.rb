@@ -26,11 +26,11 @@ module Wire
     end
 
     # ResourceFactory creates Resource objects
-    # given by name
+    # given by symbolic name
     class ResourceFactory
       include Singleton
 
-      # given a +resource_name+ as a symbol (i.e. :ovsbridge)
+      # given a +resource_symname+ as a symbol (i.e. :ovsbridge)
       # this creates a resource with given name (i.e. "testbridge")
       # and hands on arguments (+resource_nameargs+, may be 1..n)
       # returns

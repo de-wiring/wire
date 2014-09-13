@@ -1,0 +1,24 @@
+---
+gw-ext:
+  :desc: External face of gateway zone. Static IP addresses, no dhcp, no host ip
+  :zone: gateway
+  :network: 192.168.1.0/24
+gw-int:
+  :desc: Internal face of gateway zone, routing traffic to frontend. Hostip/dhcp
+  :zone: gateway
+  :network: 192.168.5.0/24
+  :hostip: 192.168.5.1
+  :dhcp:
+    :start: 192.168.5.10
+    :end: 192.168.5.50
+frontend-int:
+  :zone: frontend
+  :network: 192.168.10.0/24
+  :hostip: 192.168.10.1
+  :dhcp:
+    :start: 192.168.10.10
+    :end: 192.168.10.50
+backend-int:
+  :zone: backend
+  :network: 192.168.20.0/24
+  :hostip: 192.168.20.1

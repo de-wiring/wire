@@ -1,16 +1,16 @@
 ---
-test-ext:
-  :zone: test
+frontend-ext:
+  :zone: frontend
   :network: 192.168.1.0/24
-test-int:
-  :zone: test
+frontend-int:
+  :zone: frontend
   :network: 192.168.10.0/24
   :hostip: 192.168.10.1
   :dhcp:
     :start: 192.168.10.10
     :end: 192.168.10.50
-test-backend:
-  :zone: test
+backend-int:
+  :zone: backend
   :network: 192.168.20.0/24
   :hostip: 192.168.20.1
   :dhcp:

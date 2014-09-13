@@ -7,6 +7,7 @@ require 'spec_helper.rb'
 # - wire validate
 
 describe 'It should have a valid model' do
+  # we need at least network and zones, the rest is optional
 	describe file "#{property[:model_path]}/zones.yaml" do
 		it { should be_file }
 	end

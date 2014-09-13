@@ -86,26 +86,26 @@ module Wire
                  'network', network_name)
             return false
           else
-            # check ip ranges
-
-            begin
-              dhcp_start_ip = IPAddr.new(dhcp_data[:start])
-              dhcp_end_ip = IPAddr.new(dhcp_data[:end])
-              network_ip = IPAddr.new(network)
-
-              mark("Network dhcp start ip #{dhcp_data[:start]} is not within network range" \
-                "#{network} of network #{network_name}", 'network', network_name) unless
-                  dhcp_start_ip.in_range_of?(network_ip)
-
-              mark("Network dhcp end ip #{dhcp_data[:end]} is not within network range" \
-                "#{network} of network #{network_name}", 'network', network_name) unless
-                  dhcp_end_ip.in_range_of?(network_ip)
-            rescue => e
-              mark("Network dhcp ip range is not valid: #{e}", 'network', network_name)
-            end
+            check_network_ip_ranges(dhcp_data, network, network_name)
           end
         end
       end
+    end
+
+    # check ip ranges of +dhcp_data+ and given +network+
+    # with name +network_name+
+    def check_network_ip_ranges(dhcp_data, network, network_name)
+      network_ip = IPAddr.new(network)
+
+      # check both starting/ending ip range
+      { :start => IPAddr.new(dhcp_data[:start]),
+        :end   => IPAddr.new(dhcp_data[:end]) }.each do |type, data|
+        mark("Network dhcp #{type} ip #{dhcp_data[type]} is not within network range" \
+             "#{network} of network #{network_name}",
+             'network', network_name) unless data.in_range_of?(network_ip)
+      end
+    rescue => e
+      mark("Network dhcp ip range is not valid: #{e}", 'network', network_name)
     end
   end
 end

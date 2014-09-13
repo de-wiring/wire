@@ -30,6 +30,8 @@ module Wire
         }
       end
 
+      # TODO: move to generic execution method
+      # https://codeclimate.com/github/de-wiring/wire/Wire::Resource::OVSBridge
       # checks if the bridge exists
       def exist?
         LocalExecution.with(@executables[:vsctl],

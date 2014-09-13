@@ -1,4 +1,6 @@
 ---
+gateway:
+  :desc: Sample gateway zone
 frontend:
   :desc: Sample frontend zone
 backend:
