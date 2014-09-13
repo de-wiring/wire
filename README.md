@@ -72,7 +72,7 @@ the state on a host, to bring components down in a defined way, and to generate
 a clean specification that describes and tests the system.
 
 Of course it can wire up multiple zones with multiple networks and multiple fig 
-application groups.
+application groups. You can find example models in [the wiki](https://github.com/de-wiring/wire/wiki/Wire-Model-Examples-explained)
 
 ## Why
 
