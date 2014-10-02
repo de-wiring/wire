@@ -5,6 +5,7 @@
 [![Build Status](https://travis-ci.org/de-wiring/wire.svg?branch=master)](https://travis-ci.org/de-wiring/wire)
 [![Coverage Status](https://img.shields.io/coveralls/de-wiring/wire.svg)](https://coveralls.io/r/de-wiring/wire?branch=master)
 [![Code Climate](https://codeclimate.com/github/de-wiring/wire/badges/gpa.svg)](https://codeclimate.com/github/de-wiring/wire)
+[![Wercker](https://app.wercker.com/status/a9010abff373e7bd60120d0f57bbe4a0/s)
 
 ## In a nutshell
 
