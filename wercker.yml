@@ -1,3 +1,17 @@
 box: wercker/rvm
 # Build definition
+build:
+    steps:
+        - rvm-use:
+            version: ruby-1.9.3-p484
+        - bundle-install
+        - script:
+            name: lint
+            code: bundle exec rake lint
+        - script:
+            name: rubocop
+            code: bundle exec rake rubocop
+        - script:
+            name: spec
+            code: bundle exec rake spec
 
