@@ -114,13 +114,14 @@ module Wire
         @state = YAML.load_file(statefile_filename)
       else
         $log.debug 'No statefile found.'
+        clean
       end
       @changed = false
     end
 
     # construct name of state file
     def state_filename
-      File.join(@project.target_dir, '.state.yaml')
+      File.join(@project.get_vartmp_dir, '.state.yaml')
     end
   end
 

@@ -12,6 +12,7 @@ gw-int:
     :start: 192.168.5.10
     :end: 192.168.5.50
 frontend-int:
+  :shortname: fe-int
   :zone: frontend
   :network: 192.168.10.0/24
   :hostip: 192.168.10.1
@@ -19,6 +20,7 @@ frontend-int:
     :start: 192.168.10.10
     :end: 192.168.10.50
 backend-int:
+  :shortname: be-int
   :zone: backend
   :network: 192.168.20.0/24
   :hostip: 192.168.20.1

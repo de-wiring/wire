@@ -24,16 +24,21 @@ module Wire
       # names of networks to attach appgroup containers to
       attr_accessor :networks
 
+      # filename of state file
+      attr_accessor :statefile
+
       # initialize the object with
       # given appgroup +name+ and +container+ ids
       # params:
       # ++name++: Application group name
-      # ++networks++: [Array] of network names to attach containers to
-      # ++containers+: [Array] of container ids (i.e. from fig ps -q)
-      def initialize(name, networks, containers)
+      # ++networks++: [Array] of network objects to attach containers to
+      # ++containers++: [Array] of container ids (i.e. from fig ps -q)
+      # ++statefile++: Optional name of (network) statefile
+      def initialize(name, networks, containers, statefile=nil)
         super(name)
         self.containers = containers
         self.networks = networks
+        self.statefile = statefile
 
         begin
           # try to locate the gem base path and find shell script
@@ -73,12 +78,18 @@ module Wire
       # an array of container devices names and bridge names,
       # i.e. eht1:br0 meaning container will be attached
       # to bridge br0 with eth1.
-      # first iteration: choose device=network_name=bridge_name,
-      # all the same.
+      # if a network defines a short name, it will be used for
+      # the container interface.
+      # will check if a network does not have dhcp enable and add a
+      # NODHCP flag.
       def construct_helper_params
         res = []
-        networks.each do |network|
-          res << "#{network}:#{network}"
+        networks.each do |network_name, network_data|
+          name = (network_data[:shortname]) ? network_data[:shortname]:network_name
+
+          line = "#{name}:#{network_name}"
+          (network_data[:dhcp]) || line << ':NODHCP'
+          res << line
         end
         res.join(' ')
       end
@@ -97,8 +108,9 @@ module Wire
       # ++cmd++: One of :attach, :detach
       def updown_command(cmd)
         $log.debug "About to #{cmd.to_s.capitalize} containers to networks ..."
+        statefile_param = (@statefile?"-s #{@statefile}":'')
         with_helper(cmd.to_s, [construct_helper_params,
-                               containers.join(' ')]) do |exec_obj|
+                               containers.join(' ')], statefile_param) do |exec_obj|
           exec_obj.run
           return (exec_obj.exitstatus == 0 && count_errors(exec_obj) == 0)
         end
