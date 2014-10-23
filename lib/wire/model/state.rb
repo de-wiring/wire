@@ -121,7 +121,7 @@ module Wire
 
     # construct name of state file
     def state_filename
-      File.join(@project.get_vartmp_dir, '.state.yaml')
+      File.join(@project.vartmp_dir, '.state.yaml')
     end
   end
 

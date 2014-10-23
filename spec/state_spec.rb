@@ -47,7 +47,7 @@ describe State do
     s.clean
     s.project = Object.new
     s.project.stub(:target_dir).and_return('/tmp')
-    s.project.stub(:get_vartmp_dir).and_return('/tmp')
+    s.project.stub(:vartmp_dir).and_return('/tmp')
 
     s.changed?.should eq(false)
 

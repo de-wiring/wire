@@ -32,8 +32,9 @@ module Wire
         b_short_name_ok = (network_data[:shortname] && network_data[:shortname].size <= 6)
 
         mark("Network name #{network_name} too long, please define a :shortname with 6 chars. max.",
-             'network', network_name) if (network_name.size > 6 && !b_short_name_ok)
-        mark("Network short name of network #{network_name} too long, please define a :shortname with 6 chars. max.",
+             'network', network_name) if network_name.size > 6 && !b_short_name_ok
+        mark("Network short name of network #{network_name} too long, please define a :shortname " \
+             'with 6 chars. max.',
              'network', network_name) if network_data[:shortname] && !b_short_name_ok
       end
     end

@@ -128,4 +128,5 @@ projectFilesBackup
 
 /.state/
 .state
-
+.swp
+.*.swp

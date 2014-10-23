@@ -50,10 +50,10 @@ module Wire
 
     # return project's var/tmp directory, will be configurable
     # in the future
-    def get_vartmp_dir
+    def vartmp_dir
       # as of now, use .state in target dir
       state_dir = File.join(@target_dir, '.state')
-      unless File.directory? state_dir then
+      unless File.directory? state_dir
         FileUtils.mkdir_p state_dir
         $log.debug "created state dir #{state_dir}"
       end

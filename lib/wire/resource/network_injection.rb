@@ -34,7 +34,7 @@ module Wire
       # ++networks++: [Array] of network objects to attach containers to
       # ++containers++: [Array] of container ids (i.e. from fig ps -q)
       # ++statefile++: Optional name of (network) statefile
-      def initialize(name, networks, containers, statefile=nil)
+      def initialize(name, networks, containers, statefile = nil)
         super(name)
         self.containers = containers
         self.networks = networks
@@ -85,7 +85,7 @@ module Wire
       def construct_helper_params
         res = []
         networks.each do |network_name, network_data|
-          name = (network_data[:shortname]) ? network_data[:shortname]:network_name
+          name = (network_data[:shortname]) ? network_data[:shortname] : network_name
 
           line = "#{name}:#{network_name}"
           (network_data[:dhcp]) || line << ':NODHCP'
@@ -108,7 +108,7 @@ module Wire
       # ++cmd++: One of :attach, :detach
       def updown_command(cmd)
         $log.debug "About to #{cmd.to_s.capitalize} containers to networks ..."
-        statefile_param = (@statefile?"-s #{@statefile}":'')
+        statefile_param = (@statefile) ? "-s #{@statefile}" : ''
         with_helper(cmd.to_s, [construct_helper_params,
                                containers.join(' ')], statefile_param) do |exec_obj|
           exec_obj.run
