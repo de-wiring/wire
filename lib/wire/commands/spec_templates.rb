@@ -98,19 +98,8 @@ ERB
     def self.template_spec_helper
       <<ERB
 require 'serverspec'
-require 'rspec/its'
 
-include SpecInfra::Helper::Exec
-include SpecInfra::Helper::DetectOS
-
-RSpec.configure do |c|
-  if ENV['ASK_SUDO_PASSWORD']
-    require 'highline/import'
-    c.sudo_password = ask("Enter sudo password: ") { |q| q.echo = false }
-  else
-    c.sudo_password = ENV['SUDO_PASSWORD']
-  end
-end
+set :backend, :exec
 ERB
     end
 
@@ -122,12 +111,28 @@ ERB
 require 'rake'
 require 'rspec/core/rake_task'
 
-RSpec::Core::RakeTask.new(:spec) do |t|
-  t.pattern = 'spec/*/*_spec.rb'
-  t.rspec_opts = '--format documentation --color'
-end
-
+task :spec    => 'spec:all'
 task :default => :spec
+
+namespace :spec do
+  targets = []
+  Dir.glob('./spec/*').each do |dir|
+    next unless File.directory?(dir)
+    targets << File.basename(dir)
+  end
+
+  task :all     => targets
+  task :default => :all
+
+  targets.each do |target|
+    desc "Run serverspec tests to \#{target}"
+    RSpec::Core::RakeTask.new(target.to_sym) do |t|
+      ENV['TARGET_HOST'] = target
+      t.pattern = "spec/\#{target}/*_spec.rb"
+      t.rspec_opts = '--format documentation --color'
+    end
+  end
+end
 ERB
     end
   end

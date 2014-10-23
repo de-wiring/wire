@@ -45,7 +45,7 @@ module Wire
         outputs 'SPEC', 'To run automatically, use --run'
       rescue => exception
         $log.error "Error writing serverspec files, #{exception}"
-        STDERR.puts e.inspect
+        STDERR.puts exception.inspect
       end
 
       run_serverspec(target_specdir) if @params[:auto_run]
