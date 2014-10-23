@@ -1,5 +1,5 @@
 ---
-dmz-net:
+dmznet:
   :zone: dmz
   :network: 192.168.10.0/24
   :hostip: 192.168.10.1
