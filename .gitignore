@@ -125,3 +125,8 @@ coverage
 projectFilesBackup
 .state.yaml
 /test/models/*/serverspec
+
+/.state/
+.state
+.swp
+.*.swp

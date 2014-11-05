@@ -19,6 +19,7 @@ module Wire
       nonmatching_hostips_found?
       dhcp_address_ranges_valid?
       vlan_valid?
+      networks_names_too_long?
     end
 
     # ensures that all networks are attached to a zone
@@ -70,8 +71,21 @@ module Wire
       #   mark("Network range #{nw} used in more than one network (#{dupe_name})",
       #        'network', network_name) if dupe_name
       #   dup_map.store nw, network_name
-      # end
+      #
+    end
 
+    # ensures that networks with names > 6 chars have
+    # a short name defined, and short names are 6 chars. max.
+    def networks_names_too_long?
+      @project.get_element('networks').each do |network_name, network_data|
+        b_short_name_ok = (network_data[:shortname] && network_data[:shortname].size <= 6)
+
+        mark("Network name #{network_name} too long, please define a :shortname with 6 chars. max.",
+             'network', network_name) if network_name.size > 6 && !b_short_name_ok
+        mark("Network short name of network #{network_name} too long, please define a :shortname " \
+             'with 6 chars. max.',
+             'network', network_name) if network_data[:shortname] && !b_short_name_ok
+      end
     end
 
     # ensures that all network ranges are unique

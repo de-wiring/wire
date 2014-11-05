@@ -20,6 +20,8 @@ module Wire
 
       default_handle_resource(bridge_resource, :bridge,
                               "Bridge \'#{bridge_name}\'", :up)
+    rescue => e
+      $log.error "processing bridge: #{e}"
     end
 
     # bring vlan-enabled bridge resource up, identified by
@@ -46,6 +48,8 @@ module Wire
 
       default_handle_resource(hostip_resource, :hostip,
                               "IP \'#{hostip}\' on bridge \'#{bridge_name}\'", :up)
+    rescue => e
+      $log.error "processing host ip: #{e}"
     end
 
     # configures dnsmasq for dhcp
@@ -63,6 +67,8 @@ module Wire
 
       default_handle_resource(resource_dhcp, :dnsmasq,
                               "dnsmasq/dhcp config on network \'#{network_name}\'", :up)
+    rescue => e
+      $log.error "processing dhcp: #{e}"
     end
 
     # take the appgroups' controller and directs methods to
@@ -82,6 +88,8 @@ module Wire
 
       $log.error "Appgroup not handled, unknown controller type #{controller_entry[:type]}"
       false
+    rescue => e
+      $log.error "processing appgroup: #{e}"
     end
 
     # implement appgroup handling for fig controller
@@ -101,6 +109,8 @@ module Wire
 
       default_handle_resource(resource_fig, :appgroup,
                               "appgroup \'#{appgroup_name}\' for zone \'#{zone_name}\'", :up)
+    rescue => e
+      $log.error "processing appgroup/fig: #{e}"
     end
 
     # attaches networks to containers of appgroup
@@ -110,10 +120,11 @@ module Wire
     # ++appgroup_name++: Name of appgroup
     # ++appgroup_entry++: appgroup hash
     # ++target_dir++: project target dir
+    # ++state_dir++: project state dir (network statefile is written there)
     # Returns
     # - [Bool] true if appgroup setup is ok
     def handle_network_attachments(_zone_name, networks, appgroup_name,
-                                   appgroup_entry, target_dir)
+                                   appgroup_entry, target_dir, state_dir)
       # query container ids of containers running here
       # get path
       controller_entry = appgroup_entry[:controller]
@@ -131,12 +142,15 @@ module Wire
       end
 
       #
+      statefile_name = File.join(state_dir, ".network_attachment_#{Time.now.to_i}")
       resource_nw = Wire::Resource::ResourceFactory
-      .instance.create(:networkinjection, appgroup_name, networks.keys, container_ids)
+      .instance.create(:networkinjection, appgroup_name, networks, container_ids, statefile_name)
 
       default_handle_resource(resource_nw, :network_injection,
                               "Network(s) \'#{networks.keys.join(',')}\' in "\
                               "appgroup \'#{appgroup_name}\'", :up)
+    rescue => e
+      $log.error "processing network attachments: #{e}"
     end
   end
 end

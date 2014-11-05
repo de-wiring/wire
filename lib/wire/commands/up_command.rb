@@ -81,7 +81,7 @@ module Wire
         zone_networks = objects_in_zone('networks', zone_name)
         success = handler.handle_network_attachments(zone_name, zone_networks,
                                                      appgroup_name, appgroup_data,
-                                                     @project.target_dir)
+                                                     @project.target_dir, @project.vartmp_dir)
         b_result &= success
       end
 

@@ -14,6 +14,8 @@ module Wire
     def handle_bridge(bridge_name)
       bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsbridge, bridge_name)
       default_handle_resource(bridge_resource, :bridge, "Bridge \'#{bridge_name}\'", :down)
+    rescue => e
+      $log.error "processing bridge: #{e}"
     end
 
     # remove ip from bridge interface
@@ -29,6 +31,8 @@ module Wire
       .instance.create(:bridgeip, hostip, bridge_name)
       default_handle_resource(hostip_resource, :hostip,
                               "IP \'#{hostip}\' on bridge \'#{bridge_name}\'", :down)
+    rescue => e
+      $log.error "processing host ip: #{e}"
     end
 
     # unconfigures dnsmasq for dhcp
@@ -46,6 +50,8 @@ module Wire
                        network_entry, address_start, address_end)
       default_handle_resource(resource_dhcp, :dnsmasq,
                               "dnsmasq/dhcp config on network \'#{network_name}\'", :down)
+    rescue => e
+      $log.error "processing dhcp configuration: #{e}"
     end
 
     # take the appgroups' controller and directs methods to
@@ -67,6 +73,8 @@ module Wire
       $log.error "Appgroup not handled for zone #{zone_name}, " \
       "unknown controller type #{controller_entry[:type]}"
       false
+    rescue => e
+      $log.error "processing appgroup: #{e}"
     end
 
     # implement appgroup handling for fig controller
@@ -86,6 +94,8 @@ module Wire
 
       default_handle_resource(resource_fig, :appgroup,
                               "appgroup \'#{appgroup_name}\' for zone \'#{zone_name}\'", :down)
+    rescue => e
+      $log.error "processing appgroup/fig: #{e}"
     end
 
     # detaches networks to containers of appgroup
@@ -117,11 +127,13 @@ module Wire
 
       #
       resource_nw = Wire::Resource::ResourceFactory
-      .instance.create(:networkinjection, appgroup_name, networks.keys, container_ids)
+      .instance.create(:networkinjection, appgroup_name, networks, container_ids)
 
       default_handle_resource(resource_nw, :network_injection,
                               "Network(s) \'#{networks.keys.join(',')}\' in "\
                               "appgroup \'#{appgroup_name}\'", :down)
+    rescue => e
+      $log.error "processing network attachments: #{e}"
     end
   end
 end

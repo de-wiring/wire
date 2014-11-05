@@ -23,9 +23,9 @@ function usage() {
  	    echo '    -n/--noop 	only print commands, do not change'
  	    echo '    -d/--debug 	show debug output'
  	    echo '    -q/--quiet 	be quiet'
- 	    # echo '    -s/--state <FILE>   write state to <FILE>'  # TODO
+ 	    echo '    -s/--state <FILE>   write state to <FILE>'
 	    echo '  Examples:'
-	    echo '   attach-containers.sh attach --debug -- eth1:br1 eth2:br2 02978729 12673482'
+	    echo '   attach-containers.sh attach --debug -- eth1:br1:NODHCP eth2:br2 02978729 12673482'
 	    echo '   attach-containers.sh verify -- eth1:br1 eth2:br2 02978729 12673482'
 	    echo '   attach-containers.sh detach -q -- eth1:br1 eth2:br2 02978729 12673482'
 }
@@ -64,6 +64,7 @@ MODE=
 ACTION=
 DEBUG=nodebug
 QUIET=
+STATEFILE=
 
 while :
 do
@@ -78,6 +79,11 @@ do
           ;;
       -n | --noop)
           NOOP=1
+	      shift
+          ;;
+      -s | --state)
+	      shift
+	      STATEFILE=$1
 	      shift
           ;;
       -d | --debug)
@@ -124,6 +130,12 @@ if [[ -z "$ID_ARR" ]]; then
 	exit 3
 fi
 
+# empty state file
+if [[ ! -z "$STATEFILE" ]]; then
+    echo "# This is a wire network state file" >"$STATEFILE"
+    echo "TIMESTAMP=`date`" >>"$STATEFILE"
+fi
+
 [[ "$NOOP" -eq 1 ]] && MODE='echo NOOP% '
 
 # DEBUG
@@ -137,11 +149,24 @@ DOCKER=$(which docker)
 DHCLIENT=$(which dhclient)
 
 # -- FUNCTION ----------------------------------------------------------------
+#        Name: add_to_state
+# Description: Adds given text line to state file. If STATEFILE is empty,
+#              nothing is done
+# Parameters
+#           1: state info line
+# ----------------------------------------------------------------------------
+function add_to_state() {
+    if [[ ! -z "$STATEFILE" ]]; then
+        echo $* >>"$STATEFILE"
+	fi
+}
+
+# -- FUNCTION ----------------------------------------------------------------
 #        Name: container_process
 # Description: Given ID of container, this returns the Process id
 # Parameters
 #           1: Docker Container ID
-# Returns    : Container Process ID 
+# Returns    : Container Process ID
 # ----------------------------------------------------------------------------
 function container_process() {
 	T="$1"
@@ -170,7 +195,11 @@ function link_netns() {
 # ----------------------------------------------------------------------------
 function unlink_netns() {
 	local PID=$1
-	$MODE sudo rm /var/run/netns/$PID
+	if [[ -z $PID ]]; then
+	    log_error unlink_netns: pid not specified
+	else
+	    $MODE sudo rm "/var/run/netns/$PID"
+    fi
 }
 
 # -- FUNCTION ----------------------------------------------------------------
@@ -292,11 +321,11 @@ function has_interfaces() {
 	if [[ $? -ne 0 ]]; then
 		return 1
 	fi
-	# check if we have an ip
-	$MODE sudo $IP netns exec $NS $IP addr show $DEVICE 2>&1 | grep 'inet ' >/dev/null 2>&1
-	if [[ $? -ne 0 ]]; then
-		return 1
-	fi
+	# check if we have an ip (todo: fix in NODHCP mode)
+	#$MODE sudo $IP netns exec $NS $IP addr show $DEVICE 2>&1 | grep 'inet ' >/dev/null 2>&1
+	#if [[ $? -ne 0 ]]; then
+	#	return 1
+	#fi
 
 	# host devices
 	$MODE sudo $IP link show $HOST_IF >/dev/null 2>&1 
@@ -376,8 +405,9 @@ function handle_verify() {
 				# on host and in container
 	
 				$DEBUG - Checking devices in $ID
-        			link_netns "${PID}"
-        			
+        		link_netns "${PID}"
+                add_to_state ${ID}.CONTAINER_PID=${TARGET_PID}
+
 				# iterate given devices
 				for DEVICE_PAIR in $DEVICE_ARR; do
 					INTF=$(echo "$DEVICE_PAIR" | awk -F':' '{ print $1 }' )
@@ -419,11 +449,13 @@ function handle_attach() {
         $DEBUG PID of $TARGET is $TARGET_PID
         
         link_netns "${TARGET_PID}"
-        
+        add_to_state ${TARGET}.CONTAINER_PID=${TARGET_PID}
+
 		# iterate given devices
 		for DEVICE_PAIR in $DEVICE_ARR; do
 			INTF=$(echo $DEVICE_PAIR | awk -F':' '{ print $1 }' )
 			BRIDGE=$(echo $DEVICE_PAIR | awk -F':' '{ print $2 }' )
+			FLAGS=$(echo $DEVICE_PAIR | awk -F':' '{ print $3 }' )
 			$DEBUG Attaching $INTF to $BRIDGE
         	
 			BRIDGEDEV_MTU=$(get_mtu $BRIDGE)
@@ -432,6 +464,7 @@ function handle_attach() {
 				RES=1
 				break	
 			fi
+			add_to_state ${TARGET}.BRIDGEDEV_MTU=${BRIDGEDEV_MTU}
 
             HOST_IFNAME=v${INTF}h${TARGET_PID}
             CONTAINER_IFNAME=v${INTF}c${TARGET_PID}
@@ -444,7 +477,10 @@ function handle_attach() {
 				RES=1
 				continue	
 			fi
-        
+
+            add_to_state ${TARGET}.HOST_IFNAME=${HOST_IFNAME}
+            add_to_state ${TARGET}.CONTAINER_IFNAME=${CONTAINER_IFNAME}
+
 			$DEBUG - adding $HOST_IFNAME to $BRIDGE
         	add_device_to_switch "$HOST_IFNAME" "$BRIDGE"
 			if [[ $? -ne 0 ]]; then	
@@ -452,25 +488,35 @@ function handle_attach() {
 				RES=1
 				continue	
 			fi
-        
+            add_to_state ${TARGET}.ON_BRIDGE=$BRIDGE
+
 			$DEBUG - configuring interfaces
         	configure_interfaces "$HOST_IFNAME" "$CONTAINER_IFNAME" "$TARGET_PID" "$INTF"
 			if [[ $? -ne 0 ]]; then	
 				log_error configuring interfaces. aborting
 				RES=1
-				continue	
+                add_to_state ${CONTAINER_IFNAME}.configured=error
+				continue
 			fi
-        	
-			$DEBUG - dhcp requesting address
-        	dhcp_container "$TARGET_PID" "$INTF"
-			if [[ $? -ne 0 ]]; then	
-				log_error running dhcp. aborting
-				RES=1
-				continue	
-			fi
-        	done
+            add_to_state ${TARGET}.${CONTAINER_IFNAME}.configured=ok
 
-        	unlink_netns "$TARGET_PID"
+        	if [[ "$FLAGS" =~ NODHCP ]]; then
+			    $DEBUG - skipping dhcp for $INTF
+			else
+			    $DEBUG - dhcp requesting address
+        	    dhcp_container "$TARGET_PID" "$INTF"
+			    if [[ $? -ne 0 ]]; then
+				    log_error running dhcp. aborting
+                    add_to_state ${CONTAINER_IFNAME}.dhcp=error
+				    RES=1
+				    continue
+			    fi
+			    add_to_state ${TARGET}.${CONTAINER_IFNAME}.dhcp=ok
+
+        	fi
+
+        done
+        unlink_netns "$TARGET_PID"
 	done
 
 	return $RES
@@ -490,10 +536,10 @@ function handle_detach() {
 		$DEBUG Detaching $TARGET
 	
 		TARGET_PID=$(container_process $TARGET)
-        	$DEBUG PID of $TARGET is $TARGET_PID
+        $DEBUG PID of $TARGET is $TARGET_PID
         
-        	link_netns ${TARGET_PID}
-        
+        link_netns ${TARGET_PID}
+
 		# iterate given devices
 		for DEVICE_PAIR in $DEVICE_ARR; do
 			INTF=$(echo $DEVICE_PAIR | awk -F':' '{ print $1 }' )

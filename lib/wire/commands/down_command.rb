@@ -38,6 +38,7 @@ module Wire
         success = handler.handle_network_attachments(zone_name, zone_networks,
                                                      appgroup_name, appgroup_data,
                                                      @project.target_dir)
+
         b_result &= success
 
         # then take down containers

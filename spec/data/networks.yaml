@@ -1,7 +1,7 @@
 ---
-dmz-int:
+dmzint:
   :network: 192.168.10.0/24
   :zone: dmz
-dmz-ext:
+dmzext:
   :network: 192.168.20.0/24
   :zone: dmz

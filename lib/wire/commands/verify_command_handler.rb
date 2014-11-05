@@ -117,7 +117,7 @@ module Wire
 
       #
       resource = Wire::Resource::ResourceFactory
-      .instance.create(:networkinjection, appgroup_name, networks.keys, container_ids)
+      .instance.create(:networkinjection, appgroup_name, networks, container_ids)
       default_handle_resource(resource, :network_injection,
                               "Network(s) \'#{networks.keys.join(',')}\' in " \
                               "appgroup \'#{appgroup_name}\'")
