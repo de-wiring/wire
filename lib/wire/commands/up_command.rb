@@ -31,16 +31,12 @@ module Wire
       networks_in_zone = UpDownCommand.get_networks_for_zone(networks, zone_name)
       # re-order networks_in_zone, so that vlan'd networks appear after their
       # trunk parents
-      vlan_networks_in_zone = networks_in_zone.select { |network_name, network_data|
-        network_data[:vlan]
-      }
-      non_vlan_networks_in_zone = networks_in_zone.select { |network_name, network_data|
-        network_data[:vlan] == nil
-      }
+      vlan_networks_in_zone = networks_in_zone.select { |_, nd| nd[:vlan] }
+      non_vlan_networks_in_zone = networks_in_zone.select { |_, nd| nd[:vlan].nil? }
 
-      [ non_vlan_networks_in_zone, vlan_networks_in_zone ].each do |networks|
-        $log.debug("Bringing up networks #{networks.keys.join(',')}")
-        networks.each do |network_name, network_data|
+      [non_vlan_networks_in_zone, vlan_networks_in_zone].each do |cur_networks|
+        $log.debug("Bringing up networks #{cur_networks.keys.join(',')}")
+        cur_networks.each do |network_name, network_data|
           $log.debug("Bringing up network #{network_name}")
 
           # choose handle method (vlan or not)
@@ -61,11 +57,11 @@ module Wire
             # if we have dhcp, configure dnsmasq
             b_result &= default_handle_dhcp(zone_name, network_name, network_data, @handler)
           else
-            $log.debug("Will not touch dependant objects of #{network_name} due to previous error(s)")
+            $log.debug("Will not touch dependant objects of #{network_name} " \
+                       'due to previous error(s)')
           end
         end
       end
-
 
       # select appgroups in this zone and bring them up
       appgroups_in_zone = objects_in_zone('appgroups', zone_name)

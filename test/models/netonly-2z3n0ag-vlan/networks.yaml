@@ -18,10 +18,10 @@ frontend-int:
   :vlan:
     :id: 1000
     :on_trunk: frontend_trunk
-#backend-int:
-#  :zone: backend
-#  :network: 192.168.20.0/24
-#  :hostip: 192.168.20.1
-#  :dhcp:
-#    :start: 192.168.20.10
-#    :end: 192.168.20.20
+backend-int:
+  :zone: backend
+  :network: 192.168.20.0/24
+  :hostip: 192.168.20.1
+  :dhcp:
+    :start: 192.168.20.10
+    :end: 192.168.20.20

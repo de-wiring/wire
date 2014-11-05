@@ -34,31 +34,32 @@ module Wire
     # - no dupes
     def vlan_valid?
       # check basic validity
-      @project.get_element('networks').select { |_, network_data|
-        network_data[:vlan]
-      }.each do |network_name, network_data|
+      vlan_nets = @project.get_element('networks').select { |_, network_data| network_data[:vlan] }
+
+      vlan_nets.each do |network_name, network_data|
         vd = network_data[:vlan]
-        vlan_id_ok = false
-        begin
-          vlan_id_ok = (vd && vd[:id] != nil && vd[:id] >= 0 && vd[:id] <= 4095)
-        rescue
-        end
 
         mark("Network #{network_name} has invalid or missing vlan id. set :id between 0..4095",
-             'network', network_name) unless vlan_id_ok
-
-        trunk_id_ok = false
-        begin
-          trunk_id_ok = ( @project.get_element('networks').select { |network_name, _|
-            network_name == vd[:on_trunk] }.size == 1 )
-        rescue
-        end
+             'network', network_name) unless vlan_id_ok(vd)
 
         mark("Network #{network_name} has invalid or missing vlan trunk network. " \
              'Please point :on_trunk to an existing network.',
-             'network', network_name) unless trunk_id_ok
+             'network', network_name) unless trunk_id_ok(vd)
       end
 
+      def vlan_id_ok(vd)
+        (vd && vd[:id] && vd[:id] >= 0 && vd[:id] <= 4095)
+      rescue
+        $log.error 'Error parsing vlan/vlanid section'
+      end
+
+      def trunk_id_ok(vd)
+        (@project.get_element('networks').select do |network_name, _|
+          network_name == vd[:on_trunk]
+        end.size == 1)
+      rescue
+        $log.error "Error parsing vlan/on_trunk section for Network #{network_name}"
+      end
 
       # check dupes
       # dup_map = {}
@@ -103,7 +104,7 @@ module Wire
 
     # ensures that all network names are valid: size 1..15
     def network_names_ok?
-      @project.get_element('networks').each do |network_name, network_data|
+      @project.get_element('networks').each do |network_name, _|
         name_ok = (network_name.size >= 2 && network_name.size <= 15)
         mark("Network #{network_name}, name size must be 2..15 characters",
              'network', network_name) unless name_ok

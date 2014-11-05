@@ -53,16 +53,13 @@ module Wire
       networks_in_zone = UpDownCommand.get_networks_for_zone(networks, zone_name)
       # re-order networks_in_zone, so that vlan'd networks appear before their
       # trunk parents
-      vlan_networks_in_zone = networks_in_zone.select { |network_name, network_data|
-        network_data[:vlan]
-      }
-      non_vlan_networks_in_zone = networks_in_zone.select { |network_name, network_data|
-        network_data[:vlan] == nil
-      }
-      [ vlan_networks_in_zone, non_vlan_networks_in_zone ].each do |networks|
-        $log.debug("Bringing up networks #{networks.keys.join(',')}")
+      vlan_networks_in_zone = networks_in_zone.select { |_, nd| nd[:vlan] }
+      non_vlan_networks_in_zone = networks_in_zone.select { |_, nd| nd[:vlan].nil? }
 
-        networks.each do |network_name, network_data|
+      [vlan_networks_in_zone, non_vlan_networks_in_zone].each do |cur_networks|
+        $log.debug("Bringing up networks #{cur_networks.keys.join(',')}")
+
+        cur_networks.each do |network_name, network_data|
           $log.debug("Bringing down network #{network_name}")
 
           # if we have dhcp, unconfigure dnsmasq
