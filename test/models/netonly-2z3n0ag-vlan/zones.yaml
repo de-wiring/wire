@@ -1,0 +1,5 @@
+---
+frontend:
+  :desc: Sample frontend zone
+backend:
+  :desc: Sample backend zone

@@ -109,7 +109,17 @@ module Wire
 
         $log.debug 'checking bridge ...'
         # we should have a bridge with that name.
-        if @handler.handle_bridge(bridge_name) == false
+        b_bridge_ok = false
+        if network_data[:vlan]
+          vlanid = (network_data[:vlan])[:id]
+          on_trunk = (network_data[:vlan])[:on_trunk]
+
+          b_bridge_ok = @handler.handle_vlan_bridge(bridge_name, vlanid, on_trunk)
+        else
+          b_bridge_ok = @handler.handle_bridge(bridge_name)
+        end
+
+        if b_bridge_ok == false
           network_data.store :status, :failed
           b_verify_ok = false
           mark("Bridge \'#{bridge_name}\' does not exist.",

@@ -106,6 +106,15 @@ module Wire
       erb = ERB.new(template, nil, '%')
       @spec_code << erb.result(binding)
 
+      vlan = network_data[:vlan]
+      if vlan
+        vlanid = vlan[:id]
+        on_trunk = vlan[:on_trunk]
+        template = SpecTemplates.build_template__bridge_vlan_id_and_trunk
+        erb = ERB.new(template, nil, '%')
+        @spec_code << erb.result(binding)
+      end
+
       # render template for hostip (if any)
       ip = network_data[:hostip]
       if ip

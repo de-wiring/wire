@@ -11,6 +11,8 @@ gw-int:
   :dhcp:
     :start: 192.168.5.10
     :end: 192.168.5.50
+  :vlan:
+    :id: 517
 frontend-int:
   :zone: frontend
   :network: 192.168.10.0/24

@@ -64,7 +64,7 @@ module Wire
     end
 
     # returns networks from given +networks+ array that
-    # belong to +zone_name+
+    # belong to +zone_name+.
     # params:
     # +networks+:  array of all networks
     # +zone_name+: name of desired zone

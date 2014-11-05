@@ -16,7 +16,7 @@ describe 'It should have docker installed' do
 	end
 
 	describe command 'docker -v' do
-		its(:stdout) { should match '^Docker version 1\.2.*' }
+		its(:stdout) { should match '^Docker version 1\.3.*' }
  	end
 end
 

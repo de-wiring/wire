@@ -50,19 +50,32 @@ module Wire
 
       # select networks in current zone only
       networks_in_zone = UpDownCommand.get_networks_for_zone(networks, zone_name)
-      networks_in_zone.each do |network_name, network_data|
-        $log.debug("Bringing down network #{network_name}")
+      # re-order networks_in_zone, so that vlan'd networks appear before their
+      # trunk parents
+      vlan_networks_in_zone = networks_in_zone.select { |network_name, network_data|
+        network_data[:vlan]
+      }
+      non_vlan_networks_in_zone = networks_in_zone.select { |network_name, network_data|
+        network_data[:vlan] == nil
+      }
+      [ vlan_networks_in_zone, non_vlan_networks_in_zone ].each do |networks|
+        $log.debug("Bringing up networks #{networks.keys.join(',')}")
 
-        # if we have dhcp, unconfigure dnsmasq
-        b_result &= default_handle_dhcp(zone_name, network_name, network_data, @handler)
+        networks.each do |network_name, network_data|
+          $log.debug("Bringing down network #{network_name}")
 
-        # if we have a host ip on that bridge, take it down first
-        b_result &= default_handle_hostip(network_name, network_data, @handler)
+          # if we have dhcp, unconfigure dnsmasq
+          b_result &= default_handle_dhcp(zone_name, network_name, network_data, @handler)
 
-        # we should have a bridge with that name.
-        success = @handler.handle_bridge(network_name)
-        b_result &= success
+          # if we have a host ip on that bridge, take it down first
+          b_result &= default_handle_hostip(network_name, network_data, @handler)
+
+          # we should have a bridge with that name.
+          success = @handler.handle_bridge(network_name)
+          b_result &= success
+        end
       end
+
       b_result
     end
   end

@@ -36,6 +36,16 @@ module Wire
       default_handle_resource(bridge_resource, :bridge, "Bridge \'#{bridge_name}\'")
     end
 
+    # runs verification for a vlan bridge resource identified by
+    # +bridge_name+, +vlanid+ and +on_trunk+ parent name
+    # Returns
+    # - [Bool] true if bridge exists
+    def handle_vlan_bridge(bridge_name, vlanid, on_trunk)
+      bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsbridge, bridge_name,
+                                                                        vlanid, on_trunk)
+      default_handle_resource(bridge_resource, :bridge, "VLAN Bridge \'#{bridge_name}/#{vlanid}\'")
+    end
+
     # runs verification for a ip resource identified by
     # +bridge_name+ and +host_ip+
     # Returns

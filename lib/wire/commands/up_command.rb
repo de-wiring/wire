@@ -29,21 +29,43 @@ module Wire
 
       # select networks in current zone only
       networks_in_zone = UpDownCommand.get_networks_for_zone(networks, zone_name)
-      networks_in_zone.each do |network_name, network_data|
-        $log.debug("Bringing up network #{network_name}")
+      # re-order networks_in_zone, so that vlan'd networks appear after their
+      # trunk parents
+      vlan_networks_in_zone = networks_in_zone.select { |network_name, network_data|
+        network_data[:vlan]
+      }
+      non_vlan_networks_in_zone = networks_in_zone.select { |network_name, network_data|
+        network_data[:vlan] == nil
+      }
 
-        success = @handler.handle_bridge(network_name)
-        b_result &= success
-        if success
-          # if we have a host ip on that bridge, take it down first
-          b_result &= default_handle_hostip(network_name, network_data, @handler)
+      [ non_vlan_networks_in_zone, vlan_networks_in_zone ].each do |networks|
+        $log.debug("Bringing up networks #{networks.keys.join(',')}")
+        networks.each do |network_name, network_data|
+          $log.debug("Bringing up network #{network_name}")
 
-          # if we have dhcp, configure dnsmasq
-          b_result &= default_handle_dhcp(zone_name, network_name, network_data, @handler)
-        else
-          $log.debug("Will not touch dependant objects of #{network_name} due to previous error(s)")
+          # choose handle method (vlan or not)
+          success = false
+          if network_data[:vlan]
+            vlanid = (network_data[:vlan])[:id]
+            on_trunk = (network_data[:vlan])[:on_trunk]
+            success = @handler.handle_vlan_bridge(network_name, vlanid, on_trunk)
+          else
+            success = @handler.handle_bridge(network_name)
+          end
+
+          b_result &= success
+          if success
+            # if we have a host ip on that bridge, take it down first
+            b_result &= default_handle_hostip(network_name, network_data, @handler)
+
+            # if we have dhcp, configure dnsmasq
+            b_result &= default_handle_dhcp(zone_name, network_name, network_data, @handler)
+          else
+            $log.debug("Will not touch dependant objects of #{network_name} due to previous error(s)")
+          end
         end
       end
+
 
       # select appgroups in this zone and bring them up
       appgroups_in_zone = objects_in_zone('appgroups', zone_name)

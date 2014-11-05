@@ -12,16 +12,66 @@ module Wire
     # returns:
     # - nil, results in errors of ValidationBase
     def run_validations
+      network_names_ok?
       networks_attached_to_zones?
       duplicate_networks_found?
       missing_network_def_found?
       nonmatching_hostips_found?
       dhcp_address_ranges_valid?
+      vlan_valid?
     end
 
     # ensures that all networks are attached to a zone
     def networks_attached_to_zones?
       objects_attached_to_zones? 'networks'
+    end
+
+    # ensures that all vlan-enhanced network
+    # definitions are valid:
+    # - valid tag id 0..4095
+    # - parent exist
+    # - no dupes
+    def vlan_valid?
+      # check basic validity
+      @project.get_element('networks').select { |_, network_data|
+        network_data[:vlan]
+      }.each do |network_name, network_data|
+        vd = network_data[:vlan]
+        vlan_id_ok = false
+        begin
+          vlan_id_ok = (vd && vd[:id] != nil && vd[:id] >= 0 && vd[:id] <= 4095)
+        rescue
+        end
+
+        mark("Network #{network_name} has invalid or missing vlan id. set :id between 0..4095",
+             'network', network_name) unless vlan_id_ok
+
+        trunk_id_ok = false
+        begin
+          trunk_id_ok = ( @project.get_element('networks').select { |network_name, _|
+            network_name == vd[:on_trunk] }.size == 1 )
+        rescue
+        end
+
+        mark("Network #{network_name} has invalid or missing vlan trunk network. " \
+             'Please point :on_trunk to an existing network.',
+             'network', network_name) unless trunk_id_ok
+      end
+
+
+      # check dupes
+      # dup_map = {}
+      # @project.get_element('networks').each do |network_name, network_data|
+      #   vlan_data = network_data[:vlan]
+      #   next unless vlan_data
+      #
+      #   dupe_name = dup_map[nw]
+      #
+      #   mark("Network range #{nw} used in more than one network (#{dupe_name})",
+      #        'network', network_name) if dupe_name
+      #   dup_map.store nw, network_name
+      # end
+
     end
 
     # ensures that all network ranges are unique
@@ -34,6 +84,15 @@ module Wire
         mark("Network range #{nw} used in more than one network (#{dupe_name})",
              'network', network_name) if dupe_name
         dup_map.store nw, network_name
+      end
+    end
+
+    # ensures that all network names are valid: size 1..15
+    def network_names_ok?
+      @project.get_element('networks').each do |network_name, network_data|
+        name_ok = (network_name.size >= 2 && network_name.size <= 15)
+        mark("Network #{network_name}, name size must be 2..15 characters",
+             'network', network_name) unless name_ok
       end
     end
 

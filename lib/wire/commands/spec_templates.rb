@@ -22,6 +22,23 @@ ERB
 
     # rubocop:disable Lint/UnusedMethodArgument
     # :reek:UnusedParameters
+    def self.build_template__bridge_vlan_id_and_trunk
+      <<ERB
+  describe 'In zone <%= zone_name %>, ovs vlan bridge named <%= bridge_name %> should have id <%= vlanid %>' do
+    describe command "sudo ovs-vsctl br-to-vlan" do
+      its(:stdout) { should match /<%= vlanid %>/ }
+    end
+  end
+  describe 'In zone <%= zone_name %>, ovs vlan bridge named <%= bridge_name %> should have parent <%= on_trunk %>' do
+    describe command "sudo ovs-vsctl br-to-parent" do
+      its(:stdout) { should match /<%= on_trunk %>/ }
+    end
+  end
+ERB
+    end
+
+    # rubocop:disable Lint/UnusedMethodArgument
+    # :reek:UnusedParameters
     def self.build_template__ip_is_up
       <<ERB
   describe 'In zone <%= zone_name %> we should have the ip <%= ip %> ' \

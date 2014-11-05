@@ -22,6 +22,19 @@ module Wire
                               "Bridge \'#{bridge_name}\'", :up)
     end
 
+    # bring vlan-enabled bridge resource up, identified by
+    # +bridge_name+, additional +vlanid+ and +on_trunk+ name
+    # Returns
+    # - [Bool] true if hostip if up on bridge
+    def handle_vlan_bridge(bridge_name, vlanid, on_trunk)
+      # we should have a bridge with that name.
+      bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsbridge, bridge_name,
+                                                                        vlanid, on_trunk)
+
+      default_handle_resource(bridge_resource, :bridge,
+                              "VLAN Bridge \'#{bridge_name}/#{vlanid}\'", :up)
+    end
+
     # bring ip resource up on device identified by
     # +bridge_name+ and +host_ip+
     # Returns
