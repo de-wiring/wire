@@ -20,6 +20,21 @@ module Wire
       @handler = DownCommandHandler.new
     end
 
+    # run on all given +zones+, in REVERSE order
+    # Returns [Hash] of zones that failed.
+    def run_on_project_zones(zones)
+      reverse_zone_names = zones.keys.reverse
+
+      res_bad_zones = {}
+
+      reverse_zone_names.each do |zone_name|
+        $log.debug("Processing zone #{zone_name} ...")
+        run_on_zone(zone_name) || res_bad_zones.store(zone_name, zones[zone_name])
+      end
+
+      res_bad_zones
+    end
+
     # run in given zone:
     # returns:
     # - bool: true if successful, false otherwise
@@ -57,7 +72,7 @@ module Wire
       non_vlan_networks_in_zone = networks_in_zone.select { |_, nd| nd[:vlan].nil? }
 
       [vlan_networks_in_zone, non_vlan_networks_in_zone].each do |cur_networks|
-        $log.debug("Bringing up networks #{cur_networks.keys.join(',')}")
+        $log.debug("Bringing down networks #{cur_networks.keys.join(',')}")
 
         cur_networks.each do |network_name, network_data|
           $log.debug("Bringing down network #{network_name}")

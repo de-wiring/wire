@@ -49,6 +49,11 @@ module Wire
           exec_obj.run
           b_exists = (exec_obj.exitstatus != 2)
         end
+
+        # if bridge does not exists, don't bother
+        # checking its vlanid..
+        return false if !b_exists
+
         b_vlan_ok = true
         if @vlanid && @on_trunk
           b_vlanid_ok = false

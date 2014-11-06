@@ -27,6 +27,20 @@ module Wire
       objects_attached_to_zones? 'networks'
     end
 
+    def vlan_id_ok(vd)
+      (vd && vd[:id] && vd[:id] >= 0 && vd[:id] <= 4095)
+    rescue
+      $log.error 'Error parsing vlan/vlanid section'
+    end
+
+    def trunk_id_ok(vd)
+      (@project.get_element('networks').select do |network_name, _|
+        network_name == vd[:on_trunk]
+      end.size == 1)
+    rescue
+      $log.error "Error parsing vlan/on_trunk section for Network #{network_name}"
+    end
+
     # ensures that all vlan-enhanced network
     # definitions are valid:
     # - valid tag id 0..4095
@@ -45,20 +59,6 @@ module Wire
         mark("Network #{network_name} has invalid or missing vlan trunk network. " \
              'Please point :on_trunk to an existing network.',
              'network', network_name) unless trunk_id_ok(vd)
-      end
-
-      def vlan_id_ok(vd)
-        (vd && vd[:id] && vd[:id] >= 0 && vd[:id] <= 4095)
-      rescue
-        $log.error 'Error parsing vlan/vlanid section'
-      end
-
-      def trunk_id_ok(vd)
-        (@project.get_element('networks').select do |network_name, _|
-          network_name == vd[:on_trunk]
-        end.size == 1)
-      rescue
-        $log.error "Error parsing vlan/on_trunk section for Network #{network_name}"
       end
 
       # check dupes

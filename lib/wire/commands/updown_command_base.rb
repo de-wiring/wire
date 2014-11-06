@@ -26,6 +26,7 @@ module Wire
 
     # run on all given +zones+
     # Returns [Hash] of zones that failed.
+    # TODO: introduce zone ordering parameter
     def run_on_project_zones(zones)
       zones.select do |zone_name, _|
         $log.debug("Processing zone #{zone_name} ...")

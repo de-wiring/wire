@@ -1,4 +1,6 @@
 ---
+host:
+  :desc: Host-zone, holding network trunk
 frontend:
   :desc: Sample frontend zone
 backend:

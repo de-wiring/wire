@@ -38,7 +38,7 @@ describe DownCommand do
     dc.project = project
 
     expect(dc).to receive(:run_on_zone).and_return(true)
-    dc.run_on_project_zones(%W(z1))
+    dc.run_on_project_zones( { 'z1' => {} } )
 
     dc = DownCommand.new
     dc.project = project_appgroup
@@ -50,7 +50,7 @@ describe DownCommand do
     expect(dch).to receive(:handle_dhcp).and_return(true)
     expect(dch).to receive(:handle_appgroup).and_return(true)
     expect(dch).to receive(:handle_network_attachments).and_return(true)
-    dc.run_on_project_zones(%W(z1))
+    dc.run_on_project_zones( { 'z1' => {} } )
   end
 
 

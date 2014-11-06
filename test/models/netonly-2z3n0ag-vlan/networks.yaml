@@ -1,15 +1,16 @@
 ---
-frontend_trunk:
-  :zone: frontend
+br_trunk:
+  :zone: host
   :network: 192.168.0.0/16
+  :attach: docker0
+  :shortname: brt
 frontend-ext:
   :zone: frontend
   :network: 192.168.1.0/24
-  :vlan:
-    :id: 1001
-    :on_trunk: frontend_trunk
+  :shortname: fe-ext
 frontend-int:
   :zone: frontend
+  :shortname: fe-int
   :network: 192.168.10.0/24
   :hostip: 192.168.10.1
   :dhcp:
@@ -17,11 +18,15 @@ frontend-int:
     :end: 192.168.10.50
   :vlan:
     :id: 1000
-    :on_trunk: frontend_trunk
+    :on_trunk: br_trunk
 backend-int:
   :zone: backend
+  :shortname: be-int
   :network: 192.168.20.0/24
   :hostip: 192.168.20.1
   :dhcp:
     :start: 192.168.20.10
     :end: 192.168.20.20
+  :vlan:
+    :id: 1001
+    :on_trunk: br_trunk
