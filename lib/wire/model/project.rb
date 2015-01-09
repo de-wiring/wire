@@ -7,7 +7,7 @@
 # Wire module
 module Wire
   # define model elements for lookup purposes
-  MODEL_ELEMENTS = %w( zones networks appgroups )
+  MODEL_ELEMENTS = %w( zones networks appgroups overlays )
 
   # Defines a project with model elements
   # (zones, networks, ...) as open structs

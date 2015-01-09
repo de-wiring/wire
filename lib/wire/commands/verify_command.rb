@@ -125,6 +125,16 @@ module Wire
           mark("Bridge \'#{bridge_name}\' does not exist.",
                :network, network_name, network_data)
         else
+          # if we have a port attachment, verify that
+          attach_intf = network_data[:attach]
+          if attach_intf
+            b_port_ok = @handler.handle_port_attachment(bridge_name, attach_intf)
+            unless b_port_ok
+              mark("Bridge \'#{bridge_name}\' does not have port \'#{attach_intf}\'",
+                   :network, network_name, network_data)
+            end
+          end
+
           network_data.store :status, :ok
 
           hostip = network_data[:hostip]

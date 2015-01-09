@@ -18,7 +18,7 @@ module Wire
     # initializes an empty error list
     def initialize
       @errors = []
-      @validations = [NetworksValidation, AppGroupValidation]
+      @validations = [NetworksValidation, OverlaysValidation, AppGroupValidation]
     end
 
     # runs validation on given project

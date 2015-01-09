@@ -1,0 +1,6 @@
+# uninstall pkgs we do not need, update existing stuff afterwards
+sudo apt-get remove --purge -yqq juju-core juju
+sudo apt-get remove --purge -yqq libgl1-mesa-dri
+sudo apt-get update -yqq
+sudo touch /var/lib/cloud/instance/locale-check.skip
+sudo apt-get clean

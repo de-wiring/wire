@@ -1,0 +1,9 @@
+---
+overlay1:
+  :shortname: ov1
+  :description: VxLAN sample overlay
+  :bridge: br_trunk
+  :type: vxlan
+  :id: 471023
+  :remote:
+    :ip: 10.1.1.10

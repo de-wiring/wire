@@ -37,6 +37,17 @@ module Wire
                               "VLAN Bridge \'#{bridge_name}/#{vlanid}\'", :up)
     end
 
+    # attaches a port +attach_port+ to bridge given by +network_name+
+    def handle_port_attachment(network_name, attach_port)
+      bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsport,
+                                                                        attach_port, network_name)
+
+      default_handle_resource(bridge_resource, :ovsport,
+                              "Port \'#{attach_port}\' on bridge \'#{network_name}\'", :up)
+    rescue => e
+      $log.error "processing port-attachment: #{e}"
+    end
+
     # bring ip resource up on device identified by
     # +bridge_name+ and +host_ip+
     # Returns

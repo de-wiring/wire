@@ -102,7 +102,7 @@ module Wire
     def run_on_network_in_zone(zone_name, bridge_name, network_data)
       $log.debug("Creating specs for network #{bridge_name}")
 
-      template = SpecTemplates.build_template__bridge_exists
+      template = SpecTemplatesNetwork.build_template__bridge_exists
       erb = ERB.new(template, nil, '%')
       @spec_code << erb.result(binding)
 
@@ -110,7 +110,7 @@ module Wire
       if vlan
         vlanid = vlan[:id]
         on_trunk = vlan[:on_trunk]
-        template = SpecTemplates.build_template__bridge_vlan_id_and_trunk
+        template = SpecTemplatesNetwork.build_template__bridge_vlan_id_and_trunk
         erb = ERB.new(template, nil, '%')
         @spec_code << erb.result(binding)
       end
@@ -118,7 +118,15 @@ module Wire
       # render template for hostip (if any)
       ip = network_data[:hostip]
       if ip
-        template = SpecTemplates.build_template__ip_is_up
+        template = SpecTemplatesNetwork.build_template__ip_is_up
+        erb = ERB.new(template, nil, '%')
+        @spec_code << erb.result(binding)
+      end
+
+      # render template for network/port attachments (if any)
+      attach_intf = network_data[:attach]
+      if attach_intf
+        template = SpecTemplatesNetwork.build_template__port_exists
         erb = ERB.new(template, nil, '%')
         @spec_code << erb.result(binding)
       end
@@ -129,7 +137,7 @@ module Wire
         ip_start = dhcp_data[:start]
         ip_end = dhcp_data[:end]
         hostip = ip
-        template = SpecTemplates.build_template__dhcp_is_valid
+        template = SpecTemplatesNetwork.build_template__dhcp_is_valid
         erb = ERB.new(template, nil, '%')
         @spec_code << erb.result(binding)
 
@@ -156,11 +164,11 @@ module Wire
         figfile_part = controller_data[:file] || "#{zone_name}/fig.yaml"
         figfile = File.join(File.expand_path(@target_dir), figfile_part)
 
-        template = SpecTemplates.build_template__fig_file_is_valid
+        template = SpecTemplatesContainers.build_template__fig_file_is_valid
         erb = ERB.new(template, nil, '%')
         @spec_code << erb.result(binding)
 
-        template = SpecTemplates.build_template__fig_containers_are_up
+        template = SpecTemplatesContainers.build_template__fig_containers_are_up
         erb = ERB.new(template, nil, '%')
         @spec_code << erb.result(binding)
       end

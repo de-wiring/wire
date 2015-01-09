@@ -52,7 +52,7 @@ module Wire
 
         # if bridge does not exists, don't bother
         # checking its vlanid..
-        return false if !b_exists
+        return false unless b_exists
 
         b_vlan_ok = true
         if @vlanid && @on_trunk

@@ -18,6 +18,17 @@ module Wire
       $log.error "processing bridge: #{e}"
     end
 
+    # detaches a port +attach_port+ from bridge given by +network_name+
+    def handle_port_attachment(network_name, attach_port)
+      bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsport,
+                                                                        attach_port, network_name)
+
+      default_handle_resource(bridge_resource, :ovsport,
+                              "Port \'#{attach_port}\' on bridge \'#{network_name}\'", :down)
+    rescue => e
+      $log.error "processing port-attachment: #{e}"
+    end
+
     # remove ip from bridge interface
     def handle_hostip(bridge_name, hostip)
       bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsbridge, bridge_name)

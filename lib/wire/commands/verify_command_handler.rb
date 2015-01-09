@@ -46,6 +46,18 @@ module Wire
       default_handle_resource(bridge_resource, :bridge, "VLAN Bridge \'#{bridge_name}/#{vlanid}\'")
     end
 
+    # run verification on a port +attach_port+, if it is attach to bridge
+    # given by +network_name+
+    def handle_port_attachment(network_name, attach_port)
+      bridge_resource = Wire::Resource::ResourceFactory.instance.create(:ovsport,
+                                                                        attach_port, network_name)
+
+      default_handle_resource(bridge_resource, :ovsport,
+                              "Port \'#{attach_port}\' on bridge \'#{network_name}\'")
+    rescue => e
+      $log.error "processing port-attachment: #{e}"
+    end
+
     # runs verification for a ip resource identified by
     # +bridge_name+ and +host_ip+
     # Returns

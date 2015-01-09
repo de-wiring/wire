@@ -1,0 +1,8 @@
+# install networking parts ne weed
+echo == Ensure Open vSwitch is installed
+sudo apt-get install -yqq bridge-utils arping
+sudo apt-get install -yqq openvswitch-common openvswitch-switch openvswitch-test
+
+echo == Install dnsmasq
+sudo apt-get install -yqq dnsmasq
+

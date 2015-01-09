@@ -1,4 +1,4 @@
 db:
-  image: ubuntu:14.04
+  image: debian:wheezy
   command: /bin/bash -c "while true; do sleep 5; done"
   net: "none"

@@ -1,0 +1,26 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "trusty64"
+  config.vm.box_url = "de-wiring/debian-7.7"
+
+  config.vm.define "wire-testing_vm_debian", primary: true do |s|
+    # hostname
+
+    s.vm.synced_folder "../../lib", "/mnt/project/lib"
+    s.vm.synced_folder "../../bin", "/mnt/project/bin"
+    s.vm.synced_folder "../../test", "/mnt/project/test"
+    s.vm.synced_folder "spec.d", "/mnt/spec.d"
+
+    s.vm.provision "shell", path: "provision.d/01_os_pkg_defaults"
+    s.vm.provision "shell", path: "provision.d/05_network"
+    s.vm.provision "shell", path: "provision.d/10_docker"
+    s.vm.provision "shell", path: "provision.d/12_fig"
+    s.vm.provision "shell", path: "provision.d/15_gems"
+    s.vm.provision "shell", path: "provision.d/20_serverspec"
+    s.vm.provision "shell", path: "provision.d/21_run_host_spec"
+    s.vm.provision "shell", path: "provision.d/30_welcome"
+
+  end
+end

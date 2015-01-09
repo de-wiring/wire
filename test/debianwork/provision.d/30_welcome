@@ -1,0 +1,4 @@
+[[ -L /home/vagrant/project ]] || ln -s /mnt/project /home/vagrant/project
+[[ -L /usr/local/bin/wire ]] || ln -s /mnt/project/bin/wire /usr/local/bin/wire
+[[ -L /usr/local/bin/wire-network-container.sh ]] || ln -s /mnt/project/bin/wire /usr/local/bin/wire-network-container.sh
+

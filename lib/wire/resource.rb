@@ -6,6 +6,7 @@
 
 require_relative 'resource/resource'
 require_relative 'resource/bridge'
+require_relative 'resource/ovsport'
 require_relative 'resource/ipaddr_on_intf'
 require_relative 'resource/ip_binary'
 require_relative 'resource/ipaddr_ext'

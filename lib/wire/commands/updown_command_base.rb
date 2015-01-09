@@ -34,6 +34,16 @@ module Wire
       end
     end
 
+    # if given network (by +network_name+) defines an :attach
+    # parameter
+    def default_handle_port(network_name, network_data, handler)
+      attach_port = network_data[:attach]
+      return true unless attach_port
+
+      $log.debug 'Processing port attachment ...'
+      handler.handle_port_attachment(network_name, attach_port)
+    end
+
     # if dhcp is part of given +network_data+, use
     # +handler+ to process it.
     # +zone_name+:: Name of zone

@@ -16,7 +16,7 @@ describe 'It should have docker installed' do
 	end
 
 	describe command 'docker -v' do
-		its(:stdout) { should match '^Docker version 1\.4.*' }
+		its(:stdout) { should match '^Docker version 1\.3.*' }
  	end
 end
 
@@ -27,6 +27,12 @@ describe 'Docker should be running' do
 
 	describe process 'docker' do
 		it { should be_running }
+	end
+end
+
+describe 'We should have a debian image' do
+	describe command 'sudo docker images' do
+		its(:stdout) { should match 'debian.*wheezy' }
 	end
 end
 

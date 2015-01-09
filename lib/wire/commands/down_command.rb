@@ -83,7 +83,10 @@ module Wire
           # if we have a host ip on that bridge, take it down first
           b_result &= default_handle_hostip(network_name, network_data, @handler)
 
-          # we should have a bridge with that name.
+          # if we did attach the network/bridge to a port, take down that attachment
+          b_result &= default_handle_port(network_name, network_data, @handler)
+
+          # we should have a bridge with that name, so take it down
           success = @handler.handle_bridge(network_name)
           b_result &= success
         end

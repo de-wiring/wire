@@ -38,6 +38,7 @@ module Wire
       def create(resource_symname, *resource_nameargs)
         clazz_map = {
           :ovsbridge  => OVSBridge,
+          :ovsport    => OVSPort,
           :bridgeip   => IPAddressOnIntf,
           :dhcpconfig => DHCPRangeConfiguration,
           :figadapter => FigAdapter,

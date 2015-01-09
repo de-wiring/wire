@@ -51,6 +51,9 @@ module Wire
 
           b_result &= success
           if success
+            # if we want to attach the network/bridge to a port
+            b_result &= default_handle_port(network_name, network_data, @handler)
+
             # if we have a host ip on that bridge, take it down first
             b_result &= default_handle_hostip(network_name, network_data, @handler)
 
