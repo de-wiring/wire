@@ -11,7 +11,7 @@ gw-int:
   :dhcp:
     :start: 192.168.5.10
     :end: 192.168.5.50
-frontend-int:
+fe-int:
   :shortname: fe-int
   :zone: frontend
   :network: 192.168.10.0/24
@@ -19,7 +19,7 @@ frontend-int:
   :dhcp:
     :start: 192.168.10.10
     :end: 192.168.10.50
-backend-int:
+be-int:
   :shortname: be-int
   :zone: backend
   :network: 192.168.20.0/24
