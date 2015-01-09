@@ -8,6 +8,53 @@
 module Wire
   # stateless erb template methods used by spec_command.rb
   class SpecTemplates
+    # generate template part
+    # returns
+    # - erb template for spec_helper.rb file
+    def self.template_spec_helper
+      <<ERB
+require 'serverspec'
+
+set :backend, :exec
+ERB
+    end
+
+    # generate template part
+    # returns
+    # - erb template for Rakefile
+    def self.template_rakefile
+      <<ERB
+require 'rake'
+require 'rspec/core/rake_task'
+
+task :spec    => 'spec:all'
+task :default => :spec
+
+namespace :spec do
+  targets = []
+  Dir.glob('./spec/*').each do |dir|
+    next unless File.directory?(dir)
+    targets << File.basename(dir)
+  end
+
+  task :all     => targets
+  task :default => :all
+
+  targets.each do |target|
+    desc "Run serverspec tests to \#{target}"
+    RSpec::Core::RakeTask.new(target.to_sym) do |t|
+      ENV['TARGET_HOST'] = target
+      t.pattern = "spec/\#{target}/*_spec.rb"
+      t.rspec_opts = '--format documentation --color'
+    end
+  end
+end
+ERB
+    end
+  end
+
+  # Templates for network-related stuff
+  class SpecTemplatesNetwork
     # rubocop:disable Lint/UnusedMethodArgument
     # :reek:UnusedParameters
     def self.build_template__bridge_exists
@@ -15,6 +62,38 @@ module Wire
   describe 'In zone <%= zone_name %> we should have an ovs bridge named <%= bridge_name %>' do
     describe command "sudo ovs-vsctl list-br" do
       its(:stdout) { should match /<%= bridge_name %>/ }
+    end
+  end
+ERB
+    end
+
+    # rubocop:disable Lint/UnusedMethodArgument
+    # :reek:UnusedParameters
+    def self.build_template__port_exists
+      <<ERB
+  describe 'In zone <%= zone_name %> we should have a port <%= attach_intf %> on ovs ' \
+           'bridge <%= bridge_name %>' do
+    describe command "sudo ovs-vsctl list-ports <%= bridge_name %>" do
+      its(:stdout) { should match /<%= attach_intf %>/ }
+    end
+  end
+ERB
+    end
+
+    # rubocop:disable Lint/UnusedMethodArgument
+    # :reek:UnusedParameters
+    def self.build_template__bridge_vlan_id_and_trunk
+      <<ERB
+  describe 'In zone <%= zone_name %>, ovs vlan bridge named <%= bridge_name %> ' \
+           'should have id <%= vlanid %>' do
+    describe command "sudo ovs-vsctl br-to-vlan <%= bridge_name %>" do
+      its(:stdout) { should match /<%= vlanid %>/ }
+    end
+  end
+  describe 'In zone <%= zone_name %>, ovs vlan bridge named <%= bridge_name %> ' \
+           'should have parent <%= on_trunk %>' do
+    describe command "sudo ovs-vsctl br-to-parent <%= bridge_name %>" do
+      its(:stdout) { should match /<%= on_trunk %>/ }
     end
   end
 ERB
@@ -63,7 +142,10 @@ ERB
   end
 ERB
     end
+  end
 
+  # templates for container-related specs
+  class SpecTemplatesContainers
     # rubocop:disable Lint/UnusedMethodArgument
     # :reek:UnusedParameters
     # requires figfile, appgroup_name
@@ -89,50 +171,6 @@ ERB
       its(:stdout) { should match /Up/ }
     end
   end
-ERB
-    end
-
-    # generate template part
-    # returns
-    # - erb template for spec_helper.rb file
-    def self.template_spec_helper
-      <<ERB
-require 'serverspec'
-
-set :backend, :exec
-ERB
-    end
-
-    # generate template part
-    # returns
-    # - erb template for Rakefile
-    def self.template_rakefile
-      <<ERB
-require 'rake'
-require 'rspec/core/rake_task'
-
-task :spec    => 'spec:all'
-task :default => :spec
-
-namespace :spec do
-  targets = []
-  Dir.glob('./spec/*').each do |dir|
-    next unless File.directory?(dir)
-    targets << File.basename(dir)
-  end
-
-  task :all     => targets
-  task :default => :all
-
-  targets.each do |target|
-    desc "Run serverspec tests to \#{target}"
-    RSpec::Core::RakeTask.new(target.to_sym) do |t|
-      ENV['TARGET_HOST'] = target
-      t.pattern = "spec/\#{target}/*_spec.rb"
-      t.rspec_opts = '--format documentation --color'
-    end
-  end
-end
 ERB
     end
   end
